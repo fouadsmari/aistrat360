@@ -1,6 +1,12 @@
 "use client"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import {
   Users,
@@ -125,11 +131,11 @@ export default function AdminDashboardPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+          <h1 className="bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-3xl font-bold tracking-tight text-transparent">
             Dashboard Administrateur
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-2">
-            Gestion et supervision de l'application SaaS
+          <p className="mt-2 text-gray-500 dark:text-gray-400">
+            Gestion et supervision de l&apos;application SaaS
           </p>
         </div>
         <div className="flex gap-2">
@@ -143,24 +149,29 @@ export default function AdminDashboardPage() {
           </Button>
         </div>
       </div>
-      
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {adminStats.map((stat) => (
-          <Card key={stat.title} className="relative overflow-hidden bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
+          <Card
+            key={stat.title}
+            className="relative overflow-hidden border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900"
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">
                 {stat.title}
               </CardTitle>
-              <div className={cn("p-2 rounded-lg", stat.bgColor)}>
+              <div className={cn("rounded-lg p-2", stat.bgColor)}>
                 <stat.icon className={cn("h-4 w-4", stat.color)} />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                {stat.value}
+              </div>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 {stat.description}
               </p>
-              <div className="absolute top-0 right-0 p-2">
+              <div className="absolute right-0 top-0 p-2">
                 {stat.trend === "up" && (
                   <TrendingUp className="h-4 w-4 text-green-500 opacity-20" />
                 )}
@@ -172,11 +183,13 @@ export default function AdminDashboardPage() {
           </Card>
         ))}
       </div>
-      
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
+        <Card className="col-span-4 border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
           <CardHeader>
-            <CardTitle className="text-gray-900 dark:text-white">Gestion des Utilisateurs</CardTitle>
+            <CardTitle className="text-gray-900 dark:text-white">
+              Gestion des Utilisateurs
+            </CardTitle>
             <CardDescription className="text-gray-600 dark:text-gray-300">
               Derniers utilisateurs inscrits et leur statut
             </CardDescription>
@@ -184,44 +197,77 @@ export default function AdminDashboardPage() {
           <CardContent>
             <div className="space-y-4">
               {recentUsers.map((user) => (
-                <div key={user.id} className="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                <div
+                  key={user.id}
+                  className="flex items-center justify-between rounded-lg border border-gray-200 p-3 dark:border-gray-700"
+                >
                   <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-600 to-orange-600 flex items-center justify-center text-white text-sm font-medium">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-red-600 to-orange-600 text-sm font-medium text-white">
                       {user.name.charAt(0)}
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">{user.name}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        {user.name}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {user.email}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-4">
                     <div className="text-right">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">{user.plan}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{user.joinedAt}</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        {user.plan}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {user.joinedAt}
+                      </p>
                     </div>
-                    <div className={cn(
-                      "px-2 py-1 rounded-full text-xs font-medium",
-                      user.status === "active" && "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400",
-                      user.status === "inactive" && "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-400",
-                      user.status === "suspended" && "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400"
-                    )}>
+                    <div
+                      className={cn(
+                        "rounded-full px-2 py-1 text-xs font-medium",
+                        user.status === "active"
+                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                          : user.status === "inactive"
+                            ? "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400"
+                            : user.status === "suspended"
+                              ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                              : ""
+                      )}
+                    >
                       {user.status === "active" && "Actif"}
                       {user.status === "inactive" && "Inactif"}
                       {user.status === "suspended" && "Suspendu"}
                     </div>
                     <div className="flex space-x-1">
-                      <Button size="sm" variant="outline" className="h-8 w-8 p-0">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 w-8 p-0"
+                      >
                         <Mail className="h-3 w-3" />
                       </Button>
-                      <Button size="sm" variant="outline" className="h-8 w-8 p-0">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 w-8 p-0"
+                      >
                         <Settings className="h-3 w-3" />
                       </Button>
                       {user.status === "active" ? (
-                        <Button size="sm" variant="outline" className="h-8 w-8 p-0 text-red-600 hover:text-red-700">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                        >
                           <UserX className="h-3 w-3" />
                         </Button>
                       ) : (
-                        <Button size="sm" variant="outline" className="h-8 w-8 p-0 text-green-600 hover:text-green-700">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 w-8 p-0 text-green-600 hover:text-green-700"
+                        >
                           <UserCheck className="h-3 w-3" />
                         </Button>
                       )}
@@ -232,10 +278,10 @@ export default function AdminDashboardPage() {
             </div>
           </CardContent>
         </Card>
-        
-        <Card className="col-span-3 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
+
+        <Card className="col-span-3 border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
           <CardHeader>
-            <CardTitle className="text-gray-900 dark:text-white flex items-center">
+            <CardTitle className="flex items-center text-gray-900 dark:text-white">
               <AlertTriangle className="mr-2 h-5 w-5 text-orange-600" />
               Alertes Système
             </CardTitle>
@@ -246,21 +292,32 @@ export default function AdminDashboardPage() {
           <CardContent>
             <div className="space-y-4">
               {systemAlerts.map((alert) => (
-                <div key={alert.id} className={cn(
-                  "p-3 rounded-lg border-l-4",
-                  alert.type === "critical" && "bg-red-50 dark:bg-red-950/20 border-red-500",
-                  alert.type === "warning" && "bg-orange-50 dark:bg-orange-950/20 border-orange-500"
-                )}>
+                <div
+                  key={alert.id}
+                  className={cn(
+                    "rounded-lg border-l-4 p-3",
+                    alert.type === "critical"
+                      ? "border-red-500 bg-red-50 dark:bg-red-950/20"
+                      : alert.type === "warning"
+                        ? "border-orange-500 bg-orange-50 dark:bg-orange-950/20"
+                        : ""
+                  )}
+                >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <p className={cn(
-                        "text-sm font-medium",
-                        alert.type === "critical" && "text-red-800 dark:text-red-400",
-                        alert.type === "warning" && "text-orange-800 dark:text-orange-400"
-                      )}>
+                      <p
+                        className={cn(
+                          "text-sm font-medium",
+                          alert.type === "critical"
+                            ? "text-red-800 dark:text-red-400"
+                            : alert.type === "warning"
+                              ? "text-orange-800 dark:text-orange-400"
+                              : ""
+                        )}
+                      >
                         {alert.message}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                         {alert.time}
                       </p>
                     </div>
@@ -271,94 +328,148 @@ export default function AdminDashboardPage() {
                 </div>
               ))}
             </div>
-            <Button variant="outline" className="w-full mt-4">
+            <Button variant="outline" className="mt-4 w-full">
               Voir toutes les alertes
             </Button>
           </CardContent>
         </Card>
       </div>
-      
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
+        <Card className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
           <CardHeader>
-            <CardTitle className="text-gray-900 dark:text-white">Répartition des Abonnements</CardTitle>
-            <CardDescription className="text-gray-600 dark:text-gray-300">Distribution par plan</CardDescription>
+            <CardTitle className="text-gray-900 dark:text-white">
+              Répartition des Abonnements
+            </CardTitle>
+            <CardDescription className="text-gray-600 dark:text-gray-300">
+              Distribution par plan
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm text-gray-700 dark:text-gray-300">Premium</span>
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">2,847 (32%)</span>
+                <div className="mb-1 flex items-center justify-between">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Premium
+                  </span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                    2,847 (32%)
+                  </span>
                 </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div className="bg-gradient-to-r from-purple-600 to-violet-600 h-2 rounded-full" style={{ width: "32%" }} />
-                </div>
-              </div>
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm text-gray-700 dark:text-gray-300">Standard</span>
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">3,895 (45%)</span>
-                </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div className="bg-gradient-to-r from-blue-600 to-cyan-600 h-2 rounded-full" style={{ width: "45%" }} />
+                <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+                  <div
+                    className="h-2 rounded-full bg-gradient-to-r from-purple-600 to-violet-600"
+                    style={{ width: "32%" }}
+                  />
                 </div>
               </div>
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm text-gray-700 dark:text-gray-300">Basic</span>
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">2,000 (23%)</span>
+                <div className="mb-1 flex items-center justify-between">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Standard
+                  </span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                    3,895 (45%)
+                  </span>
                 </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div className="bg-gradient-to-r from-green-600 to-emerald-600 h-2 rounded-full" style={{ width: "23%" }} />
+                <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+                  <div
+                    className="h-2 rounded-full bg-gradient-to-r from-blue-600 to-cyan-600"
+                    style={{ width: "45%" }}
+                  />
+                </div>
+              </div>
+              <div>
+                <div className="mb-1 flex items-center justify-between">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Basic
+                  </span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                    2,000 (23%)
+                  </span>
+                </div>
+                <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+                  <div
+                    className="h-2 rounded-full bg-gradient-to-r from-green-600 to-emerald-600"
+                    style={{ width: "23%" }}
+                  />
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
-        
-        <Card className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
+
+        <Card className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
           <CardHeader>
-            <CardTitle className="text-gray-900 dark:text-white">Performance Serveurs</CardTitle>
-            <CardDescription className="text-gray-600 dark:text-gray-300">État des ressources</CardDescription>
+            <CardTitle className="text-gray-900 dark:text-white">
+              Performance Serveurs
+            </CardTitle>
+            <CardDescription className="text-gray-600 dark:text-gray-300">
+              État des ressources
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm text-gray-700 dark:text-gray-300">CPU</span>
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">68%</span>
+                <div className="mb-1 flex items-center justify-between">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    CPU
+                  </span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                    68%
+                  </span>
                 </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div className="bg-orange-500 h-2 rounded-full" style={{ width: "68%" }} />
-                </div>
-              </div>
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm text-gray-700 dark:text-gray-300">Mémoire</span>
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">82%</span>
-                </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div className="bg-red-500 h-2 rounded-full" style={{ width: "82%" }} />
+                <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+                  <div
+                    className="h-2 rounded-full bg-orange-500"
+                    style={{ width: "68%" }}
+                  />
                 </div>
               </div>
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm text-gray-700 dark:text-gray-300">Stockage</span>
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">45%</span>
+                <div className="mb-1 flex items-center justify-between">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Mémoire
+                  </span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                    82%
+                  </span>
                 </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div className="bg-blue-500 h-2 rounded-full" style={{ width: "45%" }} />
+                <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+                  <div
+                    className="h-2 rounded-full bg-red-500"
+                    style={{ width: "82%" }}
+                  />
+                </div>
+              </div>
+              <div>
+                <div className="mb-1 flex items-center justify-between">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Stockage
+                  </span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                    45%
+                  </span>
+                </div>
+                <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+                  <div
+                    className="h-2 rounded-full bg-blue-500"
+                    style={{ width: "45%" }}
+                  />
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
-        
-        <Card className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
+
+        <Card className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
           <CardHeader>
-            <CardTitle className="text-gray-900 dark:text-white">Actions Rapides</CardTitle>
-            <CardDescription className="text-gray-600 dark:text-gray-300">Outils d'administration</CardDescription>
+            <CardTitle className="text-gray-900 dark:text-white">
+              Actions Rapides
+            </CardTitle>
+            <CardDescription className="text-gray-600 dark:text-gray-300">
+              Outils d&apos;administration
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">

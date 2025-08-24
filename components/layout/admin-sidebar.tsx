@@ -104,37 +104,38 @@ interface AdminSidebarProps {
   isMobile?: boolean
 }
 
-export function AdminSidebar({ isCollapsed, onToggle, isMobile = false }: AdminSidebarProps) {
+export function AdminSidebar({
+  isCollapsed,
+  onToggle,
+  isMobile = false,
+}: AdminSidebarProps) {
   const pathname = usePathname()
 
   return (
     <aside
       className={cn(
-        "relative flex flex-col h-full bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300",
+        "relative flex h-full flex-col border-r border-gray-200 bg-white transition-all duration-300 dark:border-gray-800 dark:bg-gray-900",
         isCollapsed ? "w-16" : "w-64"
       )}
     >
-      <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200 dark:border-gray-800">
+      <div className="flex h-16 items-center justify-between border-b border-gray-200 px-4 dark:border-gray-800">
         {!isCollapsed && (
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-red-600 to-orange-600 rounded-lg flex items-center justify-center">
-              <Shield className="w-5 h-5 text-white" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-red-600 to-orange-600">
+              <Shield className="h-5 w-5 text-white" />
             </div>
-            <span className="font-semibold text-lg bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-lg font-semibold text-transparent">
               Admin Panel
             </span>
           </div>
         )}
-        
+
         {!isMobile && (
           <Button
             variant="ghost"
             size="icon"
             onClick={onToggle}
-            className={cn(
-              "h-8 w-8",
-              isCollapsed && "mx-auto"
-            )}
+            className={cn("h-8 w-8", isCollapsed && "mx-auto")}
           >
             {isCollapsed ? (
               <ChevronRight className="h-4 w-4" />
@@ -144,7 +145,7 @@ export function AdminSidebar({ isCollapsed, onToggle, isMobile = false }: AdminS
           </Button>
         )}
       </div>
-      
+
       <ScrollArea className="flex-1 py-4">
         <nav className="space-y-1 px-2">
           <TooltipProvider delayDuration={0}>
@@ -158,20 +159,27 @@ export function AdminSidebar({ isCollapsed, onToggle, isMobile = false }: AdminS
                         variant={isActive ? "secondary" : "ghost"}
                         className={cn(
                           "w-full justify-start",
-                          isActive && "bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400",
+                          isActive &&
+                            "bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400",
                           isCollapsed && "justify-center px-2"
                         )}
                       >
-                        <item.icon className={cn(
-                          "h-5 w-5",
-                          !isCollapsed && "mr-3",
-                          isActive ? "text-red-600 dark:text-red-400" : "text-gray-600 dark:text-gray-400"
-                        )} />
+                        <item.icon
+                          className={cn(
+                            "h-5 w-5",
+                            !isCollapsed && "mr-3",
+                            isActive
+                              ? "text-red-600 dark:text-red-400"
+                              : "text-gray-600 dark:text-gray-400"
+                          )}
+                        />
                         {!isCollapsed && (
-                          <span className={cn(
-                            "text-sm",
-                            isActive ? "font-medium" : ""
-                          )}>
+                          <span
+                            className={cn(
+                              "text-sm",
+                              isActive ? "font-medium" : ""
+                            )}
+                          >
                             {item.title}
                           </span>
                         )}
@@ -179,9 +187,7 @@ export function AdminSidebar({ isCollapsed, onToggle, isMobile = false }: AdminS
                     </Link>
                   </TooltipTrigger>
                   {isCollapsed && (
-                    <TooltipContent side="right">
-                      {item.title}
-                    </TooltipContent>
+                    <TooltipContent side="right">{item.title}</TooltipContent>
                   )}
                 </Tooltip>
               )
@@ -189,8 +195,8 @@ export function AdminSidebar({ isCollapsed, onToggle, isMobile = false }: AdminS
           </TooltipProvider>
         </nav>
       </ScrollArea>
-      
-      <div className="border-t border-gray-200 dark:border-gray-800 p-2">
+
+      <div className="border-t border-gray-200 p-2 dark:border-gray-800">
         <nav className="space-y-1">
           <TooltipProvider delayDuration={0}>
             {bottomItems.map((item) => {
@@ -203,20 +209,27 @@ export function AdminSidebar({ isCollapsed, onToggle, isMobile = false }: AdminS
                         variant={isActive ? "secondary" : "ghost"}
                         className={cn(
                           "w-full justify-start",
-                          isActive && "bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400",
+                          isActive &&
+                            "bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400",
                           isCollapsed && "justify-center px-2"
                         )}
                       >
-                        <item.icon className={cn(
-                          "h-5 w-5",
-                          !isCollapsed && "mr-3",
-                          isActive ? "text-red-600 dark:text-red-400" : "text-gray-600 dark:text-gray-400"
-                        )} />
+                        <item.icon
+                          className={cn(
+                            "h-5 w-5",
+                            !isCollapsed && "mr-3",
+                            isActive
+                              ? "text-red-600 dark:text-red-400"
+                              : "text-gray-600 dark:text-gray-400"
+                          )}
+                        />
                         {!isCollapsed && (
-                          <span className={cn(
-                            "text-sm",
-                            isActive ? "font-medium" : ""
-                          )}>
+                          <span
+                            className={cn(
+                              "text-sm",
+                              isActive ? "font-medium" : ""
+                            )}
+                          >
                             {item.title}
                           </span>
                         )}
@@ -224,9 +237,7 @@ export function AdminSidebar({ isCollapsed, onToggle, isMobile = false }: AdminS
                     </Link>
                   </TooltipTrigger>
                   {isCollapsed && (
-                    <TooltipContent side="right">
-                      {item.title}
-                    </TooltipContent>
+                    <TooltipContent side="right">{item.title}</TooltipContent>
                   )}
                 </Tooltip>
               )

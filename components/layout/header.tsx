@@ -24,30 +24,30 @@ export function Header({ onMenuClick, isMobile = false }: HeaderProps) {
   const { theme, setTheme } = useTheme()
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-gray-900/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-gray-900/60">
+    <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:border-gray-800 dark:bg-gray-900/95 dark:supports-[backdrop-filter]:bg-gray-900/60">
       <div className="flex h-16 items-center px-4 md:px-6">
         {isMobile && (
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden mr-2"
+            className="mr-2 md:hidden"
             onClick={onMenuClick}
           >
             <Menu className="h-5 w-5" />
           </Button>
         )}
-        
-        <div className="flex items-center flex-1 space-x-4">
-          <div className="relative flex-1 max-w-md">
+
+        <div className="flex flex-1 items-center space-x-4">
+          <div className="relative max-w-md flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <Input
               type="search"
               placeholder="Rechercher..."
-              className="pl-10 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+              className="border-gray-200 bg-gray-50 pl-10 dark:border-gray-700 dark:bg-gray-800"
             />
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           <Button
             variant="ghost"
@@ -58,12 +58,12 @@ export function Header({ onMenuClick, isMobile = false }: HeaderProps) {
             <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
             <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           </Button>
-          
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-                <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-violet-600 animate-pulse" />
+                <span className="absolute right-1 top-1 h-2 w-2 animate-pulse rounded-full bg-violet-600" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80">
@@ -71,7 +71,9 @@ export function Header({ onMenuClick, isMobile = false }: HeaderProps) {
               <DropdownMenuSeparator />
               <DropdownMenuItem>
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium">Nouvelle mise à jour disponible</p>
+                  <p className="text-sm font-medium">
+                    Nouvelle mise à jour disponible
+                  </p>
                   <p className="text-xs text-gray-500">Il y a 2 heures</p>
                 </div>
               </DropdownMenuItem>
@@ -83,11 +85,13 @@ export function Header({ onMenuClick, isMobile = false }: HeaderProps) {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-center">
-                <span className="text-sm text-violet-600 dark:text-violet-400">Voir toutes les notifications</span>
+                <span className="text-sm text-violet-600 dark:text-violet-400">
+                  Voir toutes les notifications
+                </span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-9 w-9 rounded-full">

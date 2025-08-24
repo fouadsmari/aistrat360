@@ -5,6 +5,7 @@
 ## 📝 À Faire
 
 ## ✅ Terminé
+
 - **[2025-08-24]** Création de l'application SaaS avec NextJS et shadcn
   - ✅ Initialisation environnement NextJS avec TypeScript
   - ✅ Installation et configuration shadcn/ui avec tous les composants nécessaires
@@ -36,5 +37,14 @@
   - ✅ Navigation entre les deux dashboards via sidebars
   - ✅ Layouts séparés avec sidebars spécialisées
 
+- **[2025-08-24]** Déploiement sur GitHub
+  - ✅ Repository Git initialisé
+  - ✅ Remote GitHub aistrat360 configuré
+  - ✅ Commit initial avec description complète (43 fichiers)
+  - ✅ Code poussé sur https://github.com/fouadsmari/aistrat360
+  - ✅ README.md complet avec documentation
+  - ✅ .gitignore configuré pour Next.js
+
 ---
-*Dernière mise à jour : 2025-08-24*
+
+_Dernière mise à jour : 2025-08-24_

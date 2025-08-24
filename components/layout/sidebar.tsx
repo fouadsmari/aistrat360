@@ -96,37 +96,38 @@ interface SidebarProps {
   isMobile?: boolean
 }
 
-export function Sidebar({ isCollapsed, onToggle, isMobile = false }: SidebarProps) {
+export function Sidebar({
+  isCollapsed,
+  onToggle,
+  isMobile = false,
+}: SidebarProps) {
   const pathname = usePathname()
 
   return (
     <aside
       className={cn(
-        "relative flex flex-col h-full bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300",
+        "relative flex h-full flex-col border-r border-gray-200 bg-white transition-all duration-300 dark:border-gray-800 dark:bg-gray-900",
         isCollapsed ? "w-16" : "w-64"
       )}
     >
-      <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200 dark:border-gray-800">
+      <div className="flex h-16 items-center justify-between border-b border-gray-200 px-4 dark:border-gray-800">
         {!isCollapsed && (
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-violet-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-white" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-purple-600">
+              <TrendingUp className="h-5 w-5 text-white" />
             </div>
-            <span className="font-semibold text-lg bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-lg font-semibold text-transparent">
               SaaS App
             </span>
           </div>
         )}
-        
+
         {!isMobile && (
           <Button
             variant="ghost"
             size="icon"
             onClick={onToggle}
-            className={cn(
-              "h-8 w-8",
-              isCollapsed && "mx-auto"
-            )}
+            className={cn("h-8 w-8", isCollapsed && "mx-auto")}
           >
             {isCollapsed ? (
               <ChevronRight className="h-4 w-4" />
@@ -136,7 +137,7 @@ export function Sidebar({ isCollapsed, onToggle, isMobile = false }: SidebarProp
           </Button>
         )}
       </div>
-      
+
       <ScrollArea className="flex-1 py-4">
         <nav className="space-y-1 px-2">
           <TooltipProvider delayDuration={0}>
@@ -150,20 +151,27 @@ export function Sidebar({ isCollapsed, onToggle, isMobile = false }: SidebarProp
                         variant={isActive ? "secondary" : "ghost"}
                         className={cn(
                           "w-full justify-start",
-                          isActive && "bg-violet-50 dark:bg-violet-950/30 text-violet-600 dark:text-violet-400",
+                          isActive &&
+                            "bg-violet-50 text-violet-600 dark:bg-violet-950/30 dark:text-violet-400",
                           isCollapsed && "justify-center px-2"
                         )}
                       >
-                        <item.icon className={cn(
-                          "h-5 w-5",
-                          !isCollapsed && "mr-3",
-                          isActive ? "text-violet-600 dark:text-violet-400" : "text-gray-600 dark:text-gray-400"
-                        )} />
+                        <item.icon
+                          className={cn(
+                            "h-5 w-5",
+                            !isCollapsed && "mr-3",
+                            isActive
+                              ? "text-violet-600 dark:text-violet-400"
+                              : "text-gray-600 dark:text-gray-400"
+                          )}
+                        />
                         {!isCollapsed && (
-                          <span className={cn(
-                            "text-sm",
-                            isActive ? "font-medium" : ""
-                          )}>
+                          <span
+                            className={cn(
+                              "text-sm",
+                              isActive ? "font-medium" : ""
+                            )}
+                          >
                             {item.title}
                           </span>
                         )}
@@ -171,9 +179,7 @@ export function Sidebar({ isCollapsed, onToggle, isMobile = false }: SidebarProp
                     </Link>
                   </TooltipTrigger>
                   {isCollapsed && (
-                    <TooltipContent side="right">
-                      {item.title}
-                    </TooltipContent>
+                    <TooltipContent side="right">{item.title}</TooltipContent>
                   )}
                 </Tooltip>
               )
@@ -181,8 +187,8 @@ export function Sidebar({ isCollapsed, onToggle, isMobile = false }: SidebarProp
           </TooltipProvider>
         </nav>
       </ScrollArea>
-      
-      <div className="border-t border-gray-200 dark:border-gray-800 p-2">
+
+      <div className="border-t border-gray-200 p-2 dark:border-gray-800">
         <nav className="space-y-1">
           <TooltipProvider delayDuration={0}>
             {bottomItems.map((item) => {
@@ -195,20 +201,27 @@ export function Sidebar({ isCollapsed, onToggle, isMobile = false }: SidebarProp
                         variant={isActive ? "secondary" : "ghost"}
                         className={cn(
                           "w-full justify-start",
-                          isActive && "bg-violet-50 dark:bg-violet-950/30 text-violet-600 dark:text-violet-400",
+                          isActive &&
+                            "bg-violet-50 text-violet-600 dark:bg-violet-950/30 dark:text-violet-400",
                           isCollapsed && "justify-center px-2"
                         )}
                       >
-                        <item.icon className={cn(
-                          "h-5 w-5",
-                          !isCollapsed && "mr-3",
-                          isActive ? "text-violet-600 dark:text-violet-400" : "text-gray-600 dark:text-gray-400"
-                        )} />
+                        <item.icon
+                          className={cn(
+                            "h-5 w-5",
+                            !isCollapsed && "mr-3",
+                            isActive
+                              ? "text-violet-600 dark:text-violet-400"
+                              : "text-gray-600 dark:text-gray-400"
+                          )}
+                        />
                         {!isCollapsed && (
-                          <span className={cn(
-                            "text-sm",
-                            isActive ? "font-medium" : ""
-                          )}>
+                          <span
+                            className={cn(
+                              "text-sm",
+                              isActive ? "font-medium" : ""
+                            )}
+                          >
                             {item.title}
                           </span>
                         )}
@@ -216,9 +229,7 @@ export function Sidebar({ isCollapsed, onToggle, isMobile = false }: SidebarProp
                     </Link>
                   </TooltipTrigger>
                   {isCollapsed && (
-                    <TooltipContent side="right">
-                      {item.title}
-                    </TooltipContent>
+                    <TooltipContent side="right">{item.title}</TooltipContent>
                   )}
                 </Tooltip>
               )

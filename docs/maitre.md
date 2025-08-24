@@ -1,6 +1,6 @@
-##  Workflow que tu dois suivre toi (claude)
+## Workflow que tu dois suivre toi (claude)
 
-✅ **OBLIGATOIRE** : avant de commencer la création ou modification il faut respecter les instructions ci-dessous :  
+✅ **OBLIGATOIRE** : avant de commencer la création ou modification il faut respecter les instructions ci-dessous :
 
 0. ✅ **OBLIGATOIRE** tes modifications doivent respecter mes instructions nis plus ni moins.
 1. ✅ **OBLIGATOIRE** Respecter Obligatoirement la documentation officielle des modules, environnements, api, worflow, database, sécurités et services.
@@ -14,7 +14,7 @@
 9. ✅ **OBLIGATOIRE** Mettre ce que tu t'apprête à faire dans le roadmap avant de commencer
 10. ✅ **OBLIGATOIRE** vérifier si une fonctionnalité similaire existe déjà pour ne pas se répéter
 11. ✅ **OBLIGATOIRE** Si tu as mal compris ma demande de me poser des questions pour mieux comprendre
-12. ❌ **INTERDIT ABSOLU**  de faire quelque chose qui vas à l'encontre des recommandations et ou le fonctionnement de l'app et me revenir avec des explications.
+12. ❌ **INTERDIT ABSOLU** de faire quelque chose qui vas à l'encontre des recommandations et ou le fonctionnement de l'app et me revenir avec des explications.
 
 ✅ **OBLIGATOIRE** : Pendant que tu corrige un bug ou développe une nouvelle fonctionnalité
 
@@ -34,20 +34,21 @@
 14. il faut faire un check deploy aprés avoir terminé ton implémentation ou correction de bug, si erreurs corrige les
 15. **VÉRIFIER obligatoire** aprés avoir fini il faut s'assurer si une erreur dans la console log et ou des bug nextjs s'affiche dans le navigateur si oui ne reviens pas vers moi sans les corriger.
 
-  Mon nouveau processus OBLIGATOIRE :
+Mon nouveau processus OBLIGATOIRE :
 
-  1. Avant chaque modification de code :
-  npm run type-check  # Vérifier qu'il n'y a pas d'erreurs TypeScript
-  npm run lint        # Vérifier ESLint
-  2. Après chaque modification de code :
-  npm run validate    # TypeScript + ESLint + Format check
-  npm run test        # Si des tests existent
-  3. Si erreurs détectées :
-  npm run lint:fix    # Corriger automatiquement
-  npm run format      # Formatter le code
-  # Puis corriger manuellement ce qui reste
+1. Avant chaque modification de code :
+   npm run type-check # Vérifier qu'il n'y a pas d'erreurs TypeScript
+   npm run lint # Vérifier ESLint
+2. Après chaque modification de code :
+   npm run validate # TypeScript + ESLint + Format check
+   npm run test # Si des tests existent
+3. Si erreurs détectées :
+   npm run lint:fix # Corriger automatiquement
+   npm run format # Formatter le code
 
-✅ **OBLIGATOIRE** : Aprés avoir fini la correction d'un bug ou création de nouvelle fonctionnalité : 
+# Puis corriger manuellement ce qui reste
+
+✅ **OBLIGATOIRE** : Aprés avoir fini la correction d'un bug ou création de nouvelle fonctionnalité :
 
 0. ✅ **OBLIGATOIRE** réflechi si tes modifications viole les instructions dans ce fichier, si oui annule tes modification et fait en sorte que tes corrections ou développement le respecte.
 1. ✅ **OBLIGATOIRE** fait un check deploy et corrige toutes les erreurs sans exception
@@ -71,6 +72,7 @@
    - ✅ **IDENTIFIER** les types/interfaces similaires
 
 2. **📋 PROCESSUS DE VÉRIFICATION SYSTÉMATIQUE** :
+
    ```bash
    # Avant création composant
    find . -name "*.tsx" -o -name "*.ts" | grep -i "nomcomposant"

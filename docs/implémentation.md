@@ -1,6 +1,6 @@
-##  Workflow implémentation que tu dois suivre toi (claude)
+## Workflow implémentation que tu dois suivre toi (claude)
 
-✅ **OBLIGATOIRE** : Pendant que implémente une nouvelle fonctionnalité ou composant tu dois suivre les instructions suivantes : 
+✅ **OBLIGATOIRE** : Pendant que implémente une nouvelle fonctionnalité ou composant tu dois suivre les instructions suivantes :
 
 1. ❌ **INTERDIT ABSOLU** de créer une data fake ou mockup
 2. ❌ **INTERDIT ABSOLU** créer des fichier simplifier

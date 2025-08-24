@@ -1,6 +1,6 @@
-##  Workflow correction bug que tu dois suivre toi (claude)
+## Workflow correction bug que tu dois suivre toi (claude)
 
-✅ **OBLIGATOIRE** : Pendant que tu corrige un bug tu dois suivre les instructions suivantes : 
+✅ **OBLIGATOIRE** : Pendant que tu corrige un bug tu dois suivre les instructions suivantes :
 
 1. ❌ **INTERDIT ABSOLU** de créer une data fake ou mockup
 2. ❌ **INTERDIT ABSOLU** créer des fichier simplifier
@@ -17,4 +17,3 @@
 13. **VÉRIFIER obligatoire** la correction que tu doit mettre en place doit être cohérente avec l'app, robuste et ne créer pas de bug ailleur dans l'app.
 14. il faut faire un check deploy aprés avoir corriger les bug pour être sur que l'app fonctionne
 15. **VÉRIFIER obligatoire** aprés avoir fini il faut s'assurer si une erreur dans la console log et ou des bug nextjs s'affiche dans le navigateur si oui ne reviens pas vers moi sans les corriger.
-

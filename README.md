@@ -5,22 +5,26 @@ Une application SaaS moderne construite avec Next.js 15, TypeScript et shadcn/ui
 ## ✨ Fonctionnalités
 
 ### 🔐 Authentification
+
 - Page de login moderne et responsive
 - Design avec dégradés violets et animations
 - Support du mode sombre
 - Authentification sociale (Google, GitHub)
 
 ### 📊 Dashboards Multiples
+
 - **Dashboard Utilisateurs** (`/dashboard`) - Interface violet pour les abonnés
 - **Dashboard Admin** (`/admin/dashboard`) - Interface rouge/orange pour l'administration
 
 ### 🎨 Interface Utilisateur
+
 - Design moderne et responsive
 - Mode sombre/clair automatique
 - Animations fluides et interactions
 - Composants shadcn/ui exclusivement
 
 ### 🏗️ Architecture
+
 - Next.js 15 avec App Router
 - TypeScript pour la sécurité des types
 - Tailwind CSS pour le styling
@@ -99,6 +103,7 @@ npm run check-deploy # Validation complète + build
 ## 🔧 Configuration
 
 Le projet utilise :
+
 - `tailwind.config.ts` - Configuration Tailwind CSS
 - `components.json` - Configuration shadcn/ui
 - `tsconfig.json` - Configuration TypeScript

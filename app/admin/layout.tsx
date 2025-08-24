@@ -46,10 +46,13 @@ export default function AdminLayout({
             isMobile={false}
           />
         )}
-        
+
         {isMobile && (
-          <Sheet open={isMobileSidebarOpen} onOpenChange={setIsMobileSidebarOpen}>
-            <SheetContent side="left" className="p-0 w-64">
+          <Sheet
+            open={isMobileSidebarOpen}
+            onOpenChange={setIsMobileSidebarOpen}
+          >
+            <SheetContent side="left" className="w-64 p-0">
               <AdminSidebar
                 isCollapsed={false}
                 onToggle={() => setIsMobileSidebarOpen(false)}
@@ -58,18 +61,17 @@ export default function AdminLayout({
             </SheetContent>
           </Sheet>
         )}
-        
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Header
-            onMenuClick={handleSidebarToggle}
-            isMobile={isMobile}
-          />
-          
+
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <Header onMenuClick={handleSidebarToggle} isMobile={isMobile} />
+
           <main className="flex-1 overflow-y-auto">
-            <div className={cn(
-              "p-4 md:p-6 lg:p-8",
-              "animate-in fade-in duration-500"
-            )}>
+            <div
+              className={cn(
+                "p-4 md:p-6 lg:p-8",
+                "animate-in fade-in duration-500"
+              )}
+            >
               {children}
             </div>
           </main>
