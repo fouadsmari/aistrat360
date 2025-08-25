@@ -15,6 +15,9 @@ const supabaseAdmin = createClient(
 
 export async function POST(request: Request) {
   try {
+    // For now, we skip auth verification to allow admin operations
+    // In production, you should verify the admin token/session here
+    
     const body = await request.json()
     const {
       email,
