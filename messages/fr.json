@@ -172,6 +172,21 @@
       "hours": "h",
       "days": "j",
       "minutes": "min"
+    },
+    "sidebar": {
+      "adminPanel": "Admin Panel",
+      "adminDashboard": "Dashboard Admin",
+      "userManagement": "Gestion Utilisateurs",
+      "subscriptions": "Abonnements",
+      "revenueAnalytics": "Revenus & Analytics",
+      "systemMonitoring": "Système & Monitoring",
+      "alertsLogs": "Alertes & Logs",
+      "database": "Base de Données",
+      "communication": "Communication",
+      "security": "Sécurité",
+      "userDashboard": "Dashboard Utilisateur",
+      "support": "Support",
+      "settings": "Paramètres"
     }
   },
   "dashboard": {

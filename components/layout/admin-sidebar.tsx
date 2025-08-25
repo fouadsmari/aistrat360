@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { useTranslations } from "next-intl"
 import {
   BarChart3,
   ChevronLeft,
@@ -32,71 +33,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-const adminSidebarItems = [
-  {
-    title: "Dashboard Admin",
-    icon: BarChart3,
-    href: "/admin/dashboard",
-  },
-  {
-    title: "Gestion Utilisateurs",
-    icon: Users,
-    href: "/admin/users",
-  },
-  {
-    title: "Abonnements",
-    icon: UserCheck,
-    href: "/admin/subscriptions",
-  },
-  {
-    title: "Revenus & Analytics",
-    icon: DollarSign,
-    href: "/admin/revenue",
-  },
-  {
-    title: "Système & Monitoring",
-    icon: Activity,
-    href: "/admin/monitoring",
-  },
-  {
-    title: "Alertes & Logs",
-    icon: AlertTriangle,
-    href: "/admin/alerts",
-  },
-  {
-    title: "Base de Données",
-    icon: Database,
-    href: "/admin/database",
-  },
-  {
-    title: "Communication",
-    icon: Mail,
-    href: "/admin/communication",
-  },
-  {
-    title: "Sécurité",
-    icon: Shield,
-    href: "/admin/security",
-  },
-]
-
-const bottomItems = [
-  {
-    title: "Dashboard Utilisateur",
-    icon: Globe,
-    href: "/dashboard",
-  },
-  {
-    title: "Support",
-    icon: HelpCircle,
-    href: "/admin/support",
-  },
-  {
-    title: "Paramètres",
-    icon: Settings,
-    href: "/admin/settings",
-  },
-]
 
 interface AdminSidebarProps {
   isCollapsed: boolean
@@ -110,6 +46,73 @@ export function AdminSidebar({
   isMobile = false,
 }: AdminSidebarProps) {
   const pathname = usePathname()
+  const t = useTranslations("admin.sidebar")
+
+  const adminSidebarItems = [
+    {
+      title: t("adminDashboard"),
+      icon: BarChart3,
+      href: "/admin/dashboard",
+    },
+    {
+      title: t("userManagement"),
+      icon: Users,
+      href: "/admin/users",
+    },
+    {
+      title: t("subscriptions"),
+      icon: UserCheck,
+      href: "/admin/subscriptions",
+    },
+    {
+      title: t("revenueAnalytics"),
+      icon: DollarSign,
+      href: "/admin/revenue",
+    },
+    {
+      title: t("systemMonitoring"),
+      icon: Activity,
+      href: "/admin/monitoring",
+    },
+    {
+      title: t("alertsLogs"),
+      icon: AlertTriangle,
+      href: "/admin/alerts",
+    },
+    {
+      title: t("database"),
+      icon: Database,
+      href: "/admin/database",
+    },
+    {
+      title: t("communication"),
+      icon: Mail,
+      href: "/admin/communication",
+    },
+    {
+      title: t("security"),
+      icon: Shield,
+      href: "/admin/security",
+    },
+  ]
+
+  const bottomItems = [
+    {
+      title: t("userDashboard"),
+      icon: Globe,
+      href: "/dashboard",
+    },
+    {
+      title: t("support"),
+      icon: HelpCircle,
+      href: "/admin/support",
+    },
+    {
+      title: t("settings"),
+      icon: Settings,
+      href: "/admin/settings",
+    },
+  ]
 
   return (
     <aside
@@ -125,7 +128,7 @@ export function AdminSidebar({
               <Shield className="h-5 w-5 text-white" />
             </div>
             <span className="bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-lg font-semibold text-transparent">
-              Admin Panel
+              {t("adminPanel")}
             </span>
           </div>
         )}
