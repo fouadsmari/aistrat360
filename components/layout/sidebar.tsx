@@ -30,7 +30,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-
 interface SidebarProps {
   isCollapsed: boolean
   onToggle: () => void

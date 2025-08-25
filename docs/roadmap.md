@@ -83,6 +83,15 @@
     - Formatage code avec Prettier
     - Build production réussi avec warnings mineurs
 
+- **[2025-08-25]** Corrections bugs système de traduction et profil
+  - ✅ Correction changement de langue avec rechargement complet de page
+  - ✅ Sidebar utilise maintenant les traductions au lieu du texte codé en dur
+  - ✅ Synchronisation données profil avec base de données Supabase
+  - ✅ Système de notifications toast pour feedback utilisateur
+  - ✅ Gestion erreurs et création automatique profil si inexistant
+  - ✅ Sauvegarde préférences langue dans base de données
+  - ✅ Tests unitaires mis à jour et fonctionnels
+
 ---
 
 _Dernière mise à jour : 2025-08-25_

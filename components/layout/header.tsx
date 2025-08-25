@@ -136,7 +136,9 @@ export function Header({ onMenuClick, isMobile = false }: HeaderProps) {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => router.push(`/${locale}/profile`)}>
+              <DropdownMenuItem
+                onClick={() => router.push(`/${locale}/profile`)}
+              >
                 <User className="mr-2 h-4 w-4" />
                 <span>{t("profile")}</span>
               </DropdownMenuItem>
@@ -147,7 +149,7 @@ export function Header({ onMenuClick, isMobile = false }: HeaderProps) {
                 <span>{locale === "fr" ? "Support" : "Help"}</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={handleLogout}
                 className="text-red-600 dark:text-red-400"
               >

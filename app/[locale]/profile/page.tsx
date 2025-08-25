@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { useTranslations } from "next-intl"
 import { useParams, useRouter } from "next/navigation"
+import { useToast } from "@/components/ui/toast"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -42,6 +43,7 @@ export default function ProfilePage() {
   const params = useParams()
   const router = useRouter()
   const locale = params.locale as string
+  const { showToast, ToastComponent } = useToast()
 
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
@@ -58,7 +60,7 @@ export default function ProfilePage() {
       const supabase = createSupabaseClient()
       const {
         data: { user },
-        error: authError
+        error: authError,
       } = await supabase.auth.getUser()
 
       if (authError || !user) {
@@ -83,7 +85,7 @@ export default function ProfilePage() {
             preferred_language: locale,
             role: "subscriber",
             created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
           })
           .select()
           .single()
@@ -98,7 +100,7 @@ export default function ProfilePage() {
             role: "subscriber",
             preferred_language: locale,
             phone: null,
-            company: null
+            company: null,
           })
         } else {
           setProfile(newProfile)
@@ -129,7 +131,7 @@ export default function ProfilePage() {
         role: "subscriber",
         preferred_language: locale,
         phone: null,
-        company: null
+        company: null,
       })
     } finally {
       setLoading(false)
@@ -146,37 +148,68 @@ export default function ProfilePage() {
     setSaving(true)
     try {
       const supabase = createSupabaseClient()
-      const { error } = await supabase
+
+      // Update the profile in the database
+      const { data: updatedProfile, error } = await supabase
         .from("profiles")
         .update({
-          full_name: formData.full_name,
-          phone: formData.phone,
-          company: formData.company,
+          full_name: formData.full_name || null,
+          phone: formData.phone || null,
+          company: formData.company || null,
           preferred_language: formData.preferred_language,
           updated_at: new Date().toISOString(),
         })
         .eq("id", profile.id)
+        .select()
+        .single()
 
       if (error) {
         console.error("Error updating profile:", error)
+        showToast({
+          message: t("updateError"),
+          type: "error",
+          duration: 4000,
+        })
+        setSaving(false)
         return
       }
 
-      // If language changed, redirect to new locale
+      // Update local state with the returned data
+      if (updatedProfile) {
+        setProfile(updatedProfile)
+        setFormData({
+          full_name: updatedProfile.full_name || "",
+          phone: updatedProfile.phone || "",
+          company: updatedProfile.company || "",
+          preferred_language: updatedProfile.preferred_language || locale,
+        })
+      }
+
+      // Show success feedback
+      showToast({
+        message: t("updateSuccess"),
+        type: "success",
+        duration: 3000,
+      })
+
+      // If language changed, redirect to new locale after a short delay
       if (formData.preferred_language !== locale) {
-        const currentPath = window.location.pathname
-        const newPath = currentPath.replace(
-          `/${locale}`,
-          `/${formData.preferred_language}`
-        )
-        window.location.href = newPath
-        return
+        setTimeout(() => {
+          const currentPath = window.location.pathname
+          const newPath = currentPath.replace(
+            `/${locale}`,
+            `/${formData.preferred_language}`
+          )
+          window.location.href = newPath
+        }, 500)
       }
-
-      // Refresh profile data
-      await fetchProfile()
     } catch (error) {
       console.error("Error:", error)
+      showToast({
+        message: t("updateError"),
+        type: "error",
+        duration: 4000,
+      })
     } finally {
       setSaving(false)
     }
@@ -367,6 +400,7 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
       </div>
+      {ToastComponent}
     </div>
   )
 }

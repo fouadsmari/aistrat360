@@ -29,11 +29,12 @@ export function LanguageSwitcher() {
     if (newLocale === currentLocale) return
 
     // Replace the locale in the pathname
-    const segments = pathname.split('/')
+    const segments = pathname.split("/")
     segments[1] = newLocale
-    const newPathname = segments.join('/')
-    router.push(newPathname)
-    router.refresh()
+    const newPathname = segments.join("/")
+
+    // Force a full page reload to ensure translations are updated
+    window.location.href = newPathname
   }
 
   return (
