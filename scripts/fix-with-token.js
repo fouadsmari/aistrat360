@@ -1,7 +1,7 @@
-const https = require('https')
+const https = require("https")
 
-const token = 'sbp_95cea2145b4da37efedb43ce94ffc10b7108f467'
-const projectRef = 'ypygrfrwpddqjbahgayc'
+const token = "sbp_95cea2145b4da37efedb43ce94ffc10b7108f467"
+const projectRef = "ypygrfrwpddqjbahgayc"
 
 const sqlScript = `
 -- Fix infinite recursion in profiles RLS policies
@@ -45,48 +45,48 @@ CREATE TRIGGER on_auth_user_created
 `
 
 async function executeSQL() {
-  console.log('🔧 Executing RLS fix with management token...')
-  
+  console.log("🔧 Executing RLS fix with management token...")
+
   const postData = JSON.stringify({
-    query: sqlScript
+    query: sqlScript,
   })
 
   const options = {
-    hostname: 'api.supabase.com',
+    hostname: "api.supabase.com",
     port: 443,
     path: `/v1/projects/${projectRef}/database/query`,
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-      'Content-Length': Buffer.byteLength(postData)
-    }
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      "Content-Length": Buffer.byteLength(postData),
+    },
   }
 
   return new Promise((resolve, reject) => {
     const req = https.request(options, (res) => {
-      let data = ''
-      
-      res.on('data', (chunk) => {
+      let data = ""
+
+      res.on("data", (chunk) => {
         data += chunk
       })
-      
-      res.on('end', () => {
-        console.log('Response status:', res.statusCode)
-        console.log('Response headers:', res.headers)
-        console.log('Response body:', data)
-        
+
+      res.on("end", () => {
+        console.log("Response status:", res.statusCode)
+        console.log("Response headers:", res.headers)
+        console.log("Response body:", data)
+
         if (res.statusCode === 200 || res.statusCode === 201) {
-          console.log('✅ SQL executed successfully!')
+          console.log("✅ SQL executed successfully!")
         } else {
-          console.error('❌ Error executing SQL')
+          console.error("❌ Error executing SQL")
         }
         resolve(data)
       })
     })
 
-    req.on('error', (err) => {
-      console.error('❌ Request error:', err)
+    req.on("error", (err) => {
+      console.error("❌ Request error:", err)
       reject(err)
     })
 

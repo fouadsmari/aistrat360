@@ -131,7 +131,7 @@ export default function AdminUsersPage() {
   const fetchUsers = useCallback(async () => {
     try {
       const supabase = createSupabaseClient()
-      
+
       const { data: profiles, error } = await supabase
         .from("profiles")
         .select("*")
@@ -162,7 +162,12 @@ export default function AdminUsersPage() {
 
   // Create new user
   const handleCreateUser = async () => {
-    if (!createFormData.email || !createFormData.password || !createFormData.first_name || !createFormData.last_name) {
+    if (
+      !createFormData.email ||
+      !createFormData.password ||
+      !createFormData.first_name ||
+      !createFormData.last_name
+    ) {
       showToast({
         message: "Please fill in all required fields",
         type: "error",
@@ -174,7 +179,7 @@ export default function AdminUsersPage() {
     setIsSubmitting(true)
     try {
       const supabase = createSupabaseClient()
-      
+
       // Create user in Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: createFormData.email,
@@ -217,6 +222,13 @@ export default function AdminUsersPage() {
 
         if (profileError) {
           console.error("Error updating profile:", profileError)
+          showToast({
+            message: `Database error saving new user: ${profileError.message}`,
+            type: "error",
+            duration: 4000,
+          })
+          setIsSubmitting(false)
+          return
         }
 
         showToast({
@@ -267,7 +279,7 @@ export default function AdminUsersPage() {
     setIsSubmitting(true)
     try {
       const supabase = createSupabaseClient()
-      
+
       const { error } = await supabase
         .from("profiles")
         .update({
@@ -323,7 +335,7 @@ export default function AdminUsersPage() {
     setIsSubmitting(true)
     try {
       const supabase = createSupabaseClient()
-      
+
       // First delete from profiles table
       const { error: profileError } = await supabase
         .from("profiles")
@@ -365,7 +377,7 @@ export default function AdminUsersPage() {
   const toggleUserStatus = async (user: UserProfile) => {
     try {
       const supabase = createSupabaseClient()
-      
+
       const { error } = await supabase
         .from("profiles")
         .update({
@@ -418,18 +430,22 @@ export default function AdminUsersPage() {
   }
 
   // Filter users based on search term
-  const filteredUsers = users.filter(user =>
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (user.first_name && user.first_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (user.last_name && user.last_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (user.company && user.company.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredUsers = users.filter(
+    (user) =>
+      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (user.first_name &&
+        user.first_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (user.last_name &&
+        user.last_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (user.company &&
+        user.company.toLowerCase().includes(searchTerm.toLowerCase()))
   )
 
   // Get user stats
   const totalUsers = users.length
-  const activeUsers = users.filter(user => user.is_active).length
-  const suspendedUsers = users.filter(user => !user.is_active).length
-  const todaysUsers = users.filter(user => {
+  const activeUsers = users.filter((user) => user.is_active).length
+  const suspendedUsers = users.filter((user) => !user.is_active).length
+  const todaysUsers = users.filter((user) => {
     const today = new Date().toDateString()
     return new Date(user.created_at).toDateString() === today
   }).length
@@ -439,27 +455,32 @@ export default function AdminUsersPage() {
   }, [fetchUsers])
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString(locale === "fr" ? "fr-FR" : "en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    })
+    return new Date(dateString).toLocaleDateString(
+      locale === "fr" ? "fr-FR" : "en-US",
+      {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      }
+    )
   }
 
   const formatTime = (dateString: string) => {
     const now = new Date()
     const date = new Date(dateString)
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60))
-    
+    const diffInMinutes = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60)
+    )
+
     if (diffInMinutes < 60) {
       return `${diffInMinutes}${locale === "fr" ? " min" : " min"}`
     }
-    
+
     const diffInHours = Math.floor(diffInMinutes / 60)
     if (diffInHours < 24) {
       return `${diffInHours}${locale === "fr" ? "h" : "h"}`
     }
-    
+
     const diffInDays = Math.floor(diffInHours / 24)
     return `${diffInDays}${locale === "fr" ? "j" : "d"}`
   }
@@ -483,7 +504,9 @@ export default function AdminUsersPage() {
             {t("title")}
           </h1>
           <p className="mt-2 text-gray-500 dark:text-gray-400">
-            {locale === "fr" ? "Gérez vos utilisateurs abonnés" : "Manage your subscribed users"}
+            {locale === "fr"
+              ? "Gérez vos utilisateurs abonnés"
+              : "Manage your subscribed users"}
           </p>
         </div>
 
@@ -498,112 +521,198 @@ export default function AdminUsersPage() {
             <DialogHeader>
               <DialogTitle>{t("addUser")}</DialogTitle>
               <DialogDescription>
-                {locale === "fr" ? "Créez un nouvel utilisateur abonné" : "Create a new subscribed user"}
+                {locale === "fr"
+                  ? "Créez un nouvel utilisateur abonné"
+                  : "Create a new subscribed user"}
               </DialogDescription>
             </DialogHeader>
             <div className="grid grid-cols-2 gap-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="create-first-name">{locale === "fr" ? "Prénom" : "First Name"} *</Label>
+                <Label htmlFor="create-first-name">
+                  {locale === "fr" ? "Prénom" : "First Name"} *
+                </Label>
                 <Input
                   id="create-first-name"
                   value={createFormData.first_name}
-                  onChange={(e) => setCreateFormData({ ...createFormData, first_name: e.target.value })}
+                  onChange={(e) =>
+                    setCreateFormData({
+                      ...createFormData,
+                      first_name: e.target.value,
+                    })
+                  }
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="create-last-name">{locale === "fr" ? "Nom" : "Last Name"} *</Label>
+                <Label htmlFor="create-last-name">
+                  {locale === "fr" ? "Nom" : "Last Name"} *
+                </Label>
                 <Input
                   id="create-last-name"
                   value={createFormData.last_name}
-                  onChange={(e) => setCreateFormData({ ...createFormData, last_name: e.target.value })}
+                  onChange={(e) =>
+                    setCreateFormData({
+                      ...createFormData,
+                      last_name: e.target.value,
+                    })
+                  }
                   required
                 />
               </div>
-              <div className="space-y-2 col-span-2">
+              <div className="col-span-2 space-y-2">
                 <Label htmlFor="create-email">Email *</Label>
                 <Input
                   id="create-email"
                   type="email"
                   value={createFormData.email}
-                  onChange={(e) => setCreateFormData({ ...createFormData, email: e.target.value })}
+                  onChange={(e) =>
+                    setCreateFormData({
+                      ...createFormData,
+                      email: e.target.value,
+                    })
+                  }
                   required
                 />
               </div>
-              <div className="space-y-2 col-span-2">
-                <Label htmlFor="create-password">{locale === "fr" ? "Mot de passe" : "Password"} *</Label>
+              <div className="col-span-2 space-y-2">
+                <Label htmlFor="create-password">
+                  {locale === "fr" ? "Mot de passe" : "Password"} *
+                </Label>
                 <Input
                   id="create-password"
                   type="password"
                   value={createFormData.password}
-                  onChange={(e) => setCreateFormData({ ...createFormData, password: e.target.value })}
+                  onChange={(e) =>
+                    setCreateFormData({
+                      ...createFormData,
+                      password: e.target.value,
+                    })
+                  }
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="create-role">{locale === "fr" ? "Rôle" : "Role"}</Label>
-                <Select value={createFormData.role} onValueChange={(value) => setCreateFormData({ ...createFormData, role: value })}>
+                <Label htmlFor="create-role">
+                  {locale === "fr" ? "Rôle" : "Role"}
+                </Label>
+                <Select
+                  value={createFormData.role}
+                  onValueChange={(value) =>
+                    setCreateFormData({ ...createFormData, role: value })
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="subscriber">{locale === "fr" ? "Abonné" : "Subscriber"}</SelectItem>
-                    <SelectItem value="admin">{locale === "fr" ? "Administrateur" : "Administrator"}</SelectItem>
-                    <SelectItem value="super_admin">{locale === "fr" ? "Super Admin" : "Super Admin"}</SelectItem>
+                    <SelectItem value="subscriber">
+                      {locale === "fr" ? "Abonné" : "Subscriber"}
+                    </SelectItem>
+                    <SelectItem value="admin">
+                      {locale === "fr" ? "Administrateur" : "Administrator"}
+                    </SelectItem>
+                    <SelectItem value="super_admin">
+                      {locale === "fr" ? "Super Admin" : "Super Admin"}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="create-phone">{locale === "fr" ? "Téléphone" : "Phone"}</Label>
+                <Label htmlFor="create-phone">
+                  {locale === "fr" ? "Téléphone" : "Phone"}
+                </Label>
                 <Input
                   id="create-phone"
                   value={createFormData.phone}
-                  onChange={(e) => setCreateFormData({ ...createFormData, phone: e.target.value })}
+                  onChange={(e) =>
+                    setCreateFormData({
+                      ...createFormData,
+                      phone: e.target.value,
+                    })
+                  }
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="create-company">{locale === "fr" ? "Entreprise" : "Company"}</Label>
+                <Label htmlFor="create-company">
+                  {locale === "fr" ? "Entreprise" : "Company"}
+                </Label>
                 <Input
                   id="create-company"
                   value={createFormData.company}
-                  onChange={(e) => setCreateFormData({ ...createFormData, company: e.target.value })}
+                  onChange={(e) =>
+                    setCreateFormData({
+                      ...createFormData,
+                      company: e.target.value,
+                    })
+                  }
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="create-city">{locale === "fr" ? "Ville" : "City"}</Label>
+                <Label htmlFor="create-city">
+                  {locale === "fr" ? "Ville" : "City"}
+                </Label>
                 <Input
                   id="create-city"
                   value={createFormData.city}
-                  onChange={(e) => setCreateFormData({ ...createFormData, city: e.target.value })}
+                  onChange={(e) =>
+                    setCreateFormData({
+                      ...createFormData,
+                      city: e.target.value,
+                    })
+                  }
                 />
               </div>
-              <div className="space-y-2 col-span-2">
-                <Label htmlFor="create-address">{locale === "fr" ? "Adresse" : "Address"}</Label>
+              <div className="col-span-2 space-y-2">
+                <Label htmlFor="create-address">
+                  {locale === "fr" ? "Adresse" : "Address"}
+                </Label>
                 <Input
                   id="create-address"
                   value={createFormData.address}
-                  onChange={(e) => setCreateFormData({ ...createFormData, address: e.target.value })}
+                  onChange={(e) =>
+                    setCreateFormData({
+                      ...createFormData,
+                      address: e.target.value,
+                    })
+                  }
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="create-postal-code">{locale === "fr" ? "Code postal" : "Postal Code"}</Label>
+                <Label htmlFor="create-postal-code">
+                  {locale === "fr" ? "Code postal" : "Postal Code"}
+                </Label>
                 <Input
                   id="create-postal-code"
                   value={createFormData.postal_code}
-                  onChange={(e) => setCreateFormData({ ...createFormData, postal_code: e.target.value })}
+                  onChange={(e) =>
+                    setCreateFormData({
+                      ...createFormData,
+                      postal_code: e.target.value,
+                    })
+                  }
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="create-country">{locale === "fr" ? "Pays" : "Country"}</Label>
+                <Label htmlFor="create-country">
+                  {locale === "fr" ? "Pays" : "Country"}
+                </Label>
                 <Input
                   id="create-country"
                   value={createFormData.country}
-                  onChange={(e) => setCreateFormData({ ...createFormData, country: e.target.value })}
+                  onChange={(e) =>
+                    setCreateFormData({
+                      ...createFormData,
+                      country: e.target.value,
+                    })
+                  }
                 />
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setIsCreateDialogOpen(false)}
+              >
                 {tCommon("cancel")}
               </Button>
               <Button onClick={handleCreateUser} disabled={isSubmitting}>
@@ -616,52 +725,70 @@ export default function AdminUsersPage() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card className="border-gray-200/30 dark:border-gray-800/20 bg-white/50 dark:bg-gray-900/30">
+        <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("totalUsers")}</CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">
+              {t("totalUsers")}
+            </CardTitle>
+            <User className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalUsers}</div>
           </CardContent>
         </Card>
-        <Card className="border-gray-200/30 dark:border-gray-800/20 bg-white/50 dark:bg-gray-900/30">
+        <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("activeUsers")}</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("activeUsers")}
+            </CardTitle>
             <UserCheck className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{activeUsers}</div>
+            <div className="text-2xl font-bold text-green-600">
+              {activeUsers}
+            </div>
           </CardContent>
         </Card>
-        <Card className="border-gray-200/30 dark:border-gray-800/20 bg-white/50 dark:bg-gray-900/30">
+        <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("suspended")}</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("suspended")}
+            </CardTitle>
             <UserX className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{suspendedUsers}</div>
+            <div className="text-2xl font-bold text-red-600">
+              {suspendedUsers}
+            </div>
           </CardContent>
         </Card>
-        <Card className="border-gray-200/30 dark:border-gray-800/20 bg-white/50 dark:bg-gray-900/30">
+        <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("newToday")}</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("newToday")}
+            </CardTitle>
             <Plus className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{todaysUsers}</div>
+            <div className="text-2xl font-bold text-blue-600">
+              {todaysUsers}
+            </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Search and Filter */}
-      <Card className="border-gray-200/30 dark:border-gray-800/20 bg-white/50 dark:bg-gray-900/30">
+      <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
         <CardHeader>
-          <CardTitle>{locale === "fr" ? "Derniers utilisateurs inscrits et leur statut" : "Recent registered users and their status"}</CardTitle>
+          <CardTitle>
+            {locale === "fr"
+              ? "Derniers utilisateurs inscrits et leur statut"
+              : "Recent registered users and their status"}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center space-x-4 pb-4">
-            <div className="relative flex-1 max-w-sm">
+            <div className="relative max-w-sm flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <Input
                 placeholder={t("searchUsers")}
@@ -677,11 +804,17 @@ export default function AdminUsersPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{locale === "fr" ? "Utilisateur" : "User"}</TableHead>
+                  <TableHead>
+                    {locale === "fr" ? "Utilisateur" : "User"}
+                  </TableHead>
                   <TableHead>{locale === "fr" ? "Plan" : "Plan"}</TableHead>
-                  <TableHead>{locale === "fr" ? "Dernière activité" : "Last Activity"}</TableHead>
+                  <TableHead>
+                    {locale === "fr" ? "Dernière activité" : "Last Activity"}
+                  </TableHead>
                   <TableHead>{locale === "fr" ? "Statut" : "Status"}</TableHead>
-                  <TableHead className="text-right">{locale === "fr" ? "Actions" : "Actions"}</TableHead>
+                  <TableHead className="text-right">
+                    {locale === "fr" ? "Actions" : "Actions"}
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -690,38 +823,65 @@ export default function AdminUsersPage() {
                     <TableCell>
                       <div className="flex items-center space-x-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-red-600 to-orange-600 text-white">
-                          {(user.first_name || user.email)?.charAt(0).toUpperCase()}
+                          {(user.first_name || user.email)
+                            ?.charAt(0)
+                            .toUpperCase()}
                         </div>
                         <div>
                           <div className="font-medium">
-                            {user.first_name && user.last_name 
+                            {user.first_name && user.last_name
                               ? `${user.first_name} ${user.last_name}`
-                              : user.email.split('@')[0]
-                            }
+                              : user.email.split("@")[0]}
                           </div>
-                          <div className="text-sm text-gray-500">{user.email}</div>
+                          <div className="text-sm text-gray-500">
+                            {user.email}
+                          </div>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={user.role === 'admin' || user.role === 'super_admin' ? 'default' : 'secondary'}>
-                        {user.role === 'subscriber' ? (locale === "fr" ? "Standard" : "Standard") :
-                         user.role === 'admin' ? (locale === "fr" ? "Premium" : "Premium") :
-                         user.role === 'super_admin' ? (locale === "fr" ? "Premium" : "Premium") :
-                         (locale === "fr" ? "Basic" : "Basic")}
+                      <Badge
+                        variant={
+                          user.role === "admin" || user.role === "super_admin"
+                            ? "default"
+                            : "secondary"
+                        }
+                      >
+                        {user.role === "subscriber"
+                          ? locale === "fr"
+                            ? "Standard"
+                            : "Standard"
+                          : user.role === "admin"
+                            ? locale === "fr"
+                              ? "Premium"
+                              : "Premium"
+                            : user.role === "super_admin"
+                              ? locale === "fr"
+                                ? "Premium"
+                                : "Premium"
+                              : locale === "fr"
+                                ? "Basic"
+                                : "Basic"}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <div className="text-sm text-gray-500">
-                        {locale === "fr" ? "Il y a" : ""} {formatTime(user.updated_at || user.created_at)} {locale === "en" ? "ago" : ""}
+                        {locale === "fr" ? "Il y a" : ""}{" "}
+                        {formatTime(user.updated_at || user.created_at)}{" "}
+                        {locale === "en" ? "ago" : ""}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={user.is_active ? "default" : "destructive"}>
-                        {user.is_active 
-                          ? (locale === "fr" ? "Active" : "Active")
-                          : (locale === "fr" ? "Suspendu" : "Suspended")
-                        }
+                      <Badge
+                        variant={user.is_active ? "default" : "destructive"}
+                      >
+                        {user.is_active
+                          ? locale === "fr"
+                            ? "Active"
+                            : "Active"
+                          : locale === "fr"
+                            ? "Suspendu"
+                            : "Suspended"}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
@@ -732,13 +892,19 @@ export default function AdminUsersPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>{locale === "fr" ? "Actions" : "Actions"}</DropdownMenuLabel>
+                          <DropdownMenuLabel>
+                            {locale === "fr" ? "Actions" : "Actions"}
+                          </DropdownMenuLabel>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => openEditDialog(user)}>
+                          <DropdownMenuItem
+                            onClick={() => openEditDialog(user)}
+                          >
                             <Edit className="mr-2 h-4 w-4" />
                             {t("editUser")}
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => toggleUserStatus(user)}>
+                          <DropdownMenuItem
+                            onClick={() => toggleUserStatus(user)}
+                          >
                             {user.is_active ? (
                               <>
                                 <UserX className="mr-2 h-4 w-4" />
@@ -760,7 +926,7 @@ export default function AdminUsersPage() {
                             {t("viewProfile")}
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             className="text-red-600 dark:text-red-400"
                             onClick={() => {
                               setSelectedUser(user)
@@ -777,12 +943,15 @@ export default function AdminUsersPage() {
                 ))}
                 {filteredUsers.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8">
+                    <TableCell colSpan={5} className="py-8 text-center">
                       <div className="text-gray-500">
-                        {searchTerm 
-                          ? (locale === "fr" ? "Aucun utilisateur trouvé" : "No users found")
-                          : (locale === "fr" ? "Aucun utilisateur" : "No users")
-                        }
+                        {searchTerm
+                          ? locale === "fr"
+                            ? "Aucun utilisateur trouvé"
+                            : "No users found"
+                          : locale === "fr"
+                            ? "Aucun utilisateur"
+                            : "No users"}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -799,92 +968,151 @@ export default function AdminUsersPage() {
           <DialogHeader>
             <DialogTitle>{t("editUser")}</DialogTitle>
             <DialogDescription>
-              {locale === "fr" ? "Modifiez les informations de l'utilisateur" : "Update user information"}
+              {locale === "fr"
+                ? "Modifiez les informations de l'utilisateur"
+                : "Update user information"}
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-first-name">{locale === "fr" ? "Prénom" : "First Name"} *</Label>
+              <Label htmlFor="edit-first-name">
+                {locale === "fr" ? "Prénom" : "First Name"} *
+              </Label>
               <Input
                 id="edit-first-name"
                 value={editFormData.first_name || ""}
-                onChange={(e) => setEditFormData({ ...editFormData, first_name: e.target.value })}
+                onChange={(e) =>
+                  setEditFormData({
+                    ...editFormData,
+                    first_name: e.target.value,
+                  })
+                }
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-last-name">{locale === "fr" ? "Nom" : "Last Name"} *</Label>
+              <Label htmlFor="edit-last-name">
+                {locale === "fr" ? "Nom" : "Last Name"} *
+              </Label>
               <Input
                 id="edit-last-name"
                 value={editFormData.last_name || ""}
-                onChange={(e) => setEditFormData({ ...editFormData, last_name: e.target.value })}
+                onChange={(e) =>
+                  setEditFormData({
+                    ...editFormData,
+                    last_name: e.target.value,
+                  })
+                }
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-role">{locale === "fr" ? "Rôle" : "Role"}</Label>
-              <Select value={editFormData.role} onValueChange={(value) => setEditFormData({ ...editFormData, role: value })}>
+              <Label htmlFor="edit-role">
+                {locale === "fr" ? "Rôle" : "Role"}
+              </Label>
+              <Select
+                value={editFormData.role}
+                onValueChange={(value) =>
+                  setEditFormData({ ...editFormData, role: value })
+                }
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="subscriber">{locale === "fr" ? "Abonné" : "Subscriber"}</SelectItem>
-                  <SelectItem value="admin">{locale === "fr" ? "Administrateur" : "Administrator"}</SelectItem>
-                  <SelectItem value="super_admin">{locale === "fr" ? "Super Admin" : "Super Admin"}</SelectItem>
+                  <SelectItem value="subscriber">
+                    {locale === "fr" ? "Abonné" : "Subscriber"}
+                  </SelectItem>
+                  <SelectItem value="admin">
+                    {locale === "fr" ? "Administrateur" : "Administrator"}
+                  </SelectItem>
+                  <SelectItem value="super_admin">
+                    {locale === "fr" ? "Super Admin" : "Super Admin"}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-phone">{locale === "fr" ? "Téléphone" : "Phone"}</Label>
+              <Label htmlFor="edit-phone">
+                {locale === "fr" ? "Téléphone" : "Phone"}
+              </Label>
               <Input
                 id="edit-phone"
                 value={editFormData.phone || ""}
-                onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })}
+                onChange={(e) =>
+                  setEditFormData({ ...editFormData, phone: e.target.value })
+                }
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-company">{locale === "fr" ? "Entreprise" : "Company"}</Label>
+              <Label htmlFor="edit-company">
+                {locale === "fr" ? "Entreprise" : "Company"}
+              </Label>
               <Input
                 id="edit-company"
                 value={editFormData.company || ""}
-                onChange={(e) => setEditFormData({ ...editFormData, company: e.target.value })}
+                onChange={(e) =>
+                  setEditFormData({ ...editFormData, company: e.target.value })
+                }
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-city">{locale === "fr" ? "Ville" : "City"}</Label>
+              <Label htmlFor="edit-city">
+                {locale === "fr" ? "Ville" : "City"}
+              </Label>
               <Input
                 id="edit-city"
                 value={editFormData.city || ""}
-                onChange={(e) => setEditFormData({ ...editFormData, city: e.target.value })}
+                onChange={(e) =>
+                  setEditFormData({ ...editFormData, city: e.target.value })
+                }
               />
             </div>
-            <div className="space-y-2 col-span-2">
-              <Label htmlFor="edit-address">{locale === "fr" ? "Adresse" : "Address"}</Label>
+            <div className="col-span-2 space-y-2">
+              <Label htmlFor="edit-address">
+                {locale === "fr" ? "Adresse" : "Address"}
+              </Label>
               <Input
                 id="edit-address"
                 value={editFormData.address || ""}
-                onChange={(e) => setEditFormData({ ...editFormData, address: e.target.value })}
+                onChange={(e) =>
+                  setEditFormData({ ...editFormData, address: e.target.value })
+                }
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-postal-code">{locale === "fr" ? "Code postal" : "Postal Code"}</Label>
+              <Label htmlFor="edit-postal-code">
+                {locale === "fr" ? "Code postal" : "Postal Code"}
+              </Label>
               <Input
                 id="edit-postal-code"
                 value={editFormData.postal_code || ""}
-                onChange={(e) => setEditFormData({ ...editFormData, postal_code: e.target.value })}
+                onChange={(e) =>
+                  setEditFormData({
+                    ...editFormData,
+                    postal_code: e.target.value,
+                  })
+                }
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-country">{locale === "fr" ? "Pays" : "Country"}</Label>
+              <Label htmlFor="edit-country">
+                {locale === "fr" ? "Pays" : "Country"}
+              </Label>
               <Input
                 id="edit-country"
                 value={editFormData.country || ""}
-                onChange={(e) => setEditFormData({ ...editFormData, country: e.target.value })}
+                onChange={(e) =>
+                  setEditFormData({ ...editFormData, country: e.target.value })
+                }
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsEditDialogOpen(false)}
+            >
               {tCommon("cancel")}
             </Button>
             <Button onClick={handleEditUser} disabled={isSubmitting}>
@@ -900,35 +1128,44 @@ export default function AdminUsersPage() {
           <DialogHeader>
             <DialogTitle>{t("deleteUser")}</DialogTitle>
             <DialogDescription>
-              {locale === "fr" 
-                ? "Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible." 
-                : "Are you sure you want to delete this user? This action cannot be undone."
-              }
+              {locale === "fr"
+                ? "Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible."
+                : "Are you sure you want to delete this user? This action cannot be undone."}
             </DialogDescription>
           </DialogHeader>
           {selectedUser && (
             <div className="py-4">
               <div className="flex items-center space-x-3 rounded-lg border p-4">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-red-600 to-orange-600 text-white">
-                  {(selectedUser.first_name || selectedUser.email)?.charAt(0).toUpperCase()}
+                  {(selectedUser.first_name || selectedUser.email)
+                    ?.charAt(0)
+                    .toUpperCase()}
                 </div>
                 <div>
                   <div className="font-medium">
-                    {selectedUser.first_name && selectedUser.last_name 
+                    {selectedUser.first_name && selectedUser.last_name
                       ? `${selectedUser.first_name} ${selectedUser.last_name}`
-                      : selectedUser.email.split('@')[0]
-                    }
+                      : selectedUser.email.split("@")[0]}
                   </div>
-                  <div className="text-sm text-gray-500">{selectedUser.email}</div>
+                  <div className="text-sm text-gray-500">
+                    {selectedUser.email}
+                  </div>
                 </div>
               </div>
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteDialogOpen(false)}
+            >
               {tCommon("cancel")}
             </Button>
-            <Button variant="destructive" onClick={handleDeleteUser} disabled={isSubmitting}>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteUser}
+              disabled={isSubmitting}
+            >
               {isSubmitting ? tCommon("loading") : t("deleteUser")}
             </Button>
           </DialogFooter>

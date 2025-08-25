@@ -15,26 +15,26 @@ import {
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { 
-  Check, 
-  Star, 
-  Zap, 
-  Shield, 
-  Users, 
+import {
+  Check,
+  Star,
+  Zap,
+  Shield,
+  Users,
   Rocket,
   Crown,
-  Sparkles
+  Sparkles,
 } from "lucide-react"
 import { createSupabaseClient } from "@/lib/supabase"
 import { cn } from "@/lib/utils"
-import { 
-  getSubscriptionPlans, 
-  getUserSubscription, 
+import {
+  getSubscriptionPlans,
+  getUserSubscription,
   upsertSubscription,
   getYearlyDiscount,
   formatPrice,
   type SubscriptionPlan,
-  type UserSubscription
+  type UserSubscription,
 } from "@/lib/subscription-utils"
 
 export default function PricingPage() {
@@ -46,7 +46,8 @@ export default function PricingPage() {
   const { showToast, ToastComponent } = useToast()
 
   const [plans, setPlans] = useState<SubscriptionPlan[]>([])
-  const [currentSubscription, setCurrentSubscription] = useState<UserSubscription | null>(null)
+  const [currentSubscription, setCurrentSubscription] =
+    useState<UserSubscription | null>(null)
   const [loading, setLoading] = useState(true)
   const [isYearly, setIsYearly] = useState(false)
   const [processingPlan, setProcessingPlan] = useState<string | null>(null)
@@ -54,14 +55,17 @@ export default function PricingPage() {
   const fetchPlansAndSubscription = useCallback(async () => {
     try {
       const supabase = createSupabaseClient()
-      
+
       // Get plans (always available)
       const plans = await getSubscriptionPlans()
       setPlans(plans.sort((a, b) => a.sort_order - b.sort_order))
-      
+
       // Check if user is authenticated
-      const { data: { user }, error: authError } = await supabase.auth.getUser()
-      
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser()
+
       if (authError || !user) {
         console.log("User not authenticated, showing public pricing")
         setCurrentSubscription(null)
@@ -72,7 +76,6 @@ export default function PricingPage() {
       // Get user subscription if authenticated
       const subscription = await getUserSubscription(user.id)
       setCurrentSubscription(subscription)
-
     } catch (error) {
       console.error("Error:", error)
       showToast({
@@ -93,21 +96,30 @@ export default function PricingPage() {
     setProcessingPlan(plan.name)
     try {
       const supabase = createSupabaseClient()
-      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser()
 
       if (authError || !user) {
         // Redirect to login if not authenticated
-        router.push(`/${locale}/login?redirect=${encodeURIComponent(`/${locale}/pricing`)}`)
+        router.push(
+          `/${locale}/login?redirect=${encodeURIComponent(`/${locale}/pricing`)}`
+        )
         return
       }
 
       // Here you would typically integrate with a payment processor like Stripe
       // For now, we'll just update the subscription in the database directly
-      
+
       if (plan.name === "trial") {
         // Handle trial signup
-        const subscription = await upsertSubscription(user.id, plan.name, "trial")
-        
+        const subscription = await upsertSubscription(
+          user.id,
+          plan.name,
+          "trial"
+        )
+
         if (!subscription) {
           throw new Error("Failed to create trial subscription")
         }
@@ -117,24 +129,23 @@ export default function PricingPage() {
           type: "success",
           duration: 4000,
         })
-        
+
         // Refresh the data
         fetchPlansAndSubscription()
       } else {
         // For paid plans, you would redirect to payment processor
         // For demo purposes, we'll show a message
         showToast({
-          message: `Redirecting to payment for ${locale === 'fr' ? plan.display_name_fr : plan.display_name_en}...`,
+          message: `Redirecting to payment for ${locale === "fr" ? plan.display_name_fr : plan.display_name_en}...`,
           type: "info",
           duration: 4000,
         })
-        
+
         // In a real implementation, you would:
         // 1. Create a Stripe checkout session
         // 2. Redirect to Stripe
         // 3. Handle the webhook to update subscription
       }
-
     } catch (error) {
       console.error("Error selecting plan:", error)
       showToast({
@@ -166,15 +177,15 @@ export default function PricingPage() {
     if (currentSubscription?.plan === plan.name) {
       return t("currentPlan")
     }
-    
+
     if (plan.name === "trial") {
       return t("startTrial")
     }
-    
+
     if (plan.name === "advanced") {
       return t("contactSales")
     }
-    
+
     return t("selectPlan")
   }
 
@@ -182,11 +193,11 @@ export default function PricingPage() {
     if (currentSubscription?.plan === plan.name) {
       return "secondary" as const
     }
-    
+
     if (plan.is_popular) {
       return "default" as const
     }
-    
+
     return "outline" as const
   }
 
@@ -231,7 +242,7 @@ export default function PricingPage() {
           <button
             onClick={() => setIsYearly(false)}
             className={cn(
-              "px-4 py-2 text-sm font-medium rounded-md transition-colors",
+              "rounded-md px-4 py-2 text-sm font-medium transition-colors",
               !isYearly
                 ? "bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-white"
                 : "text-gray-600 dark:text-gray-400"
@@ -242,15 +253,20 @@ export default function PricingPage() {
           <button
             onClick={() => setIsYearly(true)}
             className={cn(
-              "px-4 py-2 text-sm font-medium rounded-md transition-colors",
+              "rounded-md px-4 py-2 text-sm font-medium transition-colors",
               isYearly
                 ? "bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-white"
                 : "text-gray-600 dark:text-gray-400"
             )}
           >
             {t("yearlyBilling")}
-            {plans.some(p => getDiscountPercent(p.price_monthly, p.price_yearly) > 0) && (
-              <Badge variant="secondary" className="ml-2 bg-green-100 text-green-800">
+            {plans.some(
+              (p) => getDiscountPercent(p.price_monthly, p.price_yearly) > 0
+            ) && (
+              <Badge
+                variant="secondary"
+                className="ml-2 bg-green-100 text-green-800"
+              >
                 {t("save", { percent: "17" })}
               </Badge>
             )}
@@ -259,12 +275,17 @@ export default function PricingPage() {
       </div>
 
       {/* Plans Grid */}
-      <div className="grid gap-6 lg:grid-cols-4 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {plans.map((plan) => {
-          const yearlyDiscount = getDiscountPercent(plan.price_monthly, plan.price_yearly)
-          const displayName = locale === 'fr' ? plan.display_name_fr : plan.display_name_en
-          const description = locale === 'fr' ? plan.description_fr : plan.description_en
-          
+          const yearlyDiscount = getDiscountPercent(
+            plan.price_monthly,
+            plan.price_yearly
+          )
+          const displayName =
+            locale === "fr" ? plan.display_name_fr : plan.display_name_en
+          const description =
+            locale === "fr" ? plan.description_fr : plan.description_en
+
           return (
             <Card
               key={plan.id}
@@ -273,7 +294,8 @@ export default function PricingPage() {
                 plan.is_popular
                   ? "border-violet-500 bg-violet-50/50 dark:bg-violet-950/20"
                   : "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900",
-                isCurrentPlan(plan.name) && "ring-2 ring-green-500 ring-offset-2"
+                isCurrentPlan(plan.name) &&
+                  "ring-2 ring-green-500 ring-offset-2"
               )}
             >
               {plan.is_popular && (
@@ -284,10 +306,13 @@ export default function PricingPage() {
                   </Badge>
                 </div>
               )}
-              
+
               {isCurrentPlan(plan.name) && (
                 <div className="absolute -top-3 right-4">
-                  <Badge variant="secondary" className="bg-green-100 text-green-800">
+                  <Badge
+                    variant="secondary"
+                    className="bg-green-100 text-green-800"
+                  >
                     {t("currentPlan")}
                   </Badge>
                 </div>
@@ -295,12 +320,14 @@ export default function PricingPage() {
 
               <CardHeader className="pb-4">
                 <div className="flex items-center space-x-2">
-                  <div className={cn(
-                    "rounded-lg p-2",
-                    plan.is_popular
-                      ? "bg-gradient-to-br from-violet-600 to-purple-600 text-white"
-                      : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
-                  )}>
+                  <div
+                    className={cn(
+                      "rounded-lg p-2",
+                      plan.is_popular
+                        ? "bg-gradient-to-br from-violet-600 to-purple-600 text-white"
+                        : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                    )}
+                  >
                     {getPlanIcon(plan.name)}
                   </div>
                   <div>
@@ -316,7 +343,10 @@ export default function PricingPage() {
                 <div className="mb-6">
                   <div className="flex items-baseline space-x-2">
                     <span className="text-4xl font-bold">
-                      {formatPriceDisplay(plan.price_monthly, plan.price_yearly)}
+                      {formatPriceDisplay(
+                        plan.price_monthly,
+                        plan.price_yearly
+                      )}
                     </span>
                     {plan.price_monthly > 0 && (
                       <span className="text-gray-500">
@@ -330,7 +360,10 @@ export default function PricingPage() {
                     </p>
                   )}
                   {isYearly && yearlyDiscount > 0 && (
-                    <Badge variant="secondary" className="mt-2 bg-green-100 text-green-800">
+                    <Badge
+                      variant="secondary"
+                      className="mt-2 bg-green-100 text-green-800"
+                    >
                       {t("save", { percent: yearlyDiscount.toString() })}
                     </Badge>
                   )}
@@ -341,9 +374,9 @@ export default function PricingPage() {
                 <ul className="space-y-3">
                   {plan.features.map((feature, index) => (
                     <li key={index} className="flex items-start space-x-2">
-                      <Check className="mt-0.5 h-4 w-4 text-green-600 flex-shrink-0" />
+                      <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-green-600" />
                       <span className="text-sm text-gray-600 dark:text-gray-300">
-                        {locale === 'fr' ? feature.fr : feature.en}
+                        {locale === "fr" ? feature.fr : feature.en}
                       </span>
                     </li>
                   ))}
@@ -353,7 +386,9 @@ export default function PricingPage() {
               <CardFooter>
                 <Button
                   onClick={() => handleSelectPlan(plan)}
-                  disabled={isCurrentPlan(plan.name) || processingPlan === plan.name}
+                  disabled={
+                    isCurrentPlan(plan.name) || processingPlan === plan.name
+                  }
                   variant={getButtonVariant(plan)}
                   className={cn(
                     "w-full",
@@ -378,7 +413,7 @@ export default function PricingPage() {
       </div>
 
       {/* Features */}
-      <div className="text-center space-y-4">
+      <div className="space-y-4 text-center">
         <div className="flex justify-center space-x-8 text-sm text-gray-600 dark:text-gray-400">
           <div className="flex items-center space-x-2">
             <Check className="h-4 w-4 text-green-600" />
@@ -397,31 +432,45 @@ export default function PricingPage() {
 
       {/* FAQ Section */}
       <div className="mt-16">
-        <div className="text-center mb-12">
+        <div className="mb-12 text-center">
           <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
             {t("faq.title")}
           </h2>
         </div>
-        
+
         <div className="grid gap-8 md:grid-cols-2">
           <div>
-            <h3 className="text-lg font-semibold mb-2">{t("faq.canIChangeAnytime")}</h3>
-            <p className="text-gray-600 dark:text-gray-400">{t("faq.changeAnytimeAnswer")}</p>
+            <h3 className="mb-2 text-lg font-semibold">
+              {t("faq.canIChangeAnytime")}
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              {t("faq.changeAnytimeAnswer")}
+            </p>
           </div>
-          
+
           <div>
-            <h3 className="text-lg font-semibold mb-2">{t("faq.freeTrial")}</h3>
-            <p className="text-gray-600 dark:text-gray-400">{t("faq.freeTrialAnswer")}</p>
+            <h3 className="mb-2 text-lg font-semibold">{t("faq.freeTrial")}</h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              {t("faq.freeTrialAnswer")}
+            </p>
           </div>
-          
+
           <div>
-            <h3 className="text-lg font-semibold mb-2">{t("faq.cancelAnytime")}</h3>
-            <p className="text-gray-600 dark:text-gray-400">{t("faq.cancelAnytimeAnswer")}</p>
+            <h3 className="mb-2 text-lg font-semibold">
+              {t("faq.cancelAnytime")}
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              {t("faq.cancelAnytimeAnswer")}
+            </p>
           </div>
-          
+
           <div>
-            <h3 className="text-lg font-semibold mb-2">{t("faq.whatPaymentMethods")}</h3>
-            <p className="text-gray-600 dark:text-gray-400">{t("faq.paymentMethodsAnswer")}</p>
+            <h3 className="mb-2 text-lg font-semibold">
+              {t("faq.whatPaymentMethods")}
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              {t("faq.paymentMethodsAnswer")}
+            </p>
           </div>
         </div>
       </div>

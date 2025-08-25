@@ -42,15 +42,18 @@ export const HARDCODED_PLANS: SubscriptionPlan[] = [
     price_monthly: 0,
     price_yearly: 0,
     features: [
-      { en: "Access to basic features", fr: "Accès aux fonctionnalités de base" },
+      {
+        en: "Access to basic features",
+        fr: "Accès aux fonctionnalités de base",
+      },
       { en: "1 project", fr: "1 projet" },
       { en: "Email support", fr: "Support par email" },
-      { en: "14-day trial", fr: "14 jours d'essai" }
+      { en: "14-day trial", fr: "14 jours d'essai" },
     ],
     is_enabled: true,
     is_popular: false,
     sort_order: 0,
-    trial_days: 14
+    trial_days: 14,
   },
   {
     id: "starter",
@@ -66,12 +69,12 @@ export const HARDCODED_PLANS: SubscriptionPlan[] = [
       { en: "5 projects", fr: "5 projets" },
       { en: "10GB storage", fr: "10GB de stockage" },
       { en: "Email support", fr: "Support par email" },
-      { en: "Mobile app access", fr: "Accès à l'application mobile" }
+      { en: "Mobile app access", fr: "Accès à l'application mobile" },
     ],
     is_enabled: true,
     is_popular: false,
     sort_order: 1,
-    trial_days: 0
+    trial_days: 0,
   },
   {
     id: "pro",
@@ -89,12 +92,12 @@ export const HARDCODED_PLANS: SubscriptionPlan[] = [
       { en: "Priority support", fr: "Support prioritaire" },
       { en: "Advanced analytics", fr: "Analyses avancées" },
       { en: "Team collaboration", fr: "Collaboration d'équipe" },
-      { en: "API access", fr: "Accès API" }
+      { en: "API access", fr: "Accès API" },
     ],
     is_enabled: true,
     is_popular: true,
     sort_order: 2,
-    trial_days: 0
+    trial_days: 0,
   },
   {
     id: "advanced",
@@ -113,13 +116,13 @@ export const HARDCODED_PLANS: SubscriptionPlan[] = [
       { en: "Custom integrations", fr: "Intégrations personnalisées" },
       { en: "White-label options", fr: "Options de marque blanche" },
       { en: "SLA guarantee", fr: "Garantie SLA" },
-      { en: "Dedicated account manager", fr: "Gestionnaire de compte dédié" }
+      { en: "Dedicated account manager", fr: "Gestionnaire de compte dédié" },
     ],
     is_enabled: true,
     is_popular: false,
     sort_order: 3,
-    trial_days: 0
-  }
+    trial_days: 0,
+  },
 ]
 
 /**
@@ -134,7 +137,7 @@ export async function getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
       .eq("is_enabled", true)
       .order("sort_order", { ascending: true })
 
-    if (error && error.code !== 'PGRST116') {
+    if (error && error.code !== "PGRST116") {
       console.warn("Database not available, using hardcoded plans:", error)
       return HARDCODED_PLANS
     }
@@ -149,7 +152,9 @@ export async function getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
 /**
  * Fetch user's current subscription
  */
-export async function getUserSubscription(userId: string): Promise<UserSubscription | null> {
+export async function getUserSubscription(
+  userId: string
+): Promise<UserSubscription | null> {
   try {
     const supabase = createSupabaseClient()
     const { data, error } = await supabase
@@ -158,7 +163,7 @@ export async function getUserSubscription(userId: string): Promise<UserSubscript
       .eq("user_id", userId)
       .single()
 
-    if (error && error.code !== 'PGRST116') {
+    if (error && error.code !== "PGRST116") {
       console.warn("Error fetching user subscription:", error)
       return null
     }
@@ -174,14 +179,14 @@ export async function getUserSubscription(userId: string): Promise<UserSubscript
  * Create or update a subscription for a user
  */
 export async function upsertSubscription(
-  userId: string, 
-  planName: string, 
+  userId: string,
+  planName: string,
   status: string = "trial"
 ): Promise<UserSubscription | null> {
   try {
     const supabase = createSupabaseClient()
-    
-    const plan = HARDCODED_PLANS.find(p => p.name === planName)
+
+    const plan = HARDCODED_PLANS.find((p) => p.name === planName)
     if (!plan) {
       throw new Error(`Plan ${planName} not found`)
     }
@@ -204,7 +209,7 @@ export async function upsertSubscription(
       current_period_end: periodEnd?.toISOString() || null,
       trial_start: status === "trial" ? now.toISOString() : null,
       trial_end: trialEnd?.toISOString() || null,
-      cancel_at_period_end: false
+      cancel_at_period_end: false,
     }
 
     const { data, error } = await supabase
@@ -227,15 +232,24 @@ export async function upsertSubscription(
 /**
  * Calculate yearly discount percentage
  */
-export function getYearlyDiscount(monthlyPrice: number, yearlyPrice: number): number {
+export function getYearlyDiscount(
+  monthlyPrice: number,
+  yearlyPrice: number
+): number {
   if (monthlyPrice === 0 || yearlyPrice === 0) return 0
-  return Math.round(((monthlyPrice * 12 - yearlyPrice) / (monthlyPrice * 12)) * 100)
+  return Math.round(
+    ((monthlyPrice * 12 - yearlyPrice) / (monthlyPrice * 12)) * 100
+  )
 }
 
 /**
  * Format price for display
  */
-export function formatPrice(monthly: number, yearly: number, isYearly: boolean = false): string {
+export function formatPrice(
+  monthly: number,
+  yearly: number,
+  isYearly: boolean = false
+): string {
   const price = isYearly ? yearly / 12 : monthly
   return price === 0 ? "Free" : `$${price.toFixed(2)}`
 }
@@ -243,27 +257,31 @@ export function formatPrice(monthly: number, yearly: number, isYearly: boolean =
 /**
  * Check if a subscription is in trial period
  */
-export function isInTrialPeriod(subscription: UserSubscription | null): boolean {
+export function isInTrialPeriod(
+  subscription: UserSubscription | null
+): boolean {
   if (!subscription || subscription.status !== "trial") return false
-  
+
   if (!subscription.trial_end) return false
-  
+
   const trialEnd = new Date(subscription.trial_end)
   const now = new Date()
-  
+
   return now < trialEnd
 }
 
 /**
  * Get days remaining in trial
  */
-export function getTrialDaysRemaining(subscription: UserSubscription | null): number {
+export function getTrialDaysRemaining(
+  subscription: UserSubscription | null
+): number {
   if (!isInTrialPeriod(subscription) || !subscription?.trial_end) return 0
-  
+
   const trialEnd = new Date(subscription.trial_end)
   const now = new Date()
   const diffTime = trialEnd.getTime() - now.getTime()
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-  
+
   return Math.max(0, diffDays)
 }

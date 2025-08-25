@@ -35,7 +35,7 @@ export function Header({ onMenuClick, isMobile = false }: HeaderProps) {
     try {
       const supabase = createSupabaseClient()
       const { error } = await supabase.auth.signOut()
-      
+
       if (error) {
         console.error("Erreur lors de la déconnexion:", error.message)
       } else {

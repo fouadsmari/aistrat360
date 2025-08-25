@@ -170,17 +170,6 @@ LEFT JOIN public.subscription_plans sp ON s.plan::text = sp.name;
 -- Grant access to the view
 GRANT SELECT ON user_subscription_details TO authenticated;
 
--- Enable RLS on the view
-ALTER VIEW user_subscription_details OWNER TO postgres;
-
--- Create RLS policy for the view
-CREATE POLICY "Users can view own subscription details" ON user_subscription_details
-  FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Admins can view all subscription details" ON user_subscription_details
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE id = auth.uid() AND role IN ('admin', 'super_admin')
-    )
-  );
+-- Note: Views don't support RLS policies directly
+-- Security is handled through the underlying tables (profiles, subscriptions)
+-- which already have appropriate RLS policies in place

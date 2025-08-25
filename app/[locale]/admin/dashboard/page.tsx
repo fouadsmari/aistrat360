@@ -24,10 +24,9 @@ import {
 } from "lucide-react"
 import { useTranslations } from "next-intl"
 
-
 export default function AdminDashboardPage() {
   const t = useTranslations("admin")
-  
+
   const adminStats = [
     {
       title: t("stats.totalUsers"),
@@ -78,7 +77,7 @@ export default function AdminDashboardPage() {
     },
     {
       id: 2,
-      name: "Marc Leblanc", 
+      name: "Marc Leblanc",
       email: "marc@example.com",
       plan: "Standard",
       status: "active" as const,
@@ -87,7 +86,7 @@ export default function AdminDashboardPage() {
     {
       id: 3,
       name: "Julie Martin",
-      email: "julie@example.com", 
+      email: "julie@example.com",
       plan: "Basic",
       status: "suspended" as const,
       joinedAt: `${t("time.ago")} 1${t("time.days")}`,
@@ -96,7 +95,7 @@ export default function AdminDashboardPage() {
       id: 4,
       name: "Pierre Dubois",
       email: "pierre@example.com",
-      plan: "Premium", 
+      plan: "Premium",
       status: "active" as const,
       joinedAt: `${t("time.ago")} 2${t("time.days")}`,
     },

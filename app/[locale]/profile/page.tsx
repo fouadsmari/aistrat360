@@ -22,7 +22,18 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
-import { Save, User, Globe, Phone, Building2, MapPin, Map, Crown, Calendar, ExternalLink } from "lucide-react"
+import {
+  Save,
+  User,
+  Globe,
+  Phone,
+  Building2,
+  MapPin,
+  Map,
+  Crown,
+  Calendar,
+  ExternalLink,
+} from "lucide-react"
 import { createSupabaseClient } from "@/lib/supabase"
 
 interface UserProfile {
@@ -62,7 +73,9 @@ export default function ProfilePage() {
   const { showToast, ToastComponent } = useToast()
 
   const [profile, setProfile] = useState<UserProfile | null>(null)
-  const [subscription, setSubscription] = useState<UserSubscription | null>(null)
+  const [subscription, setSubscription] = useState<UserSubscription | null>(
+    null
+  )
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState({
@@ -91,21 +104,20 @@ export default function ProfilePage() {
         return
       }
 
-      const [{ data: profileData, error }, { data: subscriptionData, error: subError }] = await Promise.all([
-        supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .single(),
+      const [
+        { data: profileData, error },
+        { data: subscriptionData, error: subError },
+      ] = await Promise.all([
+        supabase.from("profiles").select("*").eq("id", user.id).single(),
         supabase
           .from("subscriptions")
           .select("*")
           .eq("user_id", user.id)
-          .single()
+          .single(),
       ])
 
       // Handle subscription data
-      if (subError && subError.code !== 'PGRST116') {
+      if (subError && subError.code !== "PGRST116") {
         console.error("Error fetching subscription:", subError)
         setSubscription(null)
       } else {
@@ -304,7 +316,6 @@ export default function ProfilePage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-
         {/* Subscription Card */}
         <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
           <CardHeader>
@@ -327,62 +338,73 @@ export default function ProfilePage() {
                     {tSubscription(`plans.${subscription.plan}`)}
                   </span>
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Status:
                   </span>
-                  <span className={`rounded-full px-2 py-1 text-sm font-medium ${
-                    subscription.status === 'active' 
-                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                      : subscription.status === 'trial'
-                      ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-                      : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
-                  }`}>
+                  <span
+                    className={`rounded-full px-2 py-1 text-sm font-medium ${
+                      subscription.status === "active"
+                        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                        : subscription.status === "trial"
+                          ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                          : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
+                    }`}
+                  >
                     {tSubscription(`status.${subscription.status}`)}
                   </span>
                 </div>
 
-                {subscription.status === 'trial' && subscription.trial_end && (
+                {subscription.status === "trial" && subscription.trial_end && (
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Trial ends:
                     </span>
                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                      {new Date(subscription.trial_end).toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-US')}
+                      {new Date(subscription.trial_end).toLocaleDateString(
+                        locale === "fr" ? "fr-FR" : "en-US"
+                      )}
                     </span>
                   </div>
                 )}
 
-                {subscription.status === 'active' && subscription.current_period_end && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {tSubscription("nextBilling")}:
-                    </span>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      {new Date(subscription.current_period_end).toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-US')}
-                    </span>
-                  </div>
-                )}
+                {subscription.status === "active" &&
+                  subscription.current_period_end && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {tSubscription("nextBilling")}:
+                      </span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        {new Date(
+                          subscription.current_period_end
+                        ).toLocaleDateString(
+                          locale === "fr" ? "fr-FR" : "en-US"
+                        )}
+                      </span>
+                    </div>
+                  )}
 
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full mt-4"
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-4 w-full"
                   onClick={() => router.push(`/${locale}/pricing`)}
                 >
                   <ExternalLink className="mr-2 h-4 w-4" />
-                  {subscription.status === 'trial' ? tSubscription("upgrade") : "Manage Plan"}
+                  {subscription.status === "trial"
+                    ? tSubscription("upgrade")
+                    : "Manage Plan"}
                 </Button>
               </>
             ) : (
               <>
-                <div className="text-center py-4">
-                  <Crown className="mx-auto h-12 w-12 text-gray-400 mb-2" />
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                <div className="py-4 text-center">
+                  <Crown className="mx-auto mb-2 h-12 w-12 text-gray-400" />
+                  <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
                     No active subscription
                   </p>
-                  <Button 
+                  <Button
                     variant="default"
                     size="sm"
                     className="bg-gradient-to-r from-violet-600 to-purple-600 text-white hover:from-violet-700 hover:to-purple-700"
@@ -398,7 +420,7 @@ export default function ProfilePage() {
         </Card>
 
         {/* Profile Information */}
-        <Card className="lg:col-span-1 border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
+        <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30 lg:col-span-1">
           <CardHeader>
             <CardTitle className="text-gray-900 dark:text-white">
               {t("personalInfo")}
@@ -451,7 +473,9 @@ export default function ProfilePage() {
                   className="border-gray-300/50 bg-gray-50 text-gray-500 dark:border-gray-700/50 dark:bg-gray-800 dark:text-gray-400"
                 />
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {locale === "fr" ? "L'email ne peut pas être modifié pour des raisons de sécurité" : "Email cannot be changed for security reasons"}
+                  {locale === "fr"
+                    ? "L'email ne peut pas être modifié pour des raisons de sécurité"
+                    : "Email cannot be changed for security reasons"}
                 </p>
               </div>
 
@@ -516,7 +540,10 @@ export default function ProfilePage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="postal_code" className="flex items-center gap-2">
+                <Label
+                  htmlFor="postal_code"
+                  className="flex items-center gap-2"
+                >
                   <MapPin className="h-4 w-4" />
                   {locale === "fr" ? "Code postal" : "Postal Code"}
                 </Label>

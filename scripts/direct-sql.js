@@ -1,22 +1,26 @@
-const { Client } = require('pg')
-require('dotenv').config({ path: '.env.local' })
+const { Client } = require("pg")
+require("dotenv").config({ path: ".env.local" })
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const connectionString = process.env.DATABASE_URL
 
 if (!supabaseUrl) {
-  console.error('Missing Supabase URL')
+  console.error("Missing Supabase URL")
   process.exit(1)
 }
 
 // Extract connection details from Supabase URL
-const projectId = supabaseUrl.replace('https://', '').replace('.supabase.co', '')
+const projectId = supabaseUrl
+  .replace("https://", "")
+  .replace(".supabase.co", "")
 
-console.log('\n🔧 To fix the RLS recursion issue:')
-console.log('=====================================')
-console.log(`1. Go to: https://supabase.com/dashboard/project/${projectId}/sql/new`)
-console.log('2. Copy and execute this SQL:')
-console.log('=====================================')
+console.log("\n🔧 To fix the RLS recursion issue:")
+console.log("=====================================")
+console.log(
+  `1. Go to: https://supabase.com/dashboard/project/${projectId}/sql/new`
+)
+console.log("2. Copy and execute this SQL:")
+console.log("=====================================")
 
 const fixSQL = `
 -- Fix infinite recursion in profiles RLS policies
@@ -77,34 +81,33 @@ CREATE TRIGGER on_auth_user_created
 `
 
 console.log(fixSQL)
-console.log('=====================================')
+console.log("=====================================")
 console.log('3. Click "Run" to execute the SQL')
-console.log('4. This will fix the infinite recursion issue permanently')
-console.log('=====================================\n')
+console.log("4. This will fix the infinite recursion issue permanently")
+console.log("=====================================\n")
 
 // Alternative: Try to execute via direct PostgreSQL connection if available
 if (connectionString) {
   executeDirectSQL(connectionString, fixSQL)
 } else {
-  console.log('💡 No direct database connection available.')
-  console.log('   Please execute the SQL manually in the Supabase dashboard.')
+  console.log("💡 No direct database connection available.")
+  console.log("   Please execute the SQL manually in the Supabase dashboard.")
 }
 
 async function executeDirectSQL(connectionString, sql) {
-  console.log('🔄 Attempting direct database connection...')
-  
+  console.log("🔄 Attempting direct database connection...")
+
   const client = new Client({ connectionString })
-  
+
   try {
     await client.connect()
-    console.log('✅ Connected to database')
-    
+    console.log("✅ Connected to database")
+
     await client.query(sql)
-    console.log('✅ SQL executed successfully!')
-    
+    console.log("✅ SQL executed successfully!")
   } catch (error) {
-    console.error('❌ Error executing SQL:', error.message)
-    console.log('💡 Please execute the SQL manually in the Supabase dashboard.')
+    console.error("❌ Error executing SQL:", error.message)
+    console.log("💡 Please execute the SQL manually in the Supabase dashboard.")
   } finally {
     await client.end()
   }

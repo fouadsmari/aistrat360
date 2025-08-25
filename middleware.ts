@@ -10,7 +10,7 @@ const intlMiddleware = createMiddleware(routing)
 export async function middleware(req: NextRequest) {
   // First, handle internationalization
   let response = intlMiddleware(req)
-  
+
   // If intl middleware wants to redirect, respect that
   if (response.status === 307 || response.status === 308) {
     return response

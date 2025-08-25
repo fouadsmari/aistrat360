@@ -33,7 +33,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-
 interface AdminSidebarProps {
   isCollapsed: boolean
   onToggle: () => void

@@ -1,11 +1,13 @@
-const { createClient } = require('@supabase/supabase-js')
-require('dotenv').config({ path: '.env.local' })
+const { createClient } = require("@supabase/supabase-js")
+require("dotenv").config({ path: ".env.local" })
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const supabaseServiceKey =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 if (!supabaseUrl || !supabaseServiceKey) {
-  console.error('Missing Supabase credentials')
+  console.error("Missing Supabase credentials")
   process.exit(1)
 }
 
@@ -13,102 +15,100 @@ if (!supabaseUrl || !supabaseServiceKey) {
 const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   auth: {
     autoRefreshToken: false,
-    persistSession: false
+    persistSession: false,
   },
   db: {
-    schema: 'public'
-  }
+    schema: "public",
+  },
 })
 
 async function testProfileAccess() {
-  console.log('🧪 Testing profile access with service key...')
-  
+  console.log("🧪 Testing profile access with service key...")
+
   try {
     // Test if we can access profiles table directly with service key
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .limit(5)
-    
+    const { data, error } = await supabase.from("profiles").select("*").limit(5)
+
     if (error) {
-      console.error('❌ Error accessing profiles:', error)
-      
+      console.error("❌ Error accessing profiles:", error)
+
       // Try to create a basic profile for testing
-      console.log('🔧 Attempting to create test profile...')
-      
+      console.log("🔧 Attempting to create test profile...")
+
       const { data: insertData, error: insertError } = await supabase
-        .from('profiles')
+        .from("profiles")
         .insert({
-          id: '00000000-0000-0000-0000-000000000000', // Dummy ID
-          email: 'test@example.com',
-          role: 'subscriber',
-          preferred_language: 'fr',
+          id: "00000000-0000-0000-0000-000000000000", // Dummy ID
+          email: "test@example.com",
+          role: "subscriber",
+          preferred_language: "fr",
           created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .select()
-      
+
       if (insertError) {
-        console.error('❌ Error creating profile:', insertError)
+        console.error("❌ Error creating profile:", insertError)
       } else {
-        console.log('✅ Test profile created:', insertData)
-        
+        console.log("✅ Test profile created:", insertData)
+
         // Clean up test profile
         await supabase
-          .from('profiles')
+          .from("profiles")
           .delete()
-          .eq('id', '00000000-0000-0000-0000-000000000000')
-        
-        console.log('🧹 Test profile cleaned up')
+          .eq("id", "00000000-0000-0000-0000-000000000000")
+
+        console.log("🧹 Test profile cleaned up")
       }
-      
     } else {
-      console.log('✅ Successfully accessed profiles:', data?.length, 'records found')
+      console.log(
+        "✅ Successfully accessed profiles:",
+        data?.length,
+        "records found"
+      )
     }
-    
   } catch (err) {
-    console.error('❌ Unexpected error:', err)
+    console.error("❌ Unexpected error:", err)
   }
 }
 
 async function createMinimalProfile() {
-  console.log('🔧 Creating minimal working profile system...')
-  
+  console.log("🔧 Creating minimal working profile system...")
+
   try {
     // First, check if profiles table exists and what columns it has
     const { data: tableInfo, error: tableError } = await supabase
-      .rpc('get_table_columns', { table_name: 'profiles' })
+      .rpc("get_table_columns", { table_name: "profiles" })
       .single()
-    
+
     if (tableError) {
-      console.log('ℹ️  Using standard profile structure')
+      console.log("ℹ️  Using standard profile structure")
     }
-    
+
     // Test with a very simple insert using service role
-    const testUserId = '12345678-1234-1234-1234-123456789012'
-    
+    const testUserId = "12345678-1234-1234-1234-123456789012"
+
     const { data, error } = await supabase
-      .from('profiles')
+      .from("profiles")
       .upsert({
         id: testUserId,
-        email: 'test-user@example.com',
-        role: 'subscriber',
-        preferred_language: 'fr'
+        email: "test-user@example.com",
+        role: "subscriber",
+        preferred_language: "fr",
       })
       .select()
-    
+
     if (error) {
-      console.error('❌ Error creating minimal profile:', error)
+      console.error("❌ Error creating minimal profile:", error)
     } else {
-      console.log('✅ Minimal profile created successfully:', data)
-      
+      console.log("✅ Minimal profile created successfully:", data)
+
       // Clean up
-      await supabase.from('profiles').delete().eq('id', testUserId)
-      console.log('🧹 Test profile cleaned up')
+      await supabase.from("profiles").delete().eq("id", testUserId)
+      console.log("🧹 Test profile cleaned up")
     }
-    
   } catch (err) {
-    console.error('❌ Error in minimal profile creation:', err)
+    console.error("❌ Error in minimal profile creation:", err)
   }
 }
 
@@ -116,14 +116,14 @@ async function createMinimalProfile() {
 async function run() {
   await testProfileAccess()
   await createMinimalProfile()
-  
-  console.log('\n🎯 TEMPORARY SOLUTION:')
-  console.log('The app will work with service key access.')
-  console.log('For production, you still need to fix RLS policies manually.')
-  console.log('\n📝 Next steps:')
-  console.log('1. Go to Supabase Dashboard > SQL Editor')
-  console.log('2. Execute the contents of: supabase/fix-rls-policies.sql')
-  console.log('3. This will properly fix the RLS recursion issue')
+
+  console.log("\n🎯 TEMPORARY SOLUTION:")
+  console.log("The app will work with service key access.")
+  console.log("For production, you still need to fix RLS policies manually.")
+  console.log("\n📝 Next steps:")
+  console.log("1. Go to Supabase Dashboard > SQL Editor")
+  console.log("2. Execute the contents of: supabase/fix-rls-policies.sql")
+  console.log("3. This will properly fix the RLS recursion issue")
 }
 
 run()

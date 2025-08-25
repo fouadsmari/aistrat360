@@ -21,10 +21,9 @@ import {
 } from "lucide-react"
 import { useTranslations } from "next-intl"
 
-
 export default function DashboardPage() {
   const t = useTranslations("dashboard")
-  
+
   const stats = [
     {
       title: t("stats.totalRevenue"),
@@ -297,37 +296,39 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {[t("topProducts.premiumProduct"), t("topProducts.standardProduct"), t("topProducts.basicProduct")].map(
-                (product, index) => (
-                  <div
-                    key={product}
-                    className="flex items-center justify-between"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div
-                        className={cn(
-                          "h-2 w-2 rounded-full",
-                          index === 0
-                            ? "bg-violet-600"
-                            : index === 1
-                              ? "bg-purple-600"
-                              : "bg-pink-600"
-                        )}
-                      />
-                      <span className="text-sm text-gray-700 dark:text-gray-300">
-                        {product}
-                      </span>
-                    </div>
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">
-                      {index === 0
-                        ? "€12,456"
-                        : index === 1
-                          ? "€8,234"
-                          : "€5,123"}
+              {[
+                t("topProducts.premiumProduct"),
+                t("topProducts.standardProduct"),
+                t("topProducts.basicProduct"),
+              ].map((product, index) => (
+                <div
+                  key={product}
+                  className="flex items-center justify-between"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div
+                      className={cn(
+                        "h-2 w-2 rounded-full",
+                        index === 0
+                          ? "bg-violet-600"
+                          : index === 1
+                            ? "bg-purple-600"
+                            : "bg-pink-600"
+                      )}
+                    />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      {product}
                     </span>
                   </div>
-                )
-              )}
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                    {index === 0
+                      ? "€12,456"
+                      : index === 1
+                        ? "€8,234"
+                        : "€5,123"}
+                  </span>
+                </div>
+              ))}
             </div>
             <Button
               variant="outline"

@@ -1,21 +1,25 @@
-const https = require('https')
-const fs = require('fs')
-require('dotenv').config({ path: '.env.local' })
+const https = require("https")
+const fs = require("fs")
+require("dotenv").config({ path: ".env.local" })
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const supabaseServiceKey =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 if (!supabaseUrl || !supabaseServiceKey) {
-  console.error('Missing Supabase credentials')
+  console.error("Missing Supabase credentials")
   process.exit(1)
 }
 
 // Extract project ID from URL
-const projectId = supabaseUrl.replace('https://', '').replace('.supabase.co', '')
+const projectId = supabaseUrl
+  .replace("https://", "")
+  .replace(".supabase.co", "")
 
 async function executeSQL() {
-  console.log('🔧 Fixing RLS policies via Management API...')
-  
+  console.log("🔧 Fixing RLS policies via Management API...")
+
   const sqlScript = `
 -- Drop existing problematic policies
 DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
@@ -73,45 +77,45 @@ FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
   `.trim()
 
   const postData = JSON.stringify({
-    query: sqlScript
+    query: sqlScript,
   })
 
   const options = {
     hostname: `${projectId}.supabase.co`,
     port: 443,
-    path: '/rest/v1/rpc/exec',
-    method: 'POST',
+    path: "/rest/v1/rpc/exec",
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${supabaseServiceKey}`,
-      'apikey': supabaseServiceKey,
-      'Content-Length': Buffer.byteLength(postData)
-    }
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${supabaseServiceKey}`,
+      apikey: supabaseServiceKey,
+      "Content-Length": Buffer.byteLength(postData),
+    },
   }
 
   return new Promise((resolve, reject) => {
     const req = https.request(options, (res) => {
-      let data = ''
-      
-      res.on('data', (chunk) => {
+      let data = ""
+
+      res.on("data", (chunk) => {
         data += chunk
       })
-      
-      res.on('end', () => {
-        console.log('Response status:', res.statusCode)
-        console.log('Response:', data)
-        
+
+      res.on("end", () => {
+        console.log("Response status:", res.statusCode)
+        console.log("Response:", data)
+
         if (res.statusCode === 200 || res.statusCode === 201) {
-          console.log('✅ SQL executed successfully!')
+          console.log("✅ SQL executed successfully!")
         } else {
-          console.error('❌ Error executing SQL:', data)
+          console.error("❌ Error executing SQL:", data)
         }
         resolve(data)
       })
     })
 
-    req.on('error', (err) => {
-      console.error('❌ Request error:', err)
+    req.on("error", (err) => {
+      console.error("❌ Request error:", err)
       reject(err)
     })
 
@@ -122,16 +126,18 @@ FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 // Alternative approach: Use direct PostgreSQL connection string if available
 async function tryDirectConnection() {
-  console.log('💡 Trying alternative approach...')
-  console.log('📝 Please execute this SQL manually in your Supabase dashboard:')
-  console.log('=' .repeat(60))
-  
-  const sqlContent = fs.readFileSync('supabase/fix-rls-policies.sql', 'utf8')
+  console.log("💡 Trying alternative approach...")
+  console.log("📝 Please execute this SQL manually in your Supabase dashboard:")
+  console.log("=".repeat(60))
+
+  const sqlContent = fs.readFileSync("supabase/fix-rls-policies.sql", "utf8")
   console.log(sqlContent)
-  
-  console.log('=' .repeat(60))
-  console.log(`🔗 Go to: ${supabaseUrl.replace('//', '//app.')}/project/${projectId.split('-')[0]}/sql/new`)
-  console.log('📋 Copy the SQL above and execute it in the SQL Editor')
+
+  console.log("=".repeat(60))
+  console.log(
+    `🔗 Go to: ${supabaseUrl.replace("//", "//app.")}/project/${projectId.split("-")[0]}/sql/new`
+  )
+  console.log("📋 Copy the SQL above and execute it in the SQL Editor")
 }
 
 // Execute both approaches
