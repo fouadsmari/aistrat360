@@ -127,6 +127,51 @@
       "viewDetails": "Voir les détails",
       "markResolved": "Marquer comme résolu",
       "dismiss": "Ignorer"
+    },
+    "stats": {
+      "totalUsers": "Utilisateurs Totaux",
+      "monthlyRevenue": "Revenus Mensuels",
+      "activeSubscriptions": "Abonnements Actifs",
+      "systemAlerts": "Alertes Système",
+      "thisMonth": "ce mois",
+      "vsLastMonth": "vs mois dernier",
+      "criticalAlerts": "critiques, 1 warning"
+    },
+    "actions": {
+      "backup": "Sauvegarde",
+      "configuration": "Configuration",
+      "viewAllAlerts": "Voir toutes les alertes",
+      "manageUsers": "Gérer les Utilisateurs",
+      "advancedReports": "Rapports Avancés",
+      "database": "Base de Données",
+      "communication": "Communication",
+      "security": "Sécurité"
+    },
+    "subscriptionDistribution": {
+      "title": "Répartition des Abonnements",
+      "description": "Distribution par plan"
+    },
+    "serverPerformance": {
+      "title": "Performance Serveurs",
+      "description": "État des ressources",
+      "cpu": "CPU",
+      "memory": "Mémoire",
+      "storage": "Stockage"
+    },
+    "quickActions": {
+      "title": "Actions Rapides",
+      "description": "Outils d'administration"
+    },
+    "status": {
+      "active": "Actif",
+      "inactive": "Inactif",
+      "suspended": "Suspendu"
+    },
+    "time": {
+      "ago": "Il y a",
+      "hours": "h",
+      "days": "j",
+      "minutes": "min"
     }
   },
   "profile": {

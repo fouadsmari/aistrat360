@@ -127,6 +127,51 @@
       "viewDetails": "View Details",
       "markResolved": "Mark as Resolved",
       "dismiss": "Dismiss"
+    },
+    "stats": {
+      "totalUsers": "Total Users",
+      "monthlyRevenue": "Monthly Revenue",
+      "activeSubscriptions": "Active Subscriptions",
+      "systemAlerts": "System Alerts",
+      "thisMonth": "this month",
+      "vsLastMonth": "vs last month",
+      "criticalAlerts": "critical, 1 warning"
+    },
+    "actions": {
+      "backup": "Backup",
+      "configuration": "Configuration",
+      "viewAllAlerts": "View all alerts",
+      "manageUsers": "Manage Users",
+      "advancedReports": "Advanced Reports",
+      "database": "Database",
+      "communication": "Communication",
+      "security": "Security"
+    },
+    "subscriptionDistribution": {
+      "title": "Subscription Distribution",
+      "description": "Distribution by plan"
+    },
+    "serverPerformance": {
+      "title": "Server Performance",
+      "description": "Resource status",
+      "cpu": "CPU",
+      "memory": "Memory",
+      "storage": "Storage"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "description": "Administration tools"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "suspended": "Suspended"
+    },
+    "time": {
+      "ago": "ago",
+      "hours": "h",
+      "days": "d",
+      "minutes": "min"
     }
   },
   "profile": {

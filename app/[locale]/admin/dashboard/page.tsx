@@ -22,130 +22,134 @@ import {
   BarChart,
   Mail,
 } from "lucide-react"
+import { useTranslations } from "next-intl"
 
-const adminStats = [
-  {
-    title: "Utilisateurs Totaux",
-    value: "8,742",
-    description: "+12% ce mois",
-    icon: Users,
-    trend: "up",
-    color: "text-blue-600 dark:text-blue-400",
-    bgColor: "bg-blue-50 dark:bg-blue-950/30",
-  },
-  {
-    title: "Revenus Mensuels",
-    value: "€124,589",
-    description: "+23.5% vs mois dernier",
-    icon: DollarSign,
-    trend: "up",
-    color: "text-green-600 dark:text-green-400",
-    bgColor: "bg-green-50 dark:bg-green-950/30",
-  },
-  {
-    title: "Abonnements Actifs",
-    value: "6,234",
-    description: "+8.2% ce mois",
-    icon: UserCheck,
-    trend: "up",
-    color: "text-violet-600 dark:text-violet-400",
-    bgColor: "bg-violet-50 dark:bg-violet-950/30",
-  },
-  {
-    title: "Alertes Système",
-    value: "3",
-    description: "2 critiques, 1 warning",
-    icon: AlertTriangle,
-    trend: "warning",
-    color: "text-orange-600 dark:text-orange-400",
-    bgColor: "bg-orange-50 dark:bg-orange-950/30",
-  },
-]
-
-const recentUsers = [
-  {
-    id: 1,
-    name: "Sophie Durand",
-    email: "sophie@example.com",
-    plan: "Premium",
-    status: "active",
-    joinedAt: "Il y a 2h",
-  },
-  {
-    id: 2,
-    name: "Marc Leblanc",
-    email: "marc@example.com",
-    plan: "Standard",
-    status: "active",
-    joinedAt: "Il y a 4h",
-  },
-  {
-    id: 3,
-    name: "Julie Martin",
-    email: "julie@example.com",
-    plan: "Basic",
-    status: "suspended",
-    joinedAt: "Il y a 1j",
-  },
-  {
-    id: 4,
-    name: "Pierre Dubois",
-    email: "pierre@example.com",
-    plan: "Premium",
-    status: "active",
-    joinedAt: "Il y a 2j",
-  },
-  {
-    id: 5,
-    name: "Emma Wilson",
-    email: "emma@example.com",
-    plan: "Standard",
-    status: "inactive",
-    joinedAt: "Il y a 3j",
-  },
-]
-
-const systemAlerts = [
-  {
-    id: 1,
-    type: "critical",
-    message: "Pic de charge serveur détecté",
-    time: "Il y a 15 min",
-  },
-  {
-    id: 2,
-    type: "critical",
-    message: "Erreur base de données - Pool de connexions saturé",
-    time: "Il y a 32 min",
-  },
-  {
-    id: 3,
-    type: "warning",
-    message: "Espace disque faible sur serveur-02",
-    time: "Il y a 1h",
-  },
-]
 
 export default function AdminDashboardPage() {
+  const t = useTranslations("admin")
+  
+  const adminStats = [
+    {
+      title: t("stats.totalUsers"),
+      value: "8,742",
+      description: `+12% ${t("stats.thisMonth")}`,
+      icon: Users,
+      trend: "up",
+      color: "text-blue-600 dark:text-blue-400",
+      bgColor: "bg-blue-50 dark:bg-blue-950/30",
+    },
+    {
+      title: t("stats.monthlyRevenue"),
+      value: "€124,589",
+      description: `+23.5% ${t("stats.vsLastMonth")}`,
+      icon: DollarSign,
+      trend: "up",
+      color: "text-green-600 dark:text-green-400",
+      bgColor: "bg-green-50 dark:bg-green-950/30",
+    },
+    {
+      title: t("stats.activeSubscriptions"),
+      value: "6,234",
+      description: `+8.2% ${t("stats.thisMonth")}`,
+      icon: UserCheck,
+      trend: "up",
+      color: "text-violet-600 dark:text-violet-400",
+      bgColor: "bg-violet-50 dark:bg-violet-950/30",
+    },
+    {
+      title: t("stats.systemAlerts"),
+      value: "3",
+      description: `2 ${t("stats.criticalAlerts")}`,
+      icon: AlertTriangle,
+      trend: "warning",
+      color: "text-orange-600 dark:text-orange-400",
+      bgColor: "bg-orange-50 dark:bg-orange-950/30",
+    },
+  ]
+
+  const recentUsers = [
+    {
+      id: 1,
+      name: "Sophie Durand",
+      email: "sophie@example.com",
+      plan: "Premium",
+      status: "active" as const,
+      joinedAt: `${t("time.ago")} 2${t("time.hours")}`,
+    },
+    {
+      id: 2,
+      name: "Marc Leblanc", 
+      email: "marc@example.com",
+      plan: "Standard",
+      status: "active" as const,
+      joinedAt: `${t("time.ago")} 4${t("time.hours")}`,
+    },
+    {
+      id: 3,
+      name: "Julie Martin",
+      email: "julie@example.com", 
+      plan: "Basic",
+      status: "suspended" as const,
+      joinedAt: `${t("time.ago")} 1${t("time.days")}`,
+    },
+    {
+      id: 4,
+      name: "Pierre Dubois",
+      email: "pierre@example.com",
+      plan: "Premium", 
+      status: "active" as const,
+      joinedAt: `${t("time.ago")} 2${t("time.days")}`,
+    },
+    {
+      id: 5,
+      name: "Emma Wilson",
+      email: "emma@example.com",
+      plan: "Standard",
+      status: "inactive" as const,
+      joinedAt: `${t("time.ago")} 3${t("time.days")}`,
+    },
+  ]
+
+  const systemAlerts = [
+    {
+      id: 1,
+      type: "critical" as const,
+      message: "Pic de charge serveur détecté",
+      time: `${t("time.ago")} 15 ${t("time.minutes")}`,
+    },
+    {
+      id: 2,
+      type: "critical" as const,
+      message: "Erreur base de données - Pool de connexions saturé",
+      time: `${t("time.ago")} 32 ${t("time.minutes")}`,
+    },
+    {
+      id: 3,
+      type: "warning" as const,
+      message: "Espace disque faible sur serveur-02",
+      time: `${t("time.ago")} 1${t("time.hours")}`,
+    },
+  ]
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-3xl font-bold tracking-tight text-transparent">
-            Dashboard Administrateur
+            {t("dashboard")}
           </h1>
           <p className="mt-2 text-gray-500 dark:text-gray-400">
-            Gestion et supervision de l&apos;application SaaS
+            {t("title")} - Gestion et supervision de l&apos;application SaaS
           </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline">
             <Database className="mr-2 h-4 w-4" />
-            Sauvegarde
+            {t("actions.backup")}
           </Button>
           <Button className="bg-gradient-to-r from-red-600 to-orange-600 text-white hover:from-red-700 hover:to-orange-700">
             <Settings className="mr-2 h-4 w-4" />
-            Configuration
+            {t("actions.configuration")}
           </Button>
         </div>
       </div>
@@ -188,7 +192,7 @@ export default function AdminDashboardPage() {
         <Card className="col-span-4 border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
           <CardHeader>
             <CardTitle className="text-gray-900 dark:text-white">
-              Gestion des Utilisateurs
+              {t("userManagement.title")}
             </CardTitle>
             <CardDescription className="text-gray-600 dark:text-gray-300">
               Derniers utilisateurs inscrits et leur statut
@@ -235,9 +239,9 @@ export default function AdminDashboardPage() {
                               : ""
                       )}
                     >
-                      {user.status === "active" && "Actif"}
-                      {user.status === "inactive" && "Inactif"}
-                      {user.status === "suspended" && "Suspendu"}
+                      {user.status === "active" && t("status.active")}
+                      {user.status === "inactive" && t("status.inactive")}
+                      {user.status === "suspended" && t("status.suspended")}
                     </div>
                     <div className="flex space-x-1">
                       <Button
@@ -283,7 +287,7 @@ export default function AdminDashboardPage() {
           <CardHeader>
             <CardTitle className="flex items-center text-gray-900 dark:text-white">
               <AlertTriangle className="mr-2 h-5 w-5 text-orange-600" />
-              Alertes Système
+              {t("alerts.title")}
             </CardTitle>
             <CardDescription className="text-gray-600 dark:text-gray-300">
               Supervision en temps réel
@@ -329,7 +333,7 @@ export default function AdminDashboardPage() {
               ))}
             </div>
             <Button variant="outline" className="mt-4 w-full">
-              Voir toutes les alertes
+              {t("actions.viewAllAlerts")}
             </Button>
           </CardContent>
         </Card>
@@ -339,10 +343,10 @@ export default function AdminDashboardPage() {
         <Card className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
           <CardHeader>
             <CardTitle className="text-gray-900 dark:text-white">
-              Répartition des Abonnements
+              {t("subscriptionDistribution.title")}
             </CardTitle>
             <CardDescription className="text-gray-600 dark:text-gray-300">
-              Distribution par plan
+              {t("subscriptionDistribution.description")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -402,10 +406,10 @@ export default function AdminDashboardPage() {
         <Card className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
           <CardHeader>
             <CardTitle className="text-gray-900 dark:text-white">
-              Performance Serveurs
+              {t("serverPerformance.title")}
             </CardTitle>
             <CardDescription className="text-gray-600 dark:text-gray-300">
-              État des ressources
+              {t("serverPerformance.description")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -413,7 +417,7 @@ export default function AdminDashboardPage() {
               <div>
                 <div className="mb-1 flex items-center justify-between">
                   <span className="text-sm text-gray-700 dark:text-gray-300">
-                    CPU
+                    {t("serverPerformance.cpu")}
                   </span>
                   <span className="text-sm font-medium text-gray-900 dark:text-white">
                     68%
@@ -429,7 +433,7 @@ export default function AdminDashboardPage() {
               <div>
                 <div className="mb-1 flex items-center justify-between">
                   <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Mémoire
+                    {t("serverPerformance.memory")}
                   </span>
                   <span className="text-sm font-medium text-gray-900 dark:text-white">
                     82%
@@ -445,7 +449,7 @@ export default function AdminDashboardPage() {
               <div>
                 <div className="mb-1 flex items-center justify-between">
                   <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Stockage
+                    {t("serverPerformance.storage")}
                   </span>
                   <span className="text-sm font-medium text-gray-900 dark:text-white">
                     45%
@@ -465,33 +469,33 @@ export default function AdminDashboardPage() {
         <Card className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
           <CardHeader>
             <CardTitle className="text-gray-900 dark:text-white">
-              Actions Rapides
+              {t("quickActions.title")}
             </CardTitle>
             <CardDescription className="text-gray-600 dark:text-gray-300">
-              Outils d&apos;administration
+              {t("quickActions.description")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               <Button className="w-full justify-start bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-700 hover:to-cyan-700">
                 <Users className="mr-2 h-4 w-4" />
-                Gérer les Utilisateurs
+                {t("actions.manageUsers")}
               </Button>
               <Button className="w-full justify-start" variant="outline">
                 <BarChart className="mr-2 h-4 w-4" />
-                Rapports Avancés
+                {t("actions.advancedReports")}
               </Button>
               <Button className="w-full justify-start" variant="outline">
                 <Database className="mr-2 h-4 w-4" />
-                Base de Données
+                {t("actions.database")}
               </Button>
               <Button className="w-full justify-start" variant="outline">
                 <Mail className="mr-2 h-4 w-4" />
-                Communication
+                {t("actions.communication")}
               </Button>
               <Button className="w-full justify-start" variant="outline">
                 <Shield className="mr-2 h-4 w-4" />
-                Sécurité
+                {t("actions.security")}
               </Button>
             </div>
           </CardContent>
