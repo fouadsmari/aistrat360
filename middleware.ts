@@ -8,7 +8,13 @@ import { routing } from "./src/i18n/routing"
 const intlMiddleware = createMiddleware(routing)
 
 export async function middleware(req: NextRequest) {
-  let res = NextResponse.next()
+  // First, handle internationalization
+  let response = intlMiddleware(req)
+  
+  // If intl middleware wants to redirect, respect that
+  if (response.status === 307 || response.status === 308) {
+    return response
+  }
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -19,14 +25,14 @@ export async function middleware(req: NextRequest) {
           return req.cookies.get(name)?.value
         },
         set(name: string, value: string, options: any) {
-          res.cookies.set({
+          response.cookies.set({
             name,
             value,
             ...options,
           })
         },
         remove(name: string, options: any) {
-          res.cookies.set({
+          response.cookies.set({
             name,
             value: "",
             ...options,
@@ -43,7 +49,7 @@ export async function middleware(req: NextRequest) {
 
   const pathname = req.nextUrl.pathname
 
-  // Extract locale from pathname
+  // Extract locale from pathname (should be properly set by intl middleware)
   const pathnameLocale = pathname.split("/")[1]
   const locale = routing.locales.includes(pathnameLocale as any)
     ? pathnameLocale
@@ -86,8 +92,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Apply internationalization middleware
-  return intlMiddleware(req)
+  return response
 }
 
 export const config = {

@@ -4,6 +4,10 @@ import { notFound } from "next/navigation"
 import { routing } from "@/src/i18n/routing"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import type { Metadata } from "next"
+import { Inter } from "next/font/google"
+import "../globals.css"
+
+const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "AIStrat360 - AI Strategy Platform",
@@ -37,7 +41,7 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body>
+      <body className={inter.className}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
