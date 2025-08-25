@@ -33,6 +33,7 @@
 13. **VÉRIFIER obligatoire** l'implémentation ou correction de bug que tu doit mettre en place doit être cohérente avec l'app, robuste et ne créer pas de bug ailleur dans l'app.
 14. il faut faire un check deploy aprés avoir terminé ton implémentation ou correction de bug, si erreurs corrige les
 15. **VÉRIFIER obligatoire** aprés avoir fini il faut s'assurer si une erreur dans la console log et ou des bug nextjs s'affiche dans le navigateur si oui ne reviens pas vers moi sans les corriger.
+16. pour toute modification et gestion de base tu as le cli tu pourra tout faire toi même
 
 Mon nouveau processus OBLIGATOIRE :
 

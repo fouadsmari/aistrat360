@@ -75,42 +75,25 @@ export default function ProfilePage() {
         .single()
 
       if (error) {
-        // If profile doesn't exist, create a basic profile
-        const { data: newProfile, error: createError } = await supabase
-          .from("profiles")
-          .insert({
-            id: user.id,
-            email: user.email,
-            full_name: user.user_metadata?.full_name || "",
-            preferred_language: locale,
-            role: "subscriber",
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          })
-          .select()
-          .single()
-
-        if (createError) {
-          console.error("Error creating profile:", createError)
-          setProfile({
-            id: user.id,
-            email: user.email || "",
-            full_name: null,
-            avatar_url: null,
-            role: "subscriber",
-            preferred_language: locale,
-            phone: null,
-            company: null,
-          })
-        } else {
-          setProfile(newProfile)
-          setFormData({
-            full_name: newProfile.full_name || "",
-            phone: newProfile.phone || "",
-            company: newProfile.company || "",
-            preferred_language: newProfile.preferred_language || locale,
-          })
-        }
+        // If profile doesn't exist, show a basic profile
+        // The profile should be created automatically by the database trigger
+        console.error("Profile not found, using default:", error)
+        setProfile({
+          id: user.id,
+          email: user.email || "",
+          full_name: null,
+          avatar_url: null,
+          role: "subscriber",
+          preferred_language: locale,
+          phone: null,
+          company: null,
+        })
+        setFormData({
+          full_name: "",
+          phone: "",
+          company: "",
+          preferred_language: locale,
+        })
       } else {
         setProfile(profileData)
         setFormData({
@@ -149,17 +132,18 @@ export default function ProfilePage() {
     try {
       const supabase = createSupabaseClient()
 
-      // Update the profile in the database
+      // Use upsert to create or update the profile
       const { data: updatedProfile, error } = await supabase
         .from("profiles")
-        .update({
+        .upsert({
+          id: profile.id,
+          email: profile.email,
           full_name: formData.full_name || null,
           phone: formData.phone || null,
           company: formData.company || null,
           preferred_language: formData.preferred_language,
           updated_at: new Date().toISOString(),
         })
-        .eq("id", profile.id)
         .select()
         .single()
 
