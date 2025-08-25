@@ -1,6 +1,8 @@
 "use client"
 
 import { Bell, Menu, Moon, Search, Sun, User } from "lucide-react"
+import { useTranslations } from "next-intl"
+import { useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -14,6 +16,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useTheme } from "next-themes"
 import { Sheet, SheetTrigger } from "@/components/ui/sheet"
+import { LanguageSwitcher } from "@/components/ui/language-switcher"
 
 interface HeaderProps {
   onMenuClick: () => void
@@ -22,6 +25,9 @@ interface HeaderProps {
 
 export function Header({ onMenuClick, isMobile = false }: HeaderProps) {
   const { theme, setTheme } = useTheme()
+  const t = useTranslations("header")
+  const params = useParams()
+  const locale = params.locale as string
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:border-gray-800 dark:bg-gray-900/95 dark:supports-[backdrop-filter]:bg-gray-900/60">
@@ -42,13 +48,14 @@ export function Header({ onMenuClick, isMobile = false }: HeaderProps) {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <Input
               type="search"
-              placeholder="Rechercher..."
+              placeholder={t("search")}
               className="border-gray-200 bg-gray-50 pl-10 dark:border-gray-700 dark:bg-gray-800"
             />
           </div>
         </div>
 
         <div className="flex items-center space-x-2">
+          <LanguageSwitcher />
           <Button
             variant="ghost"
             size="icon"
@@ -67,26 +74,38 @@ export function Header({ onMenuClick, isMobile = false }: HeaderProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80">
-              <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+              <DropdownMenuLabel>{t("notifications")}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium">
-                    Nouvelle mise à jour disponible
+                    {locale === "fr"
+                      ? "Nouvelle mise à jour disponible"
+                      : "New update available"}
                   </p>
-                  <p className="text-xs text-gray-500">Il y a 2 heures</p>
+                  <p className="text-xs text-gray-500">
+                    {locale === "fr" ? "Il y a 2 heures" : "2 hours ago"}
+                  </p>
                 </div>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium">Rapport mensuel généré</p>
-                  <p className="text-xs text-gray-500">Il y a 5 heures</p>
+                  <p className="text-sm font-medium">
+                    {locale === "fr"
+                      ? "Rapport mensuel généré"
+                      : "Monthly report generated"}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {locale === "fr" ? "Il y a 5 heures" : "5 hours ago"}
+                  </p>
                 </div>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-center">
                 <span className="text-sm text-violet-600 dark:text-violet-400">
-                  Voir toutes les notifications
+                  {locale === "fr"
+                    ? "Voir toutes les notifications"
+                    : "View all notifications"}
                 </span>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -106,24 +125,24 @@ export function Header({ onMenuClick, isMobile = false }: HeaderProps) {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium">Utilisateur</p>
+                  <p className="text-sm font-medium">{t("profile")}</p>
                   <p className="text-xs text-gray-500">user@example.com</p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
                 <User className="mr-2 h-4 w-4" />
-                <span>Profil</span>
+                <span>{t("profile")}</span>
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <span>Paramètres</span>
+                <span>{t("settings")}</span>
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <span>Support</span>
+                <span>{locale === "fr" ? "Support" : "Help"}</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-red-600 dark:text-red-400">
-                <span>Déconnexion</span>
+                <span>{t("logout")}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
