@@ -2,14 +2,10 @@ import createMiddleware from "next-intl/middleware"
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-import { locales, defaultLocale } from "./i18n"
+import { routing } from "./src/i18n/routing"
 
 // Create the internationalization middleware
-const intlMiddleware = createMiddleware({
-  locales,
-  defaultLocale,
-  localePrefix: "always",
-})
+const intlMiddleware = createMiddleware(routing)
 
 export async function middleware(req: NextRequest) {
   let res = NextResponse.next()
@@ -49,9 +45,9 @@ export async function middleware(req: NextRequest) {
 
   // Extract locale from pathname
   const pathnameLocale = pathname.split("/")[1]
-  const locale = locales.includes(pathnameLocale as any)
+  const locale = routing.locales.includes(pathnameLocale as any)
     ? pathnameLocale
-    : defaultLocale
+    : routing.defaultLocale
 
   // Define protected routes
   const isProtectedRoute =
