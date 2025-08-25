@@ -448,8 +448,11 @@ export default function ProfilePage() {
                   id="email"
                   value={profile.email}
                   disabled
-                  className="border-gray-300 bg-gray-50 dark:border-gray-700 dark:bg-gray-800"
+                  className="border-gray-300/50 bg-gray-50 text-gray-500 dark:border-gray-700/50 dark:bg-gray-800 dark:text-gray-400"
                 />
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {locale === "fr" ? "L'email ne peut pas être modifié pour des raisons de sécurité" : "Email cannot be changed for security reasons"}
+                </p>
               </div>
 
               <div className="space-y-2">
