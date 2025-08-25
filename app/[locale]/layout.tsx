@@ -10,6 +10,11 @@ export const metadata: Metadata = {
   description: "Plateforme SaaS moderne pour la stratégie AI",
 }
 
+// Generate static params for all supported locales - REQUIRED for Vercel
+export function generateStaticParams() {
+  return locales.map((locale) => ({ locale }))
+}
+
 export default async function LocaleLayout({
   children,
   params,
