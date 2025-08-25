@@ -1,8 +1,8 @@
 "use client"
 
-import { Bell, Menu, Moon, Search, Sun, User } from "lucide-react"
+import { Bell, Menu, Moon, Search, Sun, User, LogOut } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -27,7 +27,13 @@ export function Header({ onMenuClick, isMobile = false }: HeaderProps) {
   const { theme, setTheme } = useTheme()
   const t = useTranslations("header")
   const params = useParams()
+  const router = useRouter()
   const locale = params.locale as string
+
+  const handleLogout = async () => {
+    // TODO: Add proper logout logic with Supabase
+    router.push(`/${locale}/login`)
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:border-gray-800 dark:bg-gray-900/95 dark:supports-[backdrop-filter]:bg-gray-900/60">
@@ -130,7 +136,7 @@ export function Header({ onMenuClick, isMobile = false }: HeaderProps) {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push(`/${locale}/profile`)}>
                 <User className="mr-2 h-4 w-4" />
                 <span>{t("profile")}</span>
               </DropdownMenuItem>
@@ -141,7 +147,11 @@ export function Header({ onMenuClick, isMobile = false }: HeaderProps) {
                 <span>{locale === "fr" ? "Support" : "Help"}</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-600 dark:text-red-400">
+              <DropdownMenuItem 
+                onClick={handleLogout}
+                className="text-red-600 dark:text-red-400"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
                 <span>{t("logout")}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
