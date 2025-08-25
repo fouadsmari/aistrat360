@@ -1,118 +1,70 @@
-# 🚀 Application SaaS - AIStrat360
+# AIStrat360
 
-Une application SaaS moderne construite avec Next.js 15, TypeScript et shadcn/ui.
+🚀 **Plateforme SaaS moderne** pour la stratégie AI avec Next.js 15, Supabase, et système multilingue.
 
 ## ✨ Fonctionnalités
 
-### 🔐 Authentification
+- 🔐 **Authentification** - Connexion sécurisée avec Supabase
+- 👥 **Multi-rôles** - Admin et utilisateurs avec permissions
+- 🌍 **Multilingue** - Interface FR/EN avec changement en temps réel
+- 📱 **Responsive** - Design moderne avec mode sombre
+- ⚡ **Performance** - SSG + ISR optimisé pour la production
 
-- Page de login moderne et responsive
-- Design avec dégradés violets et animations
-- Support du mode sombre
-- Authentification sociale (Google, GitHub)
+## 🛠️ Stack technique
 
-### 📊 Dashboards Multiples
+- **Framework** : Next.js 15 avec App Router
+- **Backend** : Supabase (Auth + Database + RLS)
+- **UI** : shadcn/ui + Tailwind CSS
+- **Types** : TypeScript strict
+- **I18n** : next-intl pour l'internationalisation
+- **Tests** : Jest + Testing Library
 
-- **Dashboard Utilisateurs** (`/dashboard`) - Interface violet pour les abonnés
-- **Dashboard Admin** (`/admin/dashboard`) - Interface rouge/orange pour l'administration
-
-### 🎨 Interface Utilisateur
-
-- Design moderne et responsive
-- Mode sombre/clair automatique
-- Animations fluides et interactions
-- Composants shadcn/ui exclusivement
-
-### 🏗️ Architecture
-
-- Next.js 15 avec App Router
-- TypeScript pour la sécurité des types
-- Tailwind CSS pour le styling
-- Composants shadcn/ui
-
-## 🚀 Installation
+## 🚀 Démarrage rapide
 
 ```bash
-# Installer les dépendances
+git clone https://github.com/fouadsmari/aistrat360.git
+cd aistrat360
 npm install
-
-# Lancer en développement
 npm run dev
-
-# Build pour production
-npm run build
-
-# Lancer en production
-npm start
 ```
 
-## 🛠️ Scripts Disponibles
+## 📋 Scripts disponibles
 
 ```bash
-npm run dev          # Mode développement
+npm run dev          # Développement (localhost:3000)
 npm run build        # Build production
-npm run start        # Serveur production
-npm run lint         # Vérification ESLint
-npm run type-check   # Vérification TypeScript
-npm run validate     # TypeScript + ESLint + Format
-npm run check-deploy # Validation complète + build
+npm run test         # Tests unitaires
+npm run lint         # Vérification code
+npm run check-deploy # Validation complète
 ```
 
-## 📱 Pages Disponibles
-
-- `/login` - Page de connexion
-- `/dashboard` - Dashboard utilisateurs
-- `/admin/dashboard` - Dashboard administrateur
-
-## 🎯 Technologies Utilisées
-
-- **Framework**: Next.js 15.5.0
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS 3.4+
-- **Composants**: shadcn/ui
-- **Icônes**: Lucide React
-- **Thème**: next-themes
-
-## 🌟 Caractéristiques Techniques
-
-- ✅ Responsive design (mobile, tablet, desktop)
-- ✅ Mode sombre/clair
-- ✅ Sidebar collapsible
-- ✅ Navigation adaptative
-- ✅ Animations et transitions
-- ✅ Code TypeScript strict
-- ✅ ESLint et Prettier configurés
-
-## 📦 Structure du Projet
+## 📁 Structure
 
 ```
-├── app/                    # Pages Next.js (App Router)
-│   ├── admin/             # Dashboard administrateur
-│   ├── dashboard/         # Dashboard utilisateurs (défaut)
-│   ├── login/            # Page de connexion
-│   └── layout.tsx        # Layout racine
-├── components/           # Composants réutilisables
-│   ├── layout/          # Composants de layout
-│   ├── providers/       # Providers (theme, etc.)
-│   └── ui/              # Composants shadcn/ui
-├── lib/                 # Utilitaires
-└── docs/               # Documentation
-
+app/[locale]/        # Routes internationalisées
+├── admin/          # Dashboard administrateur
+├── dashboard/      # Dashboard utilisateur
+├── login/          # Authentification
+└── profile/        # Gestion profil
+components/ui/       # Composants réutilisables
+lib/                # Utilitaires et config
+messages/           # Traductions FR/EN
 ```
 
-## 🔧 Configuration
+## 🔑 Admin par défaut
 
-Le projet utilise :
+```
+Email: admin@example.com
+Mot de passe: Admin123!@#
+```
 
-- `tailwind.config.ts` - Configuration Tailwind CSS
-- `components.json` - Configuration shadcn/ui
-- `tsconfig.json` - Configuration TypeScript
-- `.eslintrc.json` - Configuration ESLint
+## 🌐 URLs
 
-## 🚀 Déploiement
-
-L'application est prête pour le déploiement sur Vercel, Netlify ou tout autre hébergeur compatible Next.js.
+- **Français** : `/fr/*`
+- **Anglais** : `/en/*`
+- **Admin** : `/[locale]/admin/dashboard`
+- **Utilisateur** : `/[locale]/dashboard`
 
 ---
 
-**Développé avec ❤️ par Fouad Smari**
+**Développé avec ❤️ par [Claude Code](https://claude.ai/code)**
