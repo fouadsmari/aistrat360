@@ -21,9 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
-import { Camera, Save, User, Globe, Phone, Building2, MapPin, Map, Crown, Calendar, ExternalLink } from "lucide-react"
+import { Save, User, Globe, Phone, Building2, MapPin, Map, Crown, Calendar, ExternalLink } from "lucide-react"
 import { createSupabaseClient } from "@/lib/supabase"
 
 interface UserProfile {
@@ -304,39 +303,7 @@ export default function ProfilePage() {
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Profile Picture Card */}
-        <Card className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
-          <CardHeader>
-            <CardTitle className="text-gray-900 dark:text-white">
-              {t("avatar")}
-            </CardTitle>
-            <CardDescription className="text-gray-600 dark:text-gray-300">
-              {t("changeAvatar")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="text-center">
-            <div className="relative mx-auto mb-4 h-24 w-24">
-              <Avatar className="h-24 w-24">
-                <AvatarImage
-                  src={profile.avatar_url || ""}
-                  alt={profile.full_name || ""}
-                />
-                <AvatarFallback className="bg-gradient-to-br from-violet-600 to-purple-600 text-2xl text-white">
-                  {profile.first_name?.charAt(0) ||
-                    profile.full_name?.charAt(0) ||
-                    profile.email.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <button className="absolute -bottom-1 -right-1 rounded-full bg-violet-600 p-2 text-white shadow-lg hover:bg-violet-700">
-                <Camera className="h-4 w-4" />
-              </button>
-            </div>
-            <Button variant="outline" size="sm">
-              {t("changeAvatar")}
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="grid gap-6 lg:grid-cols-2">
 
         {/* Subscription Card */}
         <Card className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
