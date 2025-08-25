@@ -180,6 +180,15 @@ export default function AdminUsersPage() {
     try {
       const supabase = createSupabaseClient()
 
+      console.log("🚀 Starting user creation process...")
+      console.log("📧 Email:", createFormData.email)
+      console.log(
+        "👤 Name:",
+        createFormData.first_name,
+        createFormData.last_name
+      )
+      console.log("🔑 Role:", createFormData.role)
+
       // Create user in Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: createFormData.email,
@@ -193,7 +202,10 @@ export default function AdminUsersPage() {
         },
       })
 
+      console.log("📊 Auth result:", { authData: !!authData.user, authError })
+
       if (authError) {
+        console.error("❌ Auth error:", authError)
         showToast({
           message: `Error creating user: ${authError.message}`,
           type: "error",
@@ -204,25 +216,39 @@ export default function AdminUsersPage() {
       }
 
       if (authData.user) {
+        console.log("✅ User created in auth, updating profile...")
+        console.log("🆔 User ID:", authData.user.id)
+
         // Update profile with additional information
+        const profileData = {
+          first_name: createFormData.first_name,
+          last_name: createFormData.last_name,
+          role: createFormData.role,
+          phone: createFormData.phone || null,
+          company: createFormData.company || null,
+          address: createFormData.address || null,
+          city: createFormData.city || null,
+          postal_code: createFormData.postal_code || null,
+          country: createFormData.country || null,
+          is_active: true,
+        }
+
+        console.log("📝 Profile update data:", profileData)
+
         const { error: profileError } = await supabase
           .from("profiles")
-          .update({
-            first_name: createFormData.first_name,
-            last_name: createFormData.last_name,
-            role: createFormData.role,
-            phone: createFormData.phone || null,
-            company: createFormData.company || null,
-            address: createFormData.address || null,
-            city: createFormData.city || null,
-            postal_code: createFormData.postal_code || null,
-            country: createFormData.country || null,
-            is_active: true,
-          })
+          .update(profileData)
           .eq("id", authData.user.id)
 
+        console.log("📊 Profile update result:", { profileError })
+
         if (profileError) {
-          console.error("Error updating profile:", profileError)
+          console.error("❌ Profile error details:", {
+            code: profileError.code,
+            message: profileError.message,
+            details: profileError.details,
+            hint: profileError.hint,
+          })
           showToast({
             message: `Database error saving new user: ${profileError.message}`,
             type: "error",
