@@ -58,9 +58,10 @@ export default function ProfilePage() {
       const supabase = createSupabaseClient()
       const {
         data: { user },
+        error: authError
       } = await supabase.auth.getUser()
 
-      if (!user) {
+      if (authError || !user) {
         router.push(`/${locale}/login`)
         return
       }
@@ -72,19 +73,64 @@ export default function ProfilePage() {
         .single()
 
       if (error) {
-        console.error("Error fetching profile:", error)
-        return
-      }
+        // If profile doesn't exist, create a basic profile
+        const { data: newProfile, error: createError } = await supabase
+          .from("profiles")
+          .insert({
+            id: user.id,
+            email: user.email,
+            full_name: user.user_metadata?.full_name || "",
+            preferred_language: locale,
+            role: "subscriber",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .select()
+          .single()
 
-      setProfile(profileData)
-      setFormData({
-        full_name: profileData.full_name || "",
-        phone: profileData.phone || "",
-        company: profileData.company || "",
-        preferred_language: profileData.preferred_language || locale,
-      })
+        if (createError) {
+          console.error("Error creating profile:", createError)
+          setProfile({
+            id: user.id,
+            email: user.email || "",
+            full_name: null,
+            avatar_url: null,
+            role: "subscriber",
+            preferred_language: locale,
+            phone: null,
+            company: null
+          })
+        } else {
+          setProfile(newProfile)
+          setFormData({
+            full_name: newProfile.full_name || "",
+            phone: newProfile.phone || "",
+            company: newProfile.company || "",
+            preferred_language: newProfile.preferred_language || locale,
+          })
+        }
+      } else {
+        setProfile(profileData)
+        setFormData({
+          full_name: profileData.full_name || "",
+          phone: profileData.phone || "",
+          company: profileData.company || "",
+          preferred_language: profileData.preferred_language || locale,
+        })
+      }
     } catch (error) {
       console.error("Error:", error)
+      // Show basic profile even if error
+      setProfile({
+        id: "temp",
+        email: "user@example.com",
+        full_name: null,
+        avatar_url: null,
+        role: "subscriber",
+        preferred_language: locale,
+        phone: null,
+        company: null
+      })
     } finally {
       setLoading(false)
     }

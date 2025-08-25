@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useParams } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import {
   BarChart3,
@@ -29,66 +30,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-const sidebarItems = [
-  {
-    title: "Tableau de bord",
-    icon: Home,
-    href: "/dashboard",
-  },
-  {
-    title: "Analytiques",
-    icon: BarChart3,
-    href: "/dashboard/analytics",
-  },
-  {
-    title: "Utilisateurs",
-    icon: Users,
-    href: "/dashboard/users",
-  },
-  {
-    title: "Produits",
-    icon: Package,
-    href: "/dashboard/products",
-  },
-  {
-    title: "Commandes",
-    icon: ShoppingCart,
-    href: "/dashboard/orders",
-  },
-  {
-    title: "Rapports",
-    icon: FileText,
-    href: "/dashboard/reports",
-  },
-  {
-    title: "Calendrier",
-    icon: Calendar,
-    href: "/dashboard/calendar",
-  },
-  {
-    title: "Intégrations",
-    icon: Layers,
-    href: "/dashboard/integrations",
-  },
-]
-
-const bottomItems = [
-  {
-    title: "Panel Admin",
-    icon: Shield,
-    href: "/admin/dashboard",
-  },
-  {
-    title: "Aide",
-    icon: HelpCircle,
-    href: "/dashboard/help",
-  },
-  {
-    title: "Paramètres",
-    icon: Settings,
-    href: "/dashboard/settings",
-  },
-]
 
 interface SidebarProps {
   isCollapsed: boolean
@@ -102,6 +43,70 @@ export function Sidebar({
   isMobile = false,
 }: SidebarProps) {
   const pathname = usePathname()
+  const params = useParams()
+  const t = useTranslations("sidebar")
+  const locale = params.locale as string
+
+  const sidebarItems = [
+    {
+      title: t("dashboard"),
+      icon: Home,
+      href: `/${locale}/dashboard`,
+    },
+    {
+      title: t("analytics"),
+      icon: BarChart3,
+      href: `/${locale}/dashboard/analytics`,
+    },
+    {
+      title: t("users"),
+      icon: Users,
+      href: `/${locale}/dashboard/users`,
+    },
+    {
+      title: t("products"),
+      icon: Package,
+      href: `/${locale}/dashboard/products`,
+    },
+    {
+      title: t("orders"),
+      icon: ShoppingCart,
+      href: `/${locale}/dashboard/orders`,
+    },
+    {
+      title: t("reports"),
+      icon: FileText,
+      href: `/${locale}/dashboard/reports`,
+    },
+    {
+      title: t("calendar"),
+      icon: Calendar,
+      href: `/${locale}/dashboard/calendar`,
+    },
+    {
+      title: t("integrations"),
+      icon: Layers,
+      href: `/${locale}/dashboard/integrations`,
+    },
+  ]
+
+  const bottomItems = [
+    {
+      title: t("adminPanel"),
+      icon: Shield,
+      href: `/${locale}/admin/dashboard`,
+    },
+    {
+      title: t("help"),
+      icon: HelpCircle,
+      href: `/${locale}/dashboard/help`,
+    },
+    {
+      title: t("settings"),
+      icon: Settings,
+      href: `/${locale}/dashboard/settings`,
+    },
+  ]
 
   return (
     <aside
