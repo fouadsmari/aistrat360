@@ -19,104 +19,108 @@ import {
   Package,
   BarChart,
 } from "lucide-react"
+import { useTranslations } from "next-intl"
 
-const stats = [
-  {
-    title: "Revenus Totaux",
-    value: "€45,231.89",
-    description: "+20.1% par rapport au mois dernier",
-    icon: DollarSign,
-    trend: "up",
-    color: "text-green-600 dark:text-green-400",
-    bgColor: "bg-green-50 dark:bg-green-950/30",
-  },
-  {
-    title: "Utilisateurs",
-    value: "+2,350",
-    description: "+180.1% par rapport au mois dernier",
-    icon: Users,
-    trend: "up",
-    color: "text-blue-600 dark:text-blue-400",
-    bgColor: "bg-blue-50 dark:bg-blue-950/30",
-  },
-  {
-    title: "Ventes",
-    value: "+12,234",
-    description: "+19% par rapport au mois dernier",
-    icon: ShoppingCart,
-    trend: "up",
-    color: "text-violet-600 dark:text-violet-400",
-    bgColor: "bg-violet-50 dark:bg-violet-950/30",
-  },
-  {
-    title: "Actifs Maintenant",
-    value: "573",
-    description: "+201 depuis la dernière heure",
-    icon: Activity,
-    trend: "up",
-    color: "text-orange-600 dark:text-orange-400",
-    bgColor: "bg-orange-50 dark:bg-orange-950/30",
-  },
-]
-
-const recentActivity = [
-  {
-    id: 1,
-    user: "Alice Martin",
-    action: "a effectué un achat",
-    amount: "€299.00",
-    time: "Il y a 2 min",
-  },
-  {
-    id: 2,
-    user: "Bob Johnson",
-    action: "s'est inscrit",
-    amount: "Nouveau",
-    time: "Il y a 5 min",
-  },
-  {
-    id: 3,
-    user: "Claire Dubois",
-    action: "a mis à jour son profil",
-    amount: "-",
-    time: "Il y a 12 min",
-  },
-  {
-    id: 4,
-    user: "David Lee",
-    action: "a effectué un achat",
-    amount: "€89.00",
-    time: "Il y a 23 min",
-  },
-  {
-    id: 5,
-    user: "Emma Wilson",
-    action: "a annulé une commande",
-    amount: "-€156.00",
-    time: "Il y a 1 heure",
-  },
-]
 
 export default function DashboardPage() {
+  const t = useTranslations("dashboard")
+  
+  const stats = [
+    {
+      title: t("stats.totalRevenue"),
+      value: "€45,231.89",
+      description: `+20.1% ${t("stats.vsLastMonth")}`,
+      icon: DollarSign,
+      trend: "up",
+      color: "text-green-600 dark:text-green-400",
+      bgColor: "bg-green-50 dark:bg-green-950/30",
+    },
+    {
+      title: t("stats.users"),
+      value: "+2,350",
+      description: `+180.1% ${t("stats.vsLastMonth")}`,
+      icon: Users,
+      trend: "up",
+      color: "text-blue-600 dark:text-blue-400",
+      bgColor: "bg-blue-50 dark:bg-blue-950/30",
+    },
+    {
+      title: t("stats.sales"),
+      value: "+12,234",
+      description: `+19% ${t("stats.vsLastMonth")}`,
+      icon: ShoppingCart,
+      trend: "up",
+      color: "text-violet-600 dark:text-violet-400",
+      bgColor: "bg-violet-50 dark:bg-violet-950/30",
+    },
+    {
+      title: t("stats.activeNow"),
+      value: "573",
+      description: `+201 ${t("stats.sinceLastHour")}`,
+      icon: Activity,
+      trend: "up",
+      color: "text-orange-600 dark:text-orange-400",
+      bgColor: "bg-orange-50 dark:bg-orange-950/30",
+    },
+  ]
+
+  const recentActivity = [
+    {
+      id: 1,
+      user: "Alice Martin",
+      action: t("recentActivity.madePurchase"),
+      amount: "€299.00",
+      time: `${t("time.ago")} 2 ${t("time.minutes")}`,
+    },
+    {
+      id: 2,
+      user: "Bob Johnson",
+      action: t("recentActivity.signedUp"),
+      amount: t("recentActivity.new"),
+      time: `${t("time.ago")} 5 ${t("time.minutes")}`,
+    },
+    {
+      id: 3,
+      user: "Claire Dubois",
+      action: t("recentActivity.updatedProfile"),
+      amount: "-",
+      time: `${t("time.ago")} 12 ${t("time.minutes")}`,
+    },
+    {
+      id: 4,
+      user: "David Lee",
+      action: t("recentActivity.madePurchase"),
+      amount: "€89.00",
+      time: `${t("time.ago")} 23 ${t("time.minutes")}`,
+    },
+    {
+      id: 5,
+      user: "Emma Wilson",
+      action: t("recentActivity.cancelledOrder"),
+      amount: "-€156.00",
+      time: `${t("time.ago")} 1 ${t("time.hours")}`,
+    },
+  ]
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-3xl font-bold tracking-tight text-transparent">
-            Tableau de bord
+            {t("title")}
           </h1>
           <p className="mt-2 text-gray-500 dark:text-gray-400">
-            Bienvenue ! Voici un aperçu de votre activité.
+            {t("welcome")}
           </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline">
             <BarChart className="mr-2 h-4 w-4" />
-            Télécharger
+            {t("download")}
           </Button>
           <Button className="bg-gradient-to-r from-violet-600 to-purple-600 text-white hover:from-violet-700 hover:to-purple-700">
             <Package className="mr-2 h-4 w-4" />
-            Nouveau Produit
+            {t("newProduct")}
           </Button>
         </div>
       </div>
@@ -156,10 +160,10 @@ export default function DashboardPage() {
         <Card className="col-span-4 border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
           <CardHeader>
             <CardTitle className="text-gray-900 dark:text-white">
-              Vue d&apos;ensemble
+              {t("overview.title")}
             </CardTitle>
             <CardDescription className="text-gray-600 dark:text-gray-300">
-              Évolution de vos revenus sur les 6 derniers mois
+              {t("overview.description")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -167,7 +171,7 @@ export default function DashboardPage() {
               <div className="text-center">
                 <BarChart className="mx-auto mb-2 h-12 w-12 text-violet-600 dark:text-violet-400" />
                 <p className="text-sm text-gray-500 dark:text-gray-300">
-                  Graphique des revenus
+                  {t("overview.revenueChart")}
                 </p>
               </div>
             </div>
@@ -177,10 +181,10 @@ export default function DashboardPage() {
         <Card className="col-span-3 border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
           <CardHeader>
             <CardTitle className="text-gray-900 dark:text-white">
-              Activité Récente
+              {t("recentActivity.title")}
             </CardTitle>
             <CardDescription className="text-gray-600 dark:text-gray-300">
-              Les dernières actions sur votre plateforme
+              {t("recentActivity.description")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -222,10 +226,10 @@ export default function DashboardPage() {
         <Card className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
           <CardHeader>
             <CardTitle className="text-gray-900 dark:text-white">
-              Performance des Ventes
+              {t("salesPerformance.title")}
             </CardTitle>
             <CardDescription className="text-gray-600 dark:text-gray-300">
-              Taux de conversion ce mois
+              {t("salesPerformance.description")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -233,7 +237,7 @@ export default function DashboardPage() {
               <div>
                 <div className="mb-1 flex items-center justify-between">
                   <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Visiteurs
+                    {t("salesPerformance.visitors")}
                   </span>
                   <span className="text-sm font-medium text-gray-900 dark:text-white">
                     12,543
@@ -249,7 +253,7 @@ export default function DashboardPage() {
               <div>
                 <div className="mb-1 flex items-center justify-between">
                   <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Conversions
+                    {t("salesPerformance.conversions")}
                   </span>
                   <span className="text-sm font-medium text-gray-900 dark:text-white">
                     3,234
@@ -265,7 +269,7 @@ export default function DashboardPage() {
               <div>
                 <div className="mb-1 flex items-center justify-between">
                   <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Taux de rebond
+                    {t("salesPerformance.bounceRate")}
                   </span>
                   <span className="text-sm font-medium text-gray-900 dark:text-white">
                     24.3%
@@ -285,15 +289,15 @@ export default function DashboardPage() {
         <Card className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
           <CardHeader>
             <CardTitle className="text-gray-900 dark:text-white">
-              Top Produits
+              {t("topProducts.title")}
             </CardTitle>
             <CardDescription className="text-gray-600 dark:text-gray-300">
-              Les plus vendus ce mois
+              {t("topProducts.description")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {["Produit Premium", "Produit Standard", "Produit Basic"].map(
+              {[t("topProducts.premiumProduct"), t("topProducts.standardProduct"), t("topProducts.basicProduct")].map(
                 (product, index) => (
                   <div
                     key={product}
@@ -329,7 +333,7 @@ export default function DashboardPage() {
               variant="outline"
               className="mt-4 w-full border-gray-200 text-gray-900 hover:bg-gray-50 dark:border-gray-600 dark:text-white dark:hover:bg-gray-800"
             >
-              Voir tous les produits
+              {t("topProducts.viewAllProducts")}
               <ArrowUpRight className="ml-2 h-4 w-4" />
             </Button>
           </CardContent>
@@ -338,10 +342,10 @@ export default function DashboardPage() {
         <Card className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
           <CardHeader>
             <CardTitle className="text-gray-900 dark:text-white">
-              Objectifs du Mois
+              {t("monthlyGoals.title")}
             </CardTitle>
             <CardDescription className="text-gray-600 dark:text-gray-300">
-              Progression vers vos objectifs
+              {t("monthlyGoals.description")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -349,7 +353,7 @@ export default function DashboardPage() {
               <div>
                 <div className="mb-1 flex items-center justify-between">
                   <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Revenus
+                    {t("monthlyGoals.revenue")}
                   </span>
                   <span className="text-sm font-medium text-gray-900 dark:text-white">
                     78%
@@ -365,7 +369,7 @@ export default function DashboardPage() {
               <div>
                 <div className="mb-1 flex items-center justify-between">
                   <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Nouveaux Clients
+                    {t("monthlyGoals.newCustomers")}
                   </span>
                   <span className="text-sm font-medium text-gray-900 dark:text-white">
                     92%
@@ -381,7 +385,7 @@ export default function DashboardPage() {
               <div>
                 <div className="mb-1 flex items-center justify-between">
                   <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Satisfaction
+                    {t("monthlyGoals.satisfaction")}
                   </span>
                   <span className="text-sm font-medium text-gray-900 dark:text-white">
                     96%
