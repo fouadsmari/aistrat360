@@ -178,20 +178,24 @@ export default function AdminUsersPage() {
 
     setIsSubmitting(true)
     try {
-      // Use admin API endpoint instead of direct Supabase calls
-      const response = await fetch('/api/admin/users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const supabase = createSupabaseClient()
+
+      // Create user in Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: createFormData.email,
+        password: createFormData.password,
+        options: {
+          data: {
+            first_name: createFormData.first_name,
+            last_name: createFormData.last_name,
+            role: createFormData.role,
+          },
         },
-        body: JSON.stringify(createFormData),
       })
 
-      const data = await response.json()
-
-      if (!response.ok) {
+      if (authError) {
         showToast({
-          message: `Error creating user: ${data.error}`,
+          message: `Error creating user: ${authError.message}`,
           type: "error",
           duration: 4000,
         })
@@ -199,27 +203,57 @@ export default function AdminUsersPage() {
         return
       }
 
-      showToast({
-        message: "User created successfully",
-        type: "success",
-        duration: 3000,
-      })
+      if (authData.user) {
+        // Update profile with additional information
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .update({
+            first_name: createFormData.first_name,
+            last_name: createFormData.last_name,
+            role: createFormData.role,
+            phone: createFormData.phone || null,
+            company: createFormData.company || null,
+            address: createFormData.address || null,
+            city: createFormData.city || null,
+            postal_code: createFormData.postal_code || null,
+            country: createFormData.country || null,
+            is_active: true,
+          })
+          .eq("id", authData.user.id)
 
-      setIsCreateDialogOpen(false)
-      setCreateFormData({
-        email: "",
-        password: "",
-        first_name: "",
-        last_name: "",
-        role: "subscriber",
-        phone: "",
-        company: "",
-        address: "",
-        city: "",
-        postal_code: "",
-        country: "",
-      })
-      fetchUsers() // Refresh the users list
+        if (profileError) {
+          console.error("Error updating profile:", profileError)
+          showToast({
+            message: `Database error saving new user: ${profileError.message}`,
+            type: "error",
+            duration: 4000,
+          })
+          setIsSubmitting(false)
+          return
+        }
+
+        showToast({
+          message: "User created successfully",
+          type: "success",
+          duration: 3000,
+        })
+
+        setIsCreateDialogOpen(false)
+        setCreateFormData({
+          email: "",
+          password: "",
+          first_name: "",
+          last_name: "",
+          role: "subscriber",
+          phone: "",
+          company: "",
+          address: "",
+          city: "",
+          postal_code: "",
+          country: "",
+        })
+        fetchUsers() // Refresh the users list
+      }
     } catch (error) {
       console.error("Error creating user:", error)
       showToast({
