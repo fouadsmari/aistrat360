@@ -18,7 +18,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
 import { Eye, EyeOff, Loader2, LogIn, Mail, Lock } from "lucide-react"
-import { supabase } from "@/lib/supabase"
+import { createSupabaseClient } from "@/lib/supabase"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -39,6 +39,7 @@ export default function LoginPage() {
     setError(null)
 
     try {
+      const supabase = createSupabaseClient()
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,

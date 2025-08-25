@@ -23,7 +23,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { Camera, Save, User, Globe, Phone, Building2 } from "lucide-react"
-import { supabase } from "@/lib/supabase"
+import { createSupabaseClient } from "@/lib/supabase"
 
 interface UserProfile {
   id: string
@@ -55,6 +55,7 @@ export default function ProfilePage() {
 
   const fetchProfile = useCallback(async () => {
     try {
+      const supabase = createSupabaseClient()
       const {
         data: { user },
       } = await supabase.auth.getUser()
@@ -98,6 +99,7 @@ export default function ProfilePage() {
 
     setSaving(true)
     try {
+      const supabase = createSupabaseClient()
       const { error } = await supabase
         .from("profiles")
         .update({
