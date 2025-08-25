@@ -616,7 +616,7 @@ export default function AdminUsersPage() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
+        <Card className="border-gray-200/30 dark:border-gray-800/20 bg-white/50 dark:bg-gray-900/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t("totalUsers")}</CardTitle>
             <User className="h-4 w-4 text-muted-foreground" />
@@ -625,7 +625,7 @@ export default function AdminUsersPage() {
             <div className="text-2xl font-bold">{totalUsers}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-gray-200/30 dark:border-gray-800/20 bg-white/50 dark:bg-gray-900/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t("activeUsers")}</CardTitle>
             <UserCheck className="h-4 w-4 text-green-600" />
@@ -634,7 +634,7 @@ export default function AdminUsersPage() {
             <div className="text-2xl font-bold text-green-600">{activeUsers}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-gray-200/30 dark:border-gray-800/20 bg-white/50 dark:bg-gray-900/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t("suspended")}</CardTitle>
             <UserX className="h-4 w-4 text-red-600" />
@@ -643,7 +643,7 @@ export default function AdminUsersPage() {
             <div className="text-2xl font-bold text-red-600">{suspendedUsers}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-gray-200/30 dark:border-gray-800/20 bg-white/50 dark:bg-gray-900/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t("newToday")}</CardTitle>
             <Plus className="h-4 w-4 text-blue-600" />
@@ -655,7 +655,7 @@ export default function AdminUsersPage() {
       </div>
 
       {/* Search and Filter */}
-      <Card>
+      <Card className="border-gray-200/30 dark:border-gray-800/20 bg-white/50 dark:bg-gray-900/30">
         <CardHeader>
           <CardTitle>{locale === "fr" ? "Derniers utilisateurs inscrits et leur statut" : "Recent registered users and their status"}</CardTitle>
         </CardHeader>
@@ -673,7 +673,7 @@ export default function AdminUsersPage() {
           </div>
 
           {/* Users Table */}
-          <div className="rounded-lg border">
+          <div className="rounded-lg border border-gray-200/30 dark:border-gray-800/20">
             <Table>
               <TableHeader>
                 <TableRow>

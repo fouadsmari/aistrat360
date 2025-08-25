@@ -306,7 +306,7 @@ export default function ProfilePage() {
       <div className="grid gap-6 lg:grid-cols-2">
 
         {/* Subscription Card */}
-        <Card className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+        <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
               <Crown className="h-5 w-5 text-violet-600" />
@@ -398,7 +398,7 @@ export default function ProfilePage() {
         </Card>
 
         {/* Profile Information */}
-        <Card className="lg:col-span-1 border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+        <Card className="lg:col-span-1 border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
           <CardHeader>
             <CardTitle className="text-gray-900 dark:text-white">
               {t("personalInfo")}

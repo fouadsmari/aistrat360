@@ -158,7 +158,7 @@ export default function AdminDashboardPage() {
         {adminStats.map((stat) => (
           <Card
             key={stat.title}
-            className="relative overflow-hidden border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900"
+            className="relative overflow-hidden border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30"
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">
@@ -189,7 +189,7 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4 border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+        <Card className="col-span-4 border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
           <CardHeader>
             <CardTitle className="text-gray-900 dark:text-white">
               {t("userManagement.title")}
@@ -283,7 +283,7 @@ export default function AdminDashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="col-span-3 border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+        <Card className="col-span-3 border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
           <CardHeader>
             <CardTitle className="flex items-center text-gray-900 dark:text-white">
               <AlertTriangle className="mr-2 h-5 w-5 text-orange-600" />
@@ -340,7 +340,7 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+        <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
           <CardHeader>
             <CardTitle className="text-gray-900 dark:text-white">
               {t("subscriptionDistribution.title")}
@@ -403,7 +403,7 @@ export default function AdminDashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+        <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
           <CardHeader>
             <CardTitle className="text-gray-900 dark:text-white">
               {t("serverPerformance.title")}
@@ -466,7 +466,7 @@ export default function AdminDashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+        <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
           <CardHeader>
             <CardTitle className="text-gray-900 dark:text-white">
               {t("quickActions.title")}
