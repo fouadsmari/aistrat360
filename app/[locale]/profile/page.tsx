@@ -23,18 +23,24 @@ import {
 } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
-import { Camera, Save, User, Globe, Phone, Building2 } from "lucide-react"
+import { Camera, Save, User, Globe, Phone, Building2, MapPin, Map } from "lucide-react"
 import { createSupabaseClient } from "@/lib/supabase"
 
 interface UserProfile {
   id: string
   email: string
+  first_name: string | null
+  last_name: string | null
   full_name: string | null
   avatar_url: string | null
   role: string
   preferred_language: string
   phone: string | null
   company: string | null
+  address: string | null
+  city: string | null
+  postal_code: string | null
+  country: string | null
 }
 
 export default function ProfilePage() {
@@ -49,9 +55,15 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState({
+    first_name: "",
+    last_name: "",
     full_name: "",
     phone: "",
     company: "",
+    address: "",
+    city: "",
+    postal_code: "",
+    country: "",
     preferred_language: locale,
   })
 
@@ -81,25 +93,43 @@ export default function ProfilePage() {
         setProfile({
           id: user.id,
           email: user.email || "",
+          first_name: null,
+          last_name: null,
           full_name: null,
           avatar_url: null,
           role: "subscriber",
           preferred_language: locale,
           phone: null,
           company: null,
+          address: null,
+          city: null,
+          postal_code: null,
+          country: null,
         })
         setFormData({
+          first_name: "",
+          last_name: "",
           full_name: "",
           phone: "",
           company: "",
+          address: "",
+          city: "",
+          postal_code: "",
+          country: "",
           preferred_language: locale,
         })
       } else {
         setProfile(profileData)
         setFormData({
+          first_name: profileData.first_name || "",
+          last_name: profileData.last_name || "",
           full_name: profileData.full_name || "",
           phone: profileData.phone || "",
           company: profileData.company || "",
+          address: profileData.address || "",
+          city: profileData.city || "",
+          postal_code: profileData.postal_code || "",
+          country: profileData.country || "",
           preferred_language: profileData.preferred_language || locale,
         })
       }
@@ -109,12 +139,18 @@ export default function ProfilePage() {
       setProfile({
         id: "temp",
         email: "user@example.com",
+        first_name: null,
+        last_name: null,
         full_name: null,
         avatar_url: null,
         role: "subscriber",
         preferred_language: locale,
         phone: null,
         company: null,
+        address: null,
+        city: null,
+        postal_code: null,
+        country: null,
       })
     } finally {
       setLoading(false)
@@ -138,9 +174,15 @@ export default function ProfilePage() {
         .upsert({
           id: profile.id,
           email: profile.email,
+          first_name: formData.first_name || null,
+          last_name: formData.last_name || null,
           full_name: formData.full_name || null,
           phone: formData.phone || null,
           company: formData.company || null,
+          address: formData.address || null,
+          city: formData.city || null,
+          postal_code: formData.postal_code || null,
+          country: formData.country || null,
           preferred_language: formData.preferred_language,
           updated_at: new Date().toISOString(),
         })
@@ -162,9 +204,15 @@ export default function ProfilePage() {
       if (updatedProfile) {
         setProfile(updatedProfile)
         setFormData({
+          first_name: updatedProfile.first_name || "",
+          last_name: updatedProfile.last_name || "",
           full_name: updatedProfile.full_name || "",
           phone: updatedProfile.phone || "",
           company: updatedProfile.company || "",
+          address: updatedProfile.address || "",
+          city: updatedProfile.city || "",
+          postal_code: updatedProfile.postal_code || "",
+          country: updatedProfile.country || "",
           preferred_language: updatedProfile.preferred_language || locale,
         })
       }
@@ -248,7 +296,8 @@ export default function ProfilePage() {
                   alt={profile.full_name || ""}
                 />
                 <AvatarFallback className="bg-gradient-to-br from-violet-600 to-purple-600 text-2xl text-white">
-                  {profile.full_name?.charAt(0) ||
+                  {profile.first_name?.charAt(0) ||
+                    profile.full_name?.charAt(0) ||
                     profile.email.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
@@ -275,15 +324,30 @@ export default function ProfilePage() {
           <CardContent className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="full_name" className="flex items-center gap-2">
+                <Label htmlFor="first_name" className="flex items-center gap-2">
                   <User className="h-4 w-4" />
-                  {t("fullName")}
+                  {locale === "fr" ? "Prénom" : "First Name"}
                 </Label>
                 <Input
-                  id="full_name"
-                  value={formData.full_name}
+                  id="first_name"
+                  value={formData.first_name}
                   onChange={(e) =>
-                    setFormData({ ...formData, full_name: e.target.value })
+                    setFormData({ ...formData, first_name: e.target.value })
+                  }
+                  className="border-gray-300 focus:border-violet-500 focus:ring-violet-500 dark:border-gray-700"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="last_name" className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  {locale === "fr" ? "Nom" : "Last Name"}
+                </Label>
+                <Input
+                  id="last_name"
+                  value={formData.last_name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, last_name: e.target.value })
                   }
                   className="border-gray-300 focus:border-violet-500 focus:ring-violet-500 dark:border-gray-700"
                 />
@@ -327,6 +391,66 @@ export default function ProfilePage() {
                   value={formData.company}
                   onChange={(e) =>
                     setFormData({ ...formData, company: e.target.value })
+                  }
+                  className="border-gray-300 focus:border-violet-500 focus:ring-violet-500 dark:border-gray-700"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="address" className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  {locale === "fr" ? "Adresse" : "Address"}
+                </Label>
+                <Input
+                  id="address"
+                  value={formData.address}
+                  onChange={(e) =>
+                    setFormData({ ...formData, address: e.target.value })
+                  }
+                  className="border-gray-300 focus:border-violet-500 focus:ring-violet-500 dark:border-gray-700"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="city" className="flex items-center gap-2">
+                  <Map className="h-4 w-4" />
+                  {locale === "fr" ? "Ville" : "City"}
+                </Label>
+                <Input
+                  id="city"
+                  value={formData.city}
+                  onChange={(e) =>
+                    setFormData({ ...formData, city: e.target.value })
+                  }
+                  className="border-gray-300 focus:border-violet-500 focus:ring-violet-500 dark:border-gray-700"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="postal_code" className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  {locale === "fr" ? "Code postal" : "Postal Code"}
+                </Label>
+                <Input
+                  id="postal_code"
+                  value={formData.postal_code}
+                  onChange={(e) =>
+                    setFormData({ ...formData, postal_code: e.target.value })
+                  }
+                  className="border-gray-300 focus:border-violet-500 focus:ring-violet-500 dark:border-gray-700"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="country" className="flex items-center gap-2">
+                  <Globe className="h-4 w-4" />
+                  {locale === "fr" ? "Pays" : "Country"}
+                </Label>
+                <Input
+                  id="country"
+                  value={formData.country}
+                  onChange={(e) =>
+                    setFormData({ ...formData, country: e.target.value })
                   }
                   className="border-gray-300 focus:border-violet-500 focus:ring-violet-500 dark:border-gray-700"
                 />

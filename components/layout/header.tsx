@@ -3,6 +3,7 @@
 import { Bell, Menu, Moon, Search, Sun, User, LogOut } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useParams, useRouter } from "next/navigation"
+import { createSupabaseClient } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -31,8 +32,19 @@ export function Header({ onMenuClick, isMobile = false }: HeaderProps) {
   const locale = params.locale as string
 
   const handleLogout = async () => {
-    // TODO: Add proper logout logic with Supabase
-    router.push(`/${locale}/login`)
+    try {
+      const supabase = createSupabaseClient()
+      const { error } = await supabase.auth.signOut()
+      
+      if (error) {
+        console.error("Erreur lors de la déconnexion:", error.message)
+      } else {
+        // Rediriger vers la page de connexion après déconnexion
+        router.push(`/${locale}/login`)
+      }
+    } catch (error) {
+      console.error("Erreur inattendue lors de la déconnexion:", error)
+    }
   }
 
   return (
