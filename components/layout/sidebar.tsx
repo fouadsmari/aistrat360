@@ -20,6 +20,7 @@ import {
   Calendar,
   HelpCircle,
   Shield,
+  CreditCard,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -86,6 +87,11 @@ export function Sidebar({
       title: t("integrations"),
       icon: Layers,
       href: `/${locale}/dashboard/integrations`,
+    },
+    {
+      title: t("pricing"),
+      icon: CreditCard,
+      href: `/${locale}/pricing`,
     },
   ]
 

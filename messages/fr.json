@@ -280,7 +280,10 @@
       "free": "Gratuit",
       "starter": "Starter",
       "professional": "Professionnel",
-      "enterprise": "Entreprise"
+      "enterprise": "Entreprise",
+      "pro": "Pro",
+      "advanced": "Avancé",
+      "trial": "Essai"
     },
     "status": {
       "active": "Actif",
@@ -304,6 +307,88 @@
     "perYear": "/an",
     "savePercent": "Économisez {percent}%"
   },
+  "pricing": {
+    "title": "Choisissez Votre Plan",
+    "subtitle": "Trouvez le plan parfait pour vos besoins",
+    "monthlyBilling": "Facturation mensuelle",
+    "yearlyBilling": "Facturation annuelle",
+    "popular": "Le Plus Populaire",
+    "currentPlan": "Plan Actuel",
+    "selectPlan": "Sélectionner le Plan",
+    "upgradeTo": "Passer au {plan}",
+    "downgradeTo": "Rétrograder vers {plan}",
+    "startTrial": "Commencer l'Essai Gratuit",
+    "contactSales": "Contacter les Ventes",
+    "perMonth": "par mois",
+    "perYear": "par an",
+    "billedMonthly": "facturé mensuellement",
+    "billedYearly": "facturé annuellement",
+    "save": "Économisez {percent}%",
+    "freeTrial": "14 jours d'essai gratuit",
+    "noCommitment": "Aucun engagement, annulez à tout moment",
+    "allFeatures": "Toutes les fonctionnalités incluses",
+    "planFeatures": {
+      "trial": {
+        "name": "Essai",
+        "description": "Essayez notre plateforme gratuitement",
+        "features": [
+          "Accès aux fonctionnalités de base",
+          "1 projet",
+          "Support par email",
+          "14 jours d'essai"
+        ]
+      },
+      "starter": {
+        "name": "Starter",
+        "description": "Parfait pour les particuliers et petites équipes",
+        "features": [
+          "Toutes les fonctionnalités de base",
+          "5 projets",
+          "10GB de stockage",
+          "Support par email",
+          "Accès à l'application mobile"
+        ]
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "Idéal pour les entreprises en croissance et les équipes",
+        "features": [
+          "Toutes les fonctionnalités Starter",
+          "25 projets",
+          "100GB de stockage",
+          "Support prioritaire",
+          "Analyses avancées",
+          "Collaboration d'équipe",
+          "Accès API"
+        ]
+      },
+      "advanced": {
+        "name": "Avancé",
+        "description": "Pour les grandes organisations aux besoins complexes",
+        "features": [
+          "Toutes les fonctionnalités Pro",
+          "Projets illimités",
+          "1TB de stockage",
+          "Support téléphonique 24/7",
+          "Intégrations personnalisées",
+          "Options de marque blanche",
+          "Garantie SLA",
+          "Gestionnaire de compte dédié"
+        ]
+      }
+    },
+    "faq": {
+      "title": "Questions Fréquemment Posées",
+      "canIChangeAnytime": "Puis-je changer de plan à tout moment ?",
+      "changeAnytimeAnswer": "Oui, vous pouvez améliorer ou rétrograder votre plan à tout moment. Les modifications prennent effet immédiatement.",
+      "freeTrial": "Offrez-vous un essai gratuit ?",
+      "freeTrialAnswer": "Oui, nous offrons un essai gratuit de 14 jours avec accès à toutes les fonctionnalités de base. Aucune carte de crédit requise.",
+      "cancelAnytime": "Puis-je annuler à tout moment ?",
+      "cancelAnytimeAnswer": "Oui, vous pouvez annuler votre abonnement à tout moment. Vous continuerez d'avoir accès jusqu'à la fin de votre période de facturation.",
+      "whatPaymentMethods": "Quelles méthodes de paiement acceptez-vous ?",
+      "paymentMethodsAnswer": "Nous acceptons toutes les principales cartes de crédit, PayPal, et les virements bancaires pour les plans entreprise."
+    }
+  },
   "sidebar": {
     "dashboard": "Tableau de bord",
     "analytics": "Analytiques",
@@ -313,6 +398,7 @@
     "reports": "Rapports",
     "calendar": "Calendrier",
     "integrations": "Intégrations",
+    "pricing": "Tarification",
     "adminPanel": "Panel Admin",
     "help": "Aide",
     "settings": "Paramètres",

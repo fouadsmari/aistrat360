@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
-import { Camera, Save, User, Globe, Phone, Building2, MapPin, Map } from "lucide-react"
+import { Camera, Save, User, Globe, Phone, Building2, MapPin, Map, Crown, Calendar, ExternalLink } from "lucide-react"
 import { createSupabaseClient } from "@/lib/supabase"
 
 interface UserProfile {
@@ -43,8 +43,19 @@ interface UserProfile {
   country: string | null
 }
 
+interface UserSubscription {
+  id: string
+  plan: string
+  status: string
+  current_period_start: string
+  current_period_end: string
+  trial_end: string | null
+  cancel_at_period_end: boolean
+}
+
 export default function ProfilePage() {
   const t = useTranslations("profile")
+  const tSubscription = useTranslations("subscription")
   const tCommon = useTranslations("common")
   const params = useParams()
   const router = useRouter()
@@ -52,6 +63,7 @@ export default function ProfilePage() {
   const { showToast, ToastComponent } = useToast()
 
   const [profile, setProfile] = useState<UserProfile | null>(null)
+  const [subscription, setSubscription] = useState<UserSubscription | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState({
@@ -80,11 +92,26 @@ export default function ProfilePage() {
         return
       }
 
-      const { data: profileData, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single()
+      const [{ data: profileData, error }, { data: subscriptionData, error: subError }] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single(),
+        supabase
+          .from("subscriptions")
+          .select("*")
+          .eq("user_id", user.id)
+          .single()
+      ])
+
+      // Handle subscription data
+      if (subError && subError.code !== 'PGRST116') {
+        console.error("Error fetching subscription:", subError)
+        setSubscription(null)
+      } else {
+        setSubscription(subscriptionData)
+      }
 
       if (error) {
         // If profile doesn't exist, show a basic profile
@@ -311,8 +338,100 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
 
+        {/* Subscription Card */}
+        <Card className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+              <Crown className="h-5 w-5 text-violet-600" />
+              {tSubscription("title")}
+            </CardTitle>
+            <CardDescription className="text-gray-600 dark:text-gray-300">
+              {tSubscription("currentPlan")}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {subscription ? (
+              <>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Plan:
+                  </span>
+                  <span className="rounded-full bg-violet-100 px-2 py-1 text-sm font-medium text-violet-800 dark:bg-violet-900 dark:text-violet-200">
+                    {tSubscription(`plans.${subscription.plan}`)}
+                  </span>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Status:
+                  </span>
+                  <span className={`rounded-full px-2 py-1 text-sm font-medium ${
+                    subscription.status === 'active' 
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                      : subscription.status === 'trial'
+                      ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                      : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                  }`}>
+                    {tSubscription(`status.${subscription.status}`)}
+                  </span>
+                </div>
+
+                {subscription.status === 'trial' && subscription.trial_end && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Trial ends:
+                    </span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      {new Date(subscription.trial_end).toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-US')}
+                    </span>
+                  </div>
+                )}
+
+                {subscription.status === 'active' && subscription.current_period_end && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {tSubscription("nextBilling")}:
+                    </span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      {new Date(subscription.current_period_end).toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-US')}
+                    </span>
+                  </div>
+                )}
+
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full mt-4"
+                  onClick={() => router.push(`/${locale}/pricing`)}
+                >
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  {subscription.status === 'trial' ? tSubscription("upgrade") : "Manage Plan"}
+                </Button>
+              </>
+            ) : (
+              <>
+                <div className="text-center py-4">
+                  <Crown className="mx-auto h-12 w-12 text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    No active subscription
+                  </p>
+                  <Button 
+                    variant="default"
+                    size="sm"
+                    className="bg-gradient-to-r from-violet-600 to-purple-600 text-white hover:from-violet-700 hover:to-purple-700"
+                    onClick={() => router.push(`/${locale}/pricing`)}
+                  >
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    View Plans
+                  </Button>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Profile Information */}
-        <Card className="col-span-2 border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+        <Card className="lg:col-span-1 border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
           <CardHeader>
             <CardTitle className="text-gray-900 dark:text-white">
               {t("personalInfo")}
