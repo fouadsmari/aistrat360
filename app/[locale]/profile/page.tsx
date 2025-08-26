@@ -33,6 +33,9 @@ import {
   Crown,
   Calendar,
   ExternalLink,
+  Key,
+  Eye,
+  EyeOff,
 } from "lucide-react"
 import { createSupabaseClient } from "@/lib/supabase"
 
@@ -78,6 +81,17 @@ export default function ProfilePage() {
   )
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [changingPassword, setChangingPassword] = useState(false)
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false,
+  })
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  })
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -198,6 +212,99 @@ export default function ProfilePage() {
   useEffect(() => {
     fetchProfile()
   }, [fetchProfile])
+
+  const handleChangePassword = async () => {
+    if (!profile) return
+
+    // Validation
+    if (
+      !passwordData.currentPassword ||
+      !passwordData.newPassword ||
+      !passwordData.confirmPassword
+    ) {
+      showToast({
+        message: "Please fill all password fields",
+        type: "error",
+        duration: 4000,
+      })
+      return
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      showToast({
+        message: "New passwords do not match",
+        type: "error",
+        duration: 4000,
+      })
+      return
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      showToast({
+        message: "New password must be at least 6 characters",
+        type: "error",
+        duration: 4000,
+      })
+      return
+    }
+
+    setChangingPassword(true)
+    try {
+      const supabase = createSupabaseClient()
+
+      // First verify current password by trying to sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: profile.email,
+        password: passwordData.currentPassword,
+      })
+
+      if (signInError) {
+        showToast({
+          message: "Current password is incorrect",
+          type: "error",
+          duration: 4000,
+        })
+        setChangingPassword(false)
+        return
+      }
+
+      // Update password
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: passwordData.newPassword,
+      })
+
+      if (updateError) {
+        showToast({
+          message: updateError.message || "Failed to update password",
+          type: "error",
+          duration: 4000,
+        })
+        setChangingPassword(false)
+        return
+      }
+
+      // Success
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      })
+
+      showToast({
+        message: "Password updated successfully",
+        type: "success",
+        duration: 3000,
+      })
+    } catch (error) {
+      showToast({
+        message: "An error occurred while updating password",
+        type: "error",
+        duration: 4000,
+      })
+    } finally {
+      setChangingPassword(false)
+    }
+  }
 
   const handleSave = async () => {
     if (!profile) return
@@ -617,6 +724,174 @@ export default function ProfilePage() {
                   <>
                     <Save className="mr-2 h-4 w-4" />
                     {t("updateProfile")}
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Password Change Card */}
+        <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30 lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+              <Key className="h-5 w-5 text-violet-600" />
+              {locale === "fr" ? "Changer le mot de passe" : "Change Password"}
+            </CardTitle>
+            <CardDescription className="text-gray-600 dark:text-gray-300">
+              {locale === "fr"
+                ? "Modifiez votre mot de passe pour sécuriser votre compte"
+                : "Update your password to secure your account"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="space-y-2">
+                <Label
+                  htmlFor="current_password"
+                  className="flex items-center gap-2"
+                >
+                  <Key className="h-4 w-4" />
+                  {locale === "fr" ? "Mot de passe actuel" : "Current Password"}
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="current_password"
+                    type={showPasswords.current ? "text" : "password"}
+                    value={passwordData.currentPassword}
+                    onChange={(e) =>
+                      setPasswordData({
+                        ...passwordData,
+                        currentPassword: e.target.value,
+                      })
+                    }
+                    className="border-gray-300 pr-10 focus:border-violet-500 focus:ring-violet-500 dark:border-gray-700"
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setShowPasswords({
+                        ...showPasswords,
+                        current: !showPasswords.current,
+                      })
+                    }
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPasswords.current ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="new_password"
+                  className="flex items-center gap-2"
+                >
+                  <Key className="h-4 w-4" />
+                  {locale === "fr" ? "Nouveau mot de passe" : "New Password"}
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="new_password"
+                    type={showPasswords.new ? "text" : "password"}
+                    value={passwordData.newPassword}
+                    onChange={(e) =>
+                      setPasswordData({
+                        ...passwordData,
+                        newPassword: e.target.value,
+                      })
+                    }
+                    className="border-gray-300 pr-10 focus:border-violet-500 focus:ring-violet-500 dark:border-gray-700"
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setShowPasswords({
+                        ...showPasswords,
+                        new: !showPasswords.new,
+                      })
+                    }
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPasswords.new ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="confirm_password"
+                  className="flex items-center gap-2"
+                >
+                  <Key className="h-4 w-4" />
+                  {locale === "fr"
+                    ? "Confirmer le mot de passe"
+                    : "Confirm Password"}
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="confirm_password"
+                    type={showPasswords.confirm ? "text" : "password"}
+                    value={passwordData.confirmPassword}
+                    onChange={(e) =>
+                      setPasswordData({
+                        ...passwordData,
+                        confirmPassword: e.target.value,
+                      })
+                    }
+                    className="border-gray-300 pr-10 focus:border-violet-500 focus:ring-violet-500 dark:border-gray-700"
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setShowPasswords({
+                        ...showPasswords,
+                        confirm: !showPasswords.confirm,
+                      })
+                    }
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPasswords.confirm ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {locale === "fr"
+                ? "Le mot de passe doit contenir au moins 6 caractères"
+                : "Password must be at least 6 characters long"}
+            </p>
+
+            <div className="flex justify-end">
+              <Button
+                onClick={handleChangePassword}
+                disabled={changingPassword}
+                className="bg-gradient-to-r from-violet-600 to-purple-600 text-white hover:from-violet-700 hover:to-purple-700"
+              >
+                {changingPassword ? (
+                  <>
+                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    {locale === "fr" ? "Modification..." : "Updating..."}
+                  </>
+                ) : (
+                  <>
+                    <Key className="mr-2 h-4 w-4" />
+                    {locale === "fr"
+                      ? "Changer le mot de passe"
+                      : "Change Password"}
                   </>
                 )}
               </Button>
