@@ -61,6 +61,8 @@ export async function middleware(req: NextRequest) {
     pathname.includes("/admin") ||
     pathname.includes("/profile")
 
+  const isAdminRoute = pathname.includes("/admin")
+
   const isAuthRoute =
     pathname.includes("/login") || pathname.includes("/signup")
 
@@ -69,6 +71,23 @@ export async function middleware(req: NextRequest) {
     const url = req.nextUrl.clone()
     url.pathname = `/${locale}/login`
     return NextResponse.redirect(url)
+  }
+
+  // Check admin access for authenticated users
+  if (isAdminRoute && session) {
+    // Get user profile to check role
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", session.user.id)
+      .single()
+
+    // If user is not admin or super_admin, redirect to regular dashboard
+    if (profile?.role !== "admin" && profile?.role !== "super_admin") {
+      const url = req.nextUrl.clone()
+      url.pathname = `/${locale}/dashboard`
+      return NextResponse.redirect(url)
+    }
   }
 
   // Redirect to dashboard if accessing auth routes with active session

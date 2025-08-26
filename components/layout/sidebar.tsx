@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname, useParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
+import { createSupabaseClient } from "@/lib/supabase"
 import {
   BarChart3,
   ChevronLeft,
@@ -46,6 +47,28 @@ export function Sidebar({
   const params = useParams()
   const t = useTranslations("sidebar")
   const locale = params.locale as string
+  const [userRole, setUserRole] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function getUserRole() {
+      const supabase = createSupabaseClient()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .single()
+
+        setUserRole(profile?.role || null)
+      }
+    }
+
+    getUserRole()
+  }, [])
 
   const sidebarItems = [
     {
@@ -96,11 +119,16 @@ export function Sidebar({
   ]
 
   const bottomItems = [
-    {
-      title: t("adminPanel"),
-      icon: Shield,
-      href: `/${locale}/admin/dashboard`,
-    },
+    // Only show admin panel for admin and super_admin users
+    ...(userRole === "admin" || userRole === "super_admin"
+      ? [
+          {
+            title: t("adminPanel"),
+            icon: Shield,
+            href: `/${locale}/admin/dashboard`,
+          },
+        ]
+      : []),
     {
       title: t("help"),
       icon: HelpCircle,

@@ -1,5 +1,7 @@
 import { createClient } from "@supabase/supabase-js"
 import { NextResponse } from "next/server"
+import { cookies } from "next/headers"
+import { createServerClient } from "@supabase/ssr"
 
 // Service role client pour bypasser RLS
 const supabaseAdmin = createClient(
@@ -13,22 +15,66 @@ const supabaseAdmin = createClient(
   }
 )
 
+// Helper function to check if user is admin or super_admin
+async function checkAdminAccess() {
+  const cookieStore = await cookies()
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+      },
+    }
+  )
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return { authorized: false, error: "Unauthorized" }
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single()
+
+  if (
+    !profile ||
+    (profile.role !== "admin" && profile.role !== "super_admin")
+  ) {
+    return { authorized: false, error: "Forbidden - Admin access required" }
+  }
+
+  return { authorized: true, userId: user.id, role: profile.role }
+}
+
 // GET - Récupère tous les utilisateurs (service role bypass RLS)
 export async function GET() {
   try {
+    // Check admin access
+    const { authorized, error: authError } = await checkAdminAccess()
+    if (!authorized) {
+      return NextResponse.json({ error: authError }, { status: 403 })
+    }
     const { data: profiles, error } = await supabaseAdmin
       .from("profiles")
       .select("*")
       .order("created_at", { ascending: false })
 
     if (error) {
-      console.error("Error fetching users:", error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     return NextResponse.json({ users: profiles })
   } catch (error) {
-    console.error("API Error:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -39,6 +85,12 @@ export async function GET() {
 // POST - Crée un nouvel utilisateur
 export async function POST(request: Request) {
   try {
+    // Check admin access
+    const { authorized, error: accessError } = await checkAdminAccess()
+    if (!authorized) {
+      return NextResponse.json({ error: accessError }, { status: 403 })
+    }
+
     const userData = await request.json()
 
     // Crée l'utilisateur avec auth.admin
@@ -59,8 +111,10 @@ export async function POST(request: Request) {
       })
 
     if (authError) {
-      console.error("Auth error:", authError)
-      return NextResponse.json({ error: authError.message }, { status: 400 })
+      return NextResponse.json(
+        { error: authError?.message || authError },
+        { status: 400 }
+      )
     }
 
     // Le trigger handle_new_user devrait créer le profil automatiquement
@@ -69,7 +123,6 @@ export async function POST(request: Request) {
       user: authUser.user,
     })
   } catch (error) {
-    console.error("API Error:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -80,6 +133,12 @@ export async function POST(request: Request) {
 // PUT - Met à jour un utilisateur
 export async function PUT(request: Request) {
   try {
+    // Check admin access
+    const { authorized, error: accessError } = await checkAdminAccess()
+    if (!authorized) {
+      return NextResponse.json({ error: accessError }, { status: 403 })
+    }
+
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get("id")
     const userData = await request.json()
@@ -139,13 +198,14 @@ export async function PUT(request: Request) {
     )
 
     if (authError) {
-      console.error("Auth update error:", authError)
-      return NextResponse.json({ error: authError.message }, { status: 500 })
+      return NextResponse.json(
+        { error: authError?.message || authError },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json({ message: "User updated successfully" })
   } catch (error) {
-    console.error("API Error:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -156,6 +216,12 @@ export async function PUT(request: Request) {
 // DELETE - Supprime un utilisateur
 export async function DELETE(request: Request) {
   try {
+    // Check admin access
+    const { authorized, error: accessError } = await checkAdminAccess()
+    if (!authorized) {
+      return NextResponse.json({ error: accessError }, { status: 403 })
+    }
+
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get("id")
 
@@ -168,12 +234,14 @@ export async function DELETE(request: Request) {
       await supabaseAdmin.auth.admin.deleteUser(userId)
 
     if (authError) {
-      return NextResponse.json({ error: authError.message }, { status: 500 })
+      return NextResponse.json(
+        { error: authError?.message || authError },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json({ message: "User deleted successfully" })
   } catch (error) {
-    console.error("API Error:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
