@@ -100,6 +100,15 @@
   - ✅ Vérifié avec npm run check-deploy - 0 erreurs ESLint, build réussi
   - ✅ Tests unitaires passent tous (21 passed)
 
+- **[2025-08-26]** Implémentation du contrôle d'accès basé sur les rôles
+  - ✅ Protection middleware pour routes admin (redirection si non-admin)
+  - ✅ Vérification API admin/users pour tous les endpoints (GET, POST, PUT, DELETE)
+  - ✅ Masquage options admin dans sidebar pour subscribers
+  - ✅ Correction rôle admin@marion.com (subscriber → admin) et mot de passe
+  - ✅ Sécurisation complète : seuls admin/super_admin accèdent au panel admin
+  - ✅ Tests de sécurité validés, build réussi, 21 tests passent
+  - ✅ Déployé sur GitHub avec contrôles d'accès fonctionnels
+
 ---
 
 _Dernière mise à jour : 2025-08-26_

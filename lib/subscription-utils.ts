@@ -138,13 +138,11 @@ export async function getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
       .order("sort_order", { ascending: true })
 
     if (error && error.code !== "PGRST116") {
-      console.warn("Database not available, using hardcoded plans:", error)
       return HARDCODED_PLANS
     }
 
     return data || HARDCODED_PLANS
   } catch (error) {
-    console.warn("Error fetching plans, using hardcoded fallback:", error)
     return HARDCODED_PLANS
   }
 }

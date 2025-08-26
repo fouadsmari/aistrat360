@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect } from "react"
 import { useTranslations } from "next-intl"
 import { useParams, useRouter } from "next/navigation"
 import { useToast } from "@/components/ui/toast"
@@ -52,7 +52,7 @@ export default function PricingPage() {
   const [isYearly, setIsYearly] = useState(false)
   const [processingPlan, setProcessingPlan] = useState<string | null>(null)
 
-  const fetchPlansAndSubscription = useCallback(async () => {
+  const fetchPlansAndSubscription = async () => {
     try {
       const supabase = createSupabaseClient()
 
@@ -67,7 +67,6 @@ export default function PricingPage() {
       } = await supabase.auth.getUser()
 
       if (authError || !user) {
-        console.log("User not authenticated, showing public pricing")
         setCurrentSubscription(null)
         setLoading(false)
         return
@@ -77,7 +76,6 @@ export default function PricingPage() {
       const subscription = await getUserSubscription(user.id)
       setCurrentSubscription(subscription)
     } catch (error) {
-      console.error("Error:", error)
       showToast({
         message: tCommon("error"),
         type: "error",
@@ -86,11 +84,12 @@ export default function PricingPage() {
     } finally {
       setLoading(false)
     }
-  }, [tCommon, showToast])
+  }
 
   useEffect(() => {
     fetchPlansAndSubscription()
-  }, [fetchPlansAndSubscription])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleSelectPlan = async (plan: SubscriptionPlan) => {
     setProcessingPlan(plan.name)
