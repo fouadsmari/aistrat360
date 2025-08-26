@@ -361,14 +361,14 @@ export default function AdminUsersPage() {
     <div className="container mx-auto space-y-8 px-4 py-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+          <h1 className="bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-3xl font-bold tracking-tight text-transparent">
             {t("title")}
           </h1>
-          <p className="text-gray-600 dark:text-gray-300">{t("description")}</p>
+          <p className="mt-2 text-gray-500 dark:text-gray-400">{t("description")}</p>
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+            <Button className="bg-gradient-to-r from-red-600 to-orange-600 text-white hover:from-red-700 hover:to-orange-700">
               <Plus className="mr-2 h-4 w-4" />
               {t("createUser")}
             </Button>
@@ -485,71 +485,91 @@ export default function AdminUsersPage() {
 
       {/* Statistics Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
+        <Card className="relative overflow-hidden border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-900 dark:text-white">
+            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">
               Total Users
             </CardTitle>
-            <Users className="h-4 w-4 text-blue-600" />
+            <div className={cn("rounded-lg p-2", "bg-blue-50 dark:bg-blue-950/30")}>
+              <Users className={cn("h-4 w-4", "text-blue-600 dark:text-blue-400")} />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-gray-900 dark:text-white">
               {totalUsers}
             </div>
-            <p className="text-xs text-gray-600 dark:text-gray-400">
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
               All registered users
             </p>
+            <div className="absolute right-0 top-0 p-2">
+              <Users className="h-4 w-4 text-blue-500 opacity-20" />
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
+        <Card className="relative overflow-hidden border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-900 dark:text-white">
+            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">
               Active Users
             </CardTitle>
-            <UserCheck className="h-4 w-4 text-green-600" />
+            <div className={cn("rounded-lg p-2", "bg-green-50 dark:bg-green-950/30")}>
+              <UserCheck className={cn("h-4 w-4", "text-green-600 dark:text-green-400")} />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-gray-900 dark:text-white">
               {activeUsers}
             </div>
-            <p className="text-xs text-gray-600 dark:text-gray-400">
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
               Currently active
             </p>
+            <div className="absolute right-0 top-0 p-2">
+              <UserCheck className="h-4 w-4 text-green-500 opacity-20" />
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
+        <Card className="relative overflow-hidden border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-900 dark:text-white">
+            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">
               Admins
             </CardTitle>
-            <Shield className="h-4 w-4 text-blue-600" />
+            <div className={cn("rounded-lg p-2", "bg-violet-50 dark:bg-violet-950/30")}>
+              <Shield className={cn("h-4 w-4", "text-violet-600 dark:text-violet-400")} />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-gray-900 dark:text-white">
               {adminUsers}
             </div>
-            <p className="text-xs text-gray-600 dark:text-gray-400">
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
               Admin & Super Admin
             </p>
+            <div className="absolute right-0 top-0 p-2">
+              <Shield className="h-4 w-4 text-violet-500 opacity-20" />
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
+        <Card className="relative overflow-hidden border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-900 dark:text-white">
+            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">
               Subscribers
             </CardTitle>
-            <User className="h-4 w-4 text-gray-600" />
+            <div className={cn("rounded-lg p-2", "bg-orange-50 dark:bg-orange-950/30")}>
+              <User className={cn("h-4 w-4", "text-orange-600 dark:text-orange-400")} />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-gray-900 dark:text-white">
               {subscriberUsers}
             </div>
-            <p className="text-xs text-gray-600 dark:text-gray-400">
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
               Regular subscribers
             </p>
+            <div className="absolute right-0 top-0 p-2">
+              <User className="h-4 w-4 text-orange-500 opacity-20" />
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -557,8 +577,7 @@ export default function AdminUsersPage() {
       {/* User List */}
       <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
         <CardHeader>
-          <CardTitle className="flex items-center text-gray-900 dark:text-white">
-            <Users className="mr-2 h-5 w-5" />
+          <CardTitle className="text-gray-900 dark:text-white">
             {t("userList")}
           </CardTitle>
           <CardDescription className="text-gray-600 dark:text-gray-300">
