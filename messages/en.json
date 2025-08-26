@@ -88,6 +88,10 @@
     "maintenance": "Maintenance",
     "userManagement": {
       "title": "User Management",
+      "description": "Manage and monitor all platform users",
+      "userList": "User List",
+      "createUser": "Create User",
+      "createNewUser": "Create New User",
       "totalUsers": "Total Users",
       "activeUsers": "Active Users",
       "newToday": "New Today",
@@ -102,7 +106,18 @@
       "viewProfile": "View Profile",
       "userDetails": "User Details",
       "lastLogin": "Last Login",
-      "registeredOn": "Registered On"
+      "registeredOn": "Registered On",
+      "success": {
+        "userCreated": "User created successfully",
+        "userUpdated": "User updated successfully",
+        "userDeleted": "User deleted successfully"
+      },
+      "errors": {
+        "fetchFailed": "Failed to fetch users",
+        "createFailed": "Failed to create user",
+        "updateFailed": "Failed to update user",
+        "deleteFailed": "Failed to delete user"
+      }
     },
     "systemStatus": {
       "title": "System Status",

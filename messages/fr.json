@@ -88,6 +88,10 @@
     "maintenance": "Maintenance",
     "userManagement": {
       "title": "Gestion des utilisateurs",
+      "description": "Gérer et surveiller tous les utilisateurs de la plateforme",
+      "userList": "Liste des utilisateurs",
+      "createUser": "Créer un utilisateur",
+      "createNewUser": "Créer un nouvel utilisateur",
       "totalUsers": "Total utilisateurs",
       "activeUsers": "Utilisateurs actifs",
       "newToday": "Nouveaux aujourd'hui",
@@ -102,7 +106,18 @@
       "viewProfile": "Voir le profil",
       "userDetails": "Détails de l'utilisateur",
       "lastLogin": "Dernière connexion",
-      "registeredOn": "Inscrit le"
+      "registeredOn": "Inscrit le",
+      "success": {
+        "userCreated": "Utilisateur créé avec succès",
+        "userUpdated": "Utilisateur mis à jour avec succès",
+        "userDeleted": "Utilisateur supprimé avec succès"
+      },
+      "errors": {
+        "fetchFailed": "Échec de récupération des utilisateurs",
+        "createFailed": "Échec de création de l'utilisateur",
+        "updateFailed": "Échec de mise à jour de l'utilisateur",
+        "deleteFailed": "Échec de suppression de l'utilisateur"
+      }
     },
     "systemStatus": {
       "title": "État du système",
