@@ -129,20 +129,25 @@ export default function AdminUsersPage() {
 
   // Fetch all users via API (uses service role)
   const fetchUsers = useCallback(async () => {
+    console.log("🔄 fetchUsers called")
     setLoading(true)
     try {
+      console.log("📡 Calling /api/admin/users")
       const response = await fetch("/api/admin/users")
+      console.log("📡 Response status:", response.status)
 
       if (!response.ok) {
-        throw new Error("Failed to fetch users")
+        throw new Error(`HTTP ${response.status}: Failed to fetch users`)
       }
 
       const data = await response.json()
+      console.log("📡 Response data:", data)
 
       if (data.error) {
         throw new Error(data.error)
       }
 
+      console.log("✅ Setting users:", data.users?.length || 0)
       setUsers(data.users || [])
     } catch (error) {
       console.error("❌ Error fetching users:", error)
@@ -151,14 +156,15 @@ export default function AdminUsersPage() {
           error instanceof Error ? error.message : "Failed to fetch users",
         type: "error",
       })
+      setUsers([]) // Set empty array on error
     } finally {
       setLoading(false)
     }
-  }, [showToast])
+  }, [])
 
   useEffect(() => {
     fetchUsers()
-  }, [fetchUsers])
+  }, [])
 
   // Create new user via API
   const handleCreateUser = async (e: React.FormEvent) => {
