@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useTranslations } from "next-intl"
-import { useParams, useRouter } from "next/navigation"
+import { useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -48,36 +48,37 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useToast } from "@/components/ui/toast"
 import {
-  User,
+  Users,
   Plus,
   Search,
-  MoreHorizontal,
   Edit,
   Trash2,
+  MoreHorizontal,
   UserCheck,
   UserX,
-  Mail,
-  Settings,
-  Eye,
+  Shield,
+  Crown,
+  User,
 } from "lucide-react"
-import { createSupabaseClient } from "@/lib/supabase"
+
+type UserRole = "subscriber" | "admin" | "super_admin"
 
 interface UserProfile {
   id: string
   email: string
-  first_name: string | null
-  last_name: string | null
-  role: string
-  phone: string | null
-  company: string | null
-  address: string | null
-  city: string | null
-  postal_code: string | null
-  country: string | null
-  created_at: string
-  updated_at: string
-  last_sign_in_at: string | null
+  first_name?: string
+  last_name?: string
+  full_name?: string
+  role: UserRole
   is_active: boolean
+  phone?: string
+  company?: string
+  address?: string
+  city?: string
+  postal_code?: string
+  country?: string
+  created_at: string
+  updated_at?: string
 }
 
 interface CreateUserData {
@@ -85,7 +86,7 @@ interface CreateUserData {
   password: string
   first_name: string
   last_name: string
-  role: string
+  role: UserRole
   phone?: string
   company?: string
   address?: string
@@ -98,7 +99,6 @@ export default function AdminUsersPage() {
   const t = useTranslations("admin.userManagement")
   const tCommon = useTranslations("common")
   const params = useParams()
-  const router = useRouter()
   const locale = params.locale as string
   const { showToast, ToastComponent } = useToast()
 
@@ -127,325 +127,175 @@ export default function AdminUsersPage() {
 
   const [editFormData, setEditFormData] = useState<Partial<UserProfile>>({})
 
-  // Fetch all users from the database
+  // Fetch all users via API (uses service role)
   const fetchUsers = useCallback(async () => {
+    setLoading(true)
     try {
-      const supabase = createSupabaseClient()
+      const response = await fetch("/api/admin/users")
 
-      const { data: profiles, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .order("created_at", { ascending: false })
-
-      if (error) {
-        console.error("Error fetching users:", error)
-        showToast({
-          message: "Error loading users",
-          type: "error",
-          duration: 4000,
-        })
-        return
+      if (!response.ok) {
+        throw new Error("Failed to fetch users")
       }
 
-      setUsers(profiles || [])
+      const data = await response.json()
+
+      if (data.error) {
+        throw new Error(data.error)
+      }
+
+      setUsers(data.users || [])
     } catch (error) {
-      console.error("Error:", error)
+      console.error("❌ Error fetching users:", error)
       showToast({
-        message: "Unexpected error loading users",
+        message:
+          error instanceof Error ? error.message : "Failed to fetch users",
         type: "error",
-        duration: 4000,
       })
     } finally {
       setLoading(false)
     }
   }, [showToast])
 
-  // Create new user
-  const handleCreateUser = async () => {
-    if (
-      !createFormData.email ||
-      !createFormData.password ||
-      !createFormData.first_name ||
-      !createFormData.last_name
-    ) {
-      showToast({
-        message: "Please fill in all required fields",
-        type: "error",
-        duration: 4000,
-      })
-      return
-    }
+  useEffect(() => {
+    fetchUsers()
+  }, [fetchUsers])
 
+  // Create new user via API
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault()
     setIsSubmitting(true)
+
     try {
-      const supabase = createSupabaseClient()
-
-      console.log("🚀 Starting user creation process...")
-      console.log("📧 Email:", createFormData.email)
-      console.log(
-        "👤 Name:",
-        createFormData.first_name,
-        createFormData.last_name
-      )
-      console.log("🔑 Role:", createFormData.role)
-
-      // Create user in Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: createFormData.email,
-        password: createFormData.password,
-        options: {
-          data: {
-            first_name: createFormData.first_name,
-            last_name: createFormData.last_name,
-            role: createFormData.role,
-          },
+      const response = await fetch("/api/admin/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify(createFormData),
       })
 
-      console.log("📊 Auth result:", { authData: !!authData.user, authError })
+      const data = await response.json()
 
-      if (authError) {
-        console.error("❌ Auth error:", authError)
-        showToast({
-          message: `Error creating user: ${authError.message}`,
-          type: "error",
-          duration: 4000,
-        })
-        setIsSubmitting(false)
-        return
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create user")
       }
 
-      if (authData.user) {
-        console.log("✅ User created in auth, updating profile...")
-        console.log("🆔 User ID:", authData.user.id)
+      await fetchUsers()
 
-        // Update profile with additional information
-        const profileData = {
-          first_name: createFormData.first_name,
-          last_name: createFormData.last_name,
-          role: createFormData.role,
-          phone: createFormData.phone || null,
-          company: createFormData.company || null,
-          address: createFormData.address || null,
-          city: createFormData.city || null,
-          postal_code: createFormData.postal_code || null,
-          country: createFormData.country || null,
-          is_active: true,
-        }
-
-        console.log("📝 Profile update data:", profileData)
-
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .update(profileData)
-          .eq("id", authData.user.id)
-
-        console.log("📊 Profile update result:", { profileError })
-
-        if (profileError) {
-          console.error("❌ Profile error details:", {
-            code: profileError.code,
-            message: profileError.message,
-            details: profileError.details,
-            hint: profileError.hint,
-          })
-          showToast({
-            message: `Database error saving new user: ${profileError.message}`,
-            type: "error",
-            duration: 4000,
-          })
-          setIsSubmitting(false)
-          return
-        }
-
-        showToast({
-          message: "User created successfully",
-          type: "success",
-          duration: 3000,
-        })
-
-        setIsCreateDialogOpen(false)
-        setCreateFormData({
-          email: "",
-          password: "",
-          first_name: "",
-          last_name: "",
-          role: "subscriber",
-          phone: "",
-          company: "",
-          address: "",
-          city: "",
-          postal_code: "",
-          country: "",
-        })
-        fetchUsers() // Refresh the users list
-      }
-    } catch (error) {
-      console.error("Error creating user:", error)
       showToast({
-        message: "Unexpected error creating user",
+        message: `User ${createFormData.first_name} ${createFormData.last_name} created successfully`,
+        type: "success",
+      })
+
+      // Reset form
+      setCreateFormData({
+        email: "",
+        password: "",
+        first_name: "",
+        last_name: "",
+        role: "subscriber",
+        phone: "",
+        company: "",
+        address: "",
+        city: "",
+        postal_code: "",
+        country: "",
+      })
+      setIsCreateDialogOpen(false)
+    } catch (error) {
+      console.error("❌ Error creating user:", error)
+      showToast({
+        message:
+          error instanceof Error ? error.message : "Failed to create user",
         type: "error",
-        duration: 4000,
       })
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  // Update user
-  const handleEditUser = async () => {
-    if (!selectedUser || !editFormData.first_name || !editFormData.last_name) {
-      showToast({
-        message: "Please fill in all required fields",
-        type: "error",
-        duration: 4000,
-      })
-      return
-    }
+  // Update user via API
+  const handleUpdateUser = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedUser) return
 
     setIsSubmitting(true)
     try {
-      const supabase = createSupabaseClient()
+      const response = await fetch(`/api/admin/users?id=${selectedUser.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(editFormData),
+      })
 
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          first_name: editFormData.first_name,
-          last_name: editFormData.last_name,
-          role: editFormData.role,
-          phone: editFormData.phone || null,
-          company: editFormData.company || null,
-          address: editFormData.address || null,
-          city: editFormData.city || null,
-          postal_code: editFormData.postal_code || null,
-          country: editFormData.country || null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", selectedUser.id)
+      const data = await response.json()
 
-      if (error) {
-        showToast({
-          message: `Error updating user: ${error.message}`,
-          type: "error",
-          duration: 4000,
-        })
-        setIsSubmitting(false)
-        return
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update user")
       }
 
+      await fetchUsers()
       showToast({
         message: "User updated successfully",
         type: "success",
-        duration: 3000,
       })
-
       setIsEditDialogOpen(false)
       setSelectedUser(null)
-      setEditFormData({})
-      fetchUsers() // Refresh the users list
     } catch (error) {
       console.error("Error updating user:", error)
       showToast({
-        message: "Unexpected error updating user",
+        message:
+          error instanceof Error ? error.message : "Failed to update user",
         type: "error",
-        duration: 4000,
       })
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  // Delete user
+  // Delete user via API
   const handleDeleteUser = async () => {
     if (!selectedUser) return
 
     setIsSubmitting(true)
     try {
-      const supabase = createSupabaseClient()
+      const response = await fetch(`/api/admin/users?id=${selectedUser.id}`, {
+        method: "DELETE",
+      })
 
-      // First delete from profiles table
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .delete()
-        .eq("id", selectedUser.id)
+      const data = await response.json()
 
-      if (profileError) {
-        showToast({
-          message: `Error deleting user profile: ${profileError.message}`,
-          type: "error",
-          duration: 4000,
-        })
-        setIsSubmitting(false)
-        return
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to delete user")
       }
 
+      await fetchUsers()
       showToast({
         message: "User deleted successfully",
         type: "success",
-        duration: 3000,
       })
-
       setIsDeleteDialogOpen(false)
       setSelectedUser(null)
-      fetchUsers() // Refresh the users list
     } catch (error) {
       console.error("Error deleting user:", error)
       showToast({
-        message: "Unexpected error deleting user",
+        message:
+          error instanceof Error ? error.message : "Failed to delete user",
         type: "error",
-        duration: 4000,
       })
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  // Toggle user active status
-  const toggleUserStatus = async (user: UserProfile) => {
-    try {
-      const supabase = createSupabaseClient()
-
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          is_active: !user.is_active,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", user.id)
-
-      if (error) {
-        showToast({
-          message: `Error updating user status: ${error.message}`,
-          type: "error",
-          duration: 4000,
-        })
-        return
-      }
-
-      showToast({
-        message: `User ${!user.is_active ? "activated" : "suspended"} successfully`,
-        type: "success",
-        duration: 3000,
-      })
-
-      fetchUsers() // Refresh the users list
-    } catch (error) {
-      console.error("Error updating user status:", error)
-      showToast({
-        message: "Unexpected error updating user status",
-        type: "error",
-        duration: 4000,
-      })
-    }
-  }
-
-  // Open edit dialog with user data
   const openEditDialog = (user: UserProfile) => {
     setSelectedUser(user)
     setEditFormData({
       first_name: user.first_name || "",
       last_name: user.last_name || "",
       role: user.role,
+      is_active: user.is_active,
       phone: user.phone || "",
       company: user.company || "",
       address: user.address || "",
@@ -456,532 +306,357 @@ export default function AdminUsersPage() {
     setIsEditDialogOpen(true)
   }
 
+  const openDeleteDialog = (user: UserProfile) => {
+    setSelectedUser(user)
+    setIsDeleteDialogOpen(true)
+  }
+
   // Filter users based on search term
   const filteredUsers = users.filter(
     (user) =>
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (user.first_name &&
-        user.first_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (user.last_name &&
-        user.last_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (user.company &&
-        user.company.toLowerCase().includes(searchTerm.toLowerCase()))
+      (user.first_name?.toLowerCase() || "").includes(
+        searchTerm.toLowerCase()
+      ) ||
+      (user.last_name?.toLowerCase() || "").includes(
+        searchTerm.toLowerCase()
+      ) ||
+      user.role.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  // Get user stats
+  const getRoleIcon = (role: UserRole) => {
+    switch (role) {
+      case "super_admin":
+        return <Crown className="h-4 w-4 text-yellow-500" />
+      case "admin":
+        return <Shield className="h-4 w-4 text-blue-500" />
+      default:
+        return <User className="h-4 w-4 text-gray-500" />
+    }
+  }
+
+  const getRoleBadgeVariant = (role: UserRole) => {
+    switch (role) {
+      case "super_admin":
+        return "default"
+      case "admin":
+        return "secondary"
+      default:
+        return "outline"
+    }
+  }
+
+  // User statistics
   const totalUsers = users.length
   const activeUsers = users.filter((user) => user.is_active).length
-  const suspendedUsers = users.filter((user) => !user.is_active).length
-  const todaysUsers = users.filter((user) => {
-    const today = new Date().toDateString()
-    return new Date(user.created_at).toDateString() === today
-  }).length
-
-  useEffect(() => {
-    fetchUsers()
-  }, [fetchUsers])
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString(
-      locale === "fr" ? "fr-FR" : "en-US",
-      {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      }
-    )
-  }
-
-  const formatTime = (dateString: string) => {
-    const now = new Date()
-    const date = new Date(dateString)
-    const diffInMinutes = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60)
-    )
-
-    if (diffInMinutes < 60) {
-      return `${diffInMinutes}${locale === "fr" ? " min" : " min"}`
-    }
-
-    const diffInHours = Math.floor(diffInMinutes / 60)
-    if (diffInHours < 24) {
-      return `${diffInHours}${locale === "fr" ? "h" : "h"}`
-    }
-
-    const diffInDays = Math.floor(diffInHours / 24)
-    return `${diffInDays}${locale === "fr" ? "j" : "d"}`
-  }
+  const adminUsers = users.filter(
+    (user) => user.role === "admin" || user.role === "super_admin"
+  ).length
+  const subscriberUsers = users.filter(
+    (user) => user.role === "subscriber"
+  ).length
 
   if (loading) {
     return (
-      <div className="flex h-[400px] items-center justify-center">
-        <div className="text-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-violet-600 border-t-transparent"></div>
-          <p className="mt-2 text-sm text-gray-500">{tCommon("loading")}</p>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex min-h-[400px] items-center justify-center">
+          <div className="text-center">
+            <div className="border-primary mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2"></div>
+            <p className="text-muted-foreground">Loading users...</p>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto space-y-8 px-4 py-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-3xl font-bold tracking-tight text-transparent">
-            {t("title")}
-          </h1>
-          <p className="mt-2 text-gray-500 dark:text-gray-400">
-            {locale === "fr"
-              ? "Gérez vos utilisateurs abonnés"
-              : "Manage your subscribed users"}
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("description")}</p>
         </div>
-
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-gradient-to-r from-red-600 to-orange-600 text-white hover:from-red-700 hover:to-orange-700">
-              <Plus className="mr-2 h-4 w-4" />
-              {t("addUser")}
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>{t("addUser")}</DialogTitle>
-              <DialogDescription>
-                {locale === "fr"
-                  ? "Créez un nouvel utilisateur abonné"
-                  : "Create a new subscribed user"}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid grid-cols-2 gap-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="create-first-name">
-                  {locale === "fr" ? "Prénom" : "First Name"} *
-                </Label>
-                <Input
-                  id="create-first-name"
-                  value={createFormData.first_name}
-                  onChange={(e) =>
-                    setCreateFormData({
-                      ...createFormData,
-                      first_name: e.target.value,
-                    })
-                  }
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="create-last-name">
-                  {locale === "fr" ? "Nom" : "Last Name"} *
-                </Label>
-                <Input
-                  id="create-last-name"
-                  value={createFormData.last_name}
-                  onChange={(e) =>
-                    setCreateFormData({
-                      ...createFormData,
-                      last_name: e.target.value,
-                    })
-                  }
-                  required
-                />
-              </div>
-              <div className="col-span-2 space-y-2">
-                <Label htmlFor="create-email">Email *</Label>
-                <Input
-                  id="create-email"
-                  type="email"
-                  value={createFormData.email}
-                  onChange={(e) =>
-                    setCreateFormData({
-                      ...createFormData,
-                      email: e.target.value,
-                    })
-                  }
-                  required
-                />
-              </div>
-              <div className="col-span-2 space-y-2">
-                <Label htmlFor="create-password">
-                  {locale === "fr" ? "Mot de passe" : "Password"} *
-                </Label>
-                <Input
-                  id="create-password"
-                  type="password"
-                  value={createFormData.password}
-                  onChange={(e) =>
-                    setCreateFormData({
-                      ...createFormData,
-                      password: e.target.value,
-                    })
-                  }
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="create-role">
-                  {locale === "fr" ? "Rôle" : "Role"}
-                </Label>
-                <Select
-                  value={createFormData.role}
-                  onValueChange={(value) =>
-                    setCreateFormData({ ...createFormData, role: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="subscriber">
-                      {locale === "fr" ? "Abonné" : "Subscriber"}
-                    </SelectItem>
-                    <SelectItem value="admin">
-                      {locale === "fr" ? "Administrateur" : "Administrator"}
-                    </SelectItem>
-                    <SelectItem value="super_admin">
-                      {locale === "fr" ? "Super Admin" : "Super Admin"}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="create-phone">
-                  {locale === "fr" ? "Téléphone" : "Phone"}
-                </Label>
-                <Input
-                  id="create-phone"
-                  value={createFormData.phone}
-                  onChange={(e) =>
-                    setCreateFormData({
-                      ...createFormData,
-                      phone: e.target.value,
-                    })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="create-company">
-                  {locale === "fr" ? "Entreprise" : "Company"}
-                </Label>
-                <Input
-                  id="create-company"
-                  value={createFormData.company}
-                  onChange={(e) =>
-                    setCreateFormData({
-                      ...createFormData,
-                      company: e.target.value,
-                    })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="create-city">
-                  {locale === "fr" ? "Ville" : "City"}
-                </Label>
-                <Input
-                  id="create-city"
-                  value={createFormData.city}
-                  onChange={(e) =>
-                    setCreateFormData({
-                      ...createFormData,
-                      city: e.target.value,
-                    })
-                  }
-                />
-              </div>
-              <div className="col-span-2 space-y-2">
-                <Label htmlFor="create-address">
-                  {locale === "fr" ? "Adresse" : "Address"}
-                </Label>
-                <Input
-                  id="create-address"
-                  value={createFormData.address}
-                  onChange={(e) =>
-                    setCreateFormData({
-                      ...createFormData,
-                      address: e.target.value,
-                    })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="create-postal-code">
-                  {locale === "fr" ? "Code postal" : "Postal Code"}
-                </Label>
-                <Input
-                  id="create-postal-code"
-                  value={createFormData.postal_code}
-                  onChange={(e) =>
-                    setCreateFormData({
-                      ...createFormData,
-                      postal_code: e.target.value,
-                    })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="create-country">
-                  {locale === "fr" ? "Pays" : "Country"}
-                </Label>
-                <Input
-                  id="create-country"
-                  value={createFormData.country}
-                  onChange={(e) =>
-                    setCreateFormData({
-                      ...createFormData,
-                      country: e.target.value,
-                    })
-                  }
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setIsCreateDialogOpen(false)}
-              >
-                {tCommon("cancel")}
-              </Button>
-              <Button onClick={handleCreateUser} disabled={isSubmitting}>
-                {isSubmitting ? tCommon("loading") : t("addUser")}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
+      {/* Statistics Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t("totalUsers")}
-            </CardTitle>
-            <User className="text-muted-foreground h-4 w-4" />
+            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <Users className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalUsers}</div>
+            <p className="text-muted-foreground text-xs">
+              All registered users
+            </p>
           </CardContent>
         </Card>
-        <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
+
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t("activeUsers")}
-            </CardTitle>
-            <UserCheck className="h-4 w-4 text-green-600" />
+            <CardTitle className="text-sm font-medium">Active Users</CardTitle>
+            <UserCheck className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {activeUsers}
-            </div>
+            <div className="text-2xl font-bold">{activeUsers}</div>
+            <p className="text-muted-foreground text-xs">Currently active</p>
           </CardContent>
         </Card>
-        <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
+
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t("suspended")}
-            </CardTitle>
-            <UserX className="h-4 w-4 text-red-600" />
+            <CardTitle className="text-sm font-medium">Admins</CardTitle>
+            <Shield className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">
-              {suspendedUsers}
-            </div>
+            <div className="text-2xl font-bold">{adminUsers}</div>
+            <p className="text-muted-foreground text-xs">Admin & Super Admin</p>
           </CardContent>
         </Card>
-        <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
+
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t("newToday")}
-            </CardTitle>
-            <Plus className="h-4 w-4 text-blue-600" />
+            <CardTitle className="text-sm font-medium">Subscribers</CardTitle>
+            <User className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">
-              {todaysUsers}
-            </div>
+            <div className="text-2xl font-bold">{subscriberUsers}</div>
+            <p className="text-muted-foreground text-xs">Regular subscribers</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Search and Filter */}
-      <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
+      {/* Search and Create User */}
+      <Card>
         <CardHeader>
-          <CardTitle>
-            {locale === "fr"
-              ? "Derniers utilisateurs inscrits et leur statut"
-              : "Recent registered users and their status"}
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>{t("userList")}</CardTitle>
+              <CardDescription>
+                Manage and monitor all platform users
+              </CardDescription>
+            </div>
+            <Dialog
+              open={isCreateDialogOpen}
+              onOpenChange={setIsCreateDialogOpen}
+            >
+              <DialogTrigger asChild>
+                <Button className="bg-primary hover:bg-primary/90">
+                  <Plus className="mr-2 h-4 w-4" />
+                  {t("createUser")}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl bg-white dark:bg-gray-900">
+                <DialogHeader>
+                  <DialogTitle>{t("createNewUser")}</DialogTitle>
+                  <DialogDescription>
+                    Create a new user account with specified role and details
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleCreateUser} className="space-y-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
+                      <Label htmlFor="email">Email *</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={createFormData.email}
+                        onChange={(e) =>
+                          setCreateFormData({
+                            ...createFormData,
+                            email: e.target.value,
+                          })
+                        }
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="password">Password *</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        value={createFormData.password}
+                        onChange={(e) =>
+                          setCreateFormData({
+                            ...createFormData,
+                            password: e.target.value,
+                          })
+                        }
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
+                      <Label htmlFor="first_name">First Name *</Label>
+                      <Input
+                        id="first_name"
+                        value={createFormData.first_name}
+                        onChange={(e) =>
+                          setCreateFormData({
+                            ...createFormData,
+                            first_name: e.target.value,
+                          })
+                        }
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="last_name">Last Name *</Label>
+                      <Input
+                        id="last_name"
+                        value={createFormData.last_name}
+                        onChange={(e) =>
+                          setCreateFormData({
+                            ...createFormData,
+                            last_name: e.target.value,
+                          })
+                        }
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="role">Role *</Label>
+                    <Select
+                      value={createFormData.role}
+                      onValueChange={(value: UserRole) =>
+                        setCreateFormData({ ...createFormData, role: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="subscriber">Subscriber</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="super_admin">Super Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <DialogFooter>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsCreateDialogOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={isSubmitting}>
+                      {isSubmitting ? "Creating..." : "Create User"}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center space-x-4 pb-4">
-            <div className="relative max-w-sm flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <div className="mb-4 flex items-center space-x-2">
+            <div className="relative flex-1">
+              <Search className="text-muted-foreground absolute left-2 top-2.5 h-4 w-4" />
               <Input
-                placeholder={t("searchUsers")}
+                placeholder="Search users by email, name, or role..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-8"
               />
             </div>
           </div>
 
-          {/* Users Table */}
-          <div className="rounded-lg border border-gray-200/30 dark:border-gray-800/20">
+          <div className="rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>
-                    {locale === "fr" ? "Utilisateur" : "User"}
-                  </TableHead>
-                  <TableHead>{locale === "fr" ? "Plan" : "Plan"}</TableHead>
-                  <TableHead>
-                    {locale === "fr" ? "Dernière activité" : "Last Activity"}
-                  </TableHead>
-                  <TableHead>{locale === "fr" ? "Statut" : "Status"}</TableHead>
-                  <TableHead className="text-right">
-                    {locale === "fr" ? "Actions" : "Actions"}
-                  </TableHead>
+                  <TableHead>User</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredUsers.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>
-                      <div className="flex items-center space-x-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-red-600 to-orange-600 text-white">
-                          {(user.first_name || user.email)
-                            ?.charAt(0)
-                            .toUpperCase()}
-                        </div>
+                {filteredUsers.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="h-24 text-center">
+                      No users found.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredUsers.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell className="font-medium">
                         <div>
-                          <div className="font-medium">
-                            {user.first_name && user.last_name
-                              ? `${user.first_name} ${user.last_name}`
-                              : user.email.split("@")[0]}
+                          <div className="font-semibold">
+                            {user.full_name ||
+                              `${user.first_name || ""} ${user.last_name || ""}`}
                           </div>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-muted-foreground text-sm">
                             {user.email}
                           </div>
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          user.role === "admin" || user.role === "super_admin"
-                            ? "default"
-                            : "secondary"
-                        }
-                      >
-                        {user.role === "subscriber"
-                          ? locale === "fr"
-                            ? "Standard"
-                            : "Standard"
-                          : user.role === "admin"
-                            ? locale === "fr"
-                              ? "Premium"
-                              : "Premium"
-                            : user.role === "super_admin"
-                              ? locale === "fr"
-                                ? "Premium"
-                                : "Premium"
-                              : locale === "fr"
-                                ? "Basic"
-                                : "Basic"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm text-gray-500">
-                        {locale === "fr" ? "Il y a" : ""}{" "}
-                        {formatTime(user.updated_at || user.created_at)}{" "}
-                        {locale === "en" ? "ago" : ""}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={user.is_active ? "default" : "destructive"}
-                      >
-                        {user.is_active
-                          ? locale === "fr"
-                            ? "Active"
-                            : "Active"
-                          : locale === "fr"
-                            ? "Suspendu"
-                            : "Suspended"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>
-                            {locale === "fr" ? "Actions" : "Actions"}
-                          </DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => openEditDialog(user)}
-                          >
-                            <Edit className="mr-2 h-4 w-4" />
-                            {t("editUser")}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => toggleUserStatus(user)}
-                          >
-                            {user.is_active ? (
-                              <>
-                                <UserX className="mr-2 h-4 w-4" />
-                                {t("suspendUser")}
-                              </>
-                            ) : (
-                              <>
-                                <UserCheck className="mr-2 h-4 w-4" />
-                                {t("activateUser")}
-                              </>
-                            )}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Mail className="mr-2 h-4 w-4" />
-                            {locale === "fr" ? "Envoyer email" : "Send email"}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Eye className="mr-2 h-4 w-4" />
-                            {t("viewProfile")}
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="text-red-600 dark:text-red-400"
-                            onClick={() => {
-                              setSelectedUser(user)
-                              setIsDeleteDialogOpen(true)
-                            }}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            {t("deleteUser")}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {filteredUsers.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={5} className="py-8 text-center">
-                      <div className="text-gray-500">
-                        {searchTerm
-                          ? locale === "fr"
-                            ? "Aucun utilisateur trouvé"
-                            : "No users found"
-                          : locale === "fr"
-                            ? "Aucun utilisateur"
-                            : "No users"}
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={getRoleBadgeVariant(user.role)}
+                          className="flex w-fit items-center gap-1"
+                        >
+                          {getRoleIcon(user.role)}
+                          {user.role.replace("_", " ")}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={user.is_active ? "default" : "secondary"}
+                        >
+                          {user.is_active ? (
+                            <>
+                              <UserCheck className="mr-1 h-3 w-3" />
+                              Active
+                            </>
+                          ) : (
+                            <>
+                              <UserX className="mr-1 h-3 w-3" />
+                              Suspended
+                            </>
+                          )}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {new Date(user.created_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => openEditDialog(user)}
+                            >
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit User
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => openDeleteDialog(user)}
+                              className="text-red-600"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete User
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
                 )}
               </TableBody>
             </Table>
@@ -991,209 +666,129 @@ export default function AdminUsersPage() {
 
       {/* Edit User Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl bg-white dark:bg-gray-900">
           <DialogHeader>
-            <DialogTitle>{t("editUser")}</DialogTitle>
+            <DialogTitle>Edit User</DialogTitle>
             <DialogDescription>
-              {locale === "fr"
-                ? "Modifiez les informations de l'utilisateur"
-                : "Update user information"}
+              Update user information and permissions
             </DialogDescription>
           </DialogHeader>
-          <div className="grid grid-cols-2 gap-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-first-name">
-                {locale === "fr" ? "Prénom" : "First Name"} *
-              </Label>
-              <Input
-                id="edit-first-name"
-                value={editFormData.first_name || ""}
-                onChange={(e) =>
-                  setEditFormData({
-                    ...editFormData,
-                    first_name: e.target.value,
-                  })
-                }
-                required
-              />
+          <form onSubmit={handleUpdateUser} className="space-y-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <Label htmlFor="edit_first_name">First Name</Label>
+                <Input
+                  id="edit_first_name"
+                  value={editFormData.first_name || ""}
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      first_name: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit_last_name">Last Name</Label>
+                <Input
+                  id="edit_last_name"
+                  value={editFormData.last_name || ""}
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      last_name: e.target.value,
+                    })
+                  }
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-last-name">
-                {locale === "fr" ? "Nom" : "Last Name"} *
-              </Label>
-              <Input
-                id="edit-last-name"
-                value={editFormData.last_name || ""}
-                onChange={(e) =>
-                  setEditFormData({
-                    ...editFormData,
-                    last_name: e.target.value,
-                  })
-                }
-                required
-              />
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <Label htmlFor="edit_role">Role</Label>
+                <Select
+                  value={editFormData.role}
+                  onValueChange={(value: UserRole) =>
+                    setEditFormData({ ...editFormData, role: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="subscriber">Subscriber</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="super_admin">Super Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="edit_is_active">Status</Label>
+                <Select
+                  value={editFormData.is_active ? "active" : "suspended"}
+                  onValueChange={(value) =>
+                    setEditFormData({
+                      ...editFormData,
+                      is_active: value === "active",
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="suspended">Suspended</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-role">
-                {locale === "fr" ? "Rôle" : "Role"}
-              </Label>
-              <Select
-                value={editFormData.role}
-                onValueChange={(value) =>
-                  setEditFormData({ ...editFormData, role: value })
-                }
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsEditDialogOpen(false)}
               >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="subscriber">
-                    {locale === "fr" ? "Abonné" : "Subscriber"}
-                  </SelectItem>
-                  <SelectItem value="admin">
-                    {locale === "fr" ? "Administrateur" : "Administrator"}
-                  </SelectItem>
-                  <SelectItem value="super_admin">
-                    {locale === "fr" ? "Super Admin" : "Super Admin"}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-phone">
-                {locale === "fr" ? "Téléphone" : "Phone"}
-              </Label>
-              <Input
-                id="edit-phone"
-                value={editFormData.phone || ""}
-                onChange={(e) =>
-                  setEditFormData({ ...editFormData, phone: e.target.value })
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-company">
-                {locale === "fr" ? "Entreprise" : "Company"}
-              </Label>
-              <Input
-                id="edit-company"
-                value={editFormData.company || ""}
-                onChange={(e) =>
-                  setEditFormData({ ...editFormData, company: e.target.value })
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-city">
-                {locale === "fr" ? "Ville" : "City"}
-              </Label>
-              <Input
-                id="edit-city"
-                value={editFormData.city || ""}
-                onChange={(e) =>
-                  setEditFormData({ ...editFormData, city: e.target.value })
-                }
-              />
-            </div>
-            <div className="col-span-2 space-y-2">
-              <Label htmlFor="edit-address">
-                {locale === "fr" ? "Adresse" : "Address"}
-              </Label>
-              <Input
-                id="edit-address"
-                value={editFormData.address || ""}
-                onChange={(e) =>
-                  setEditFormData({ ...editFormData, address: e.target.value })
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-postal-code">
-                {locale === "fr" ? "Code postal" : "Postal Code"}
-              </Label>
-              <Input
-                id="edit-postal-code"
-                value={editFormData.postal_code || ""}
-                onChange={(e) =>
-                  setEditFormData({
-                    ...editFormData,
-                    postal_code: e.target.value,
-                  })
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-country">
-                {locale === "fr" ? "Pays" : "Country"}
-              </Label>
-              <Input
-                id="edit-country"
-                value={editFormData.country || ""}
-                onChange={(e) =>
-                  setEditFormData({ ...editFormData, country: e.target.value })
-                }
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsEditDialogOpen(false)}
-            >
-              {tCommon("cancel")}
-            </Button>
-            <Button onClick={handleEditUser} disabled={isSubmitting}>
-              {isSubmitting ? tCommon("loading") : tCommon("save")}
-            </Button>
-          </DialogFooter>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Updating..." : "Update User"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 
       {/* Delete User Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
+        <DialogContent className="bg-white dark:bg-gray-900">
           <DialogHeader>
-            <DialogTitle>{t("deleteUser")}</DialogTitle>
+            <DialogTitle>Delete User</DialogTitle>
             <DialogDescription>
-              {locale === "fr"
-                ? "Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible."
-                : "Are you sure you want to delete this user? This action cannot be undone."}
+              Are you sure you want to delete this user? This action cannot be
+              undone.
             </DialogDescription>
           </DialogHeader>
-          {selectedUser && (
-            <div className="py-4">
-              <div className="flex items-center space-x-3 rounded-lg border p-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-red-600 to-orange-600 text-white">
-                  {(selectedUser.first_name || selectedUser.email)
-                    ?.charAt(0)
-                    .toUpperCase()}
-                </div>
-                <div>
-                  <div className="font-medium">
-                    {selectedUser.first_name && selectedUser.last_name
-                      ? `${selectedUser.first_name} ${selectedUser.last_name}`
-                      : selectedUser.email.split("@")[0]}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {selectedUser.email}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          <div className="py-4">
+            <p className="text-muted-foreground text-sm">
+              User: <span className="font-semibold">{selectedUser?.email}</span>
+            </p>
+          </div>
           <DialogFooter>
             <Button
+              type="button"
               variant="outline"
               onClick={() => setIsDeleteDialogOpen(false)}
             >
-              {tCommon("cancel")}
+              Cancel
             </Button>
             <Button
               variant="destructive"
               onClick={handleDeleteUser}
               disabled={isSubmitting}
             >
-              {isSubmitting ? tCommon("loading") : t("deleteUser")}
+              {isSubmitting ? "Deleting..." : "Delete User"}
             </Button>
           </DialogFooter>
         </DialogContent>
