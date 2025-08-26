@@ -14,14 +14,6 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -37,29 +29,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { useToast } from "@/components/ui/toast"
 import {
   Users,
   Plus,
   Search,
-  Edit,
-  Trash2,
-  MoreHorizontal,
+  Mail,
+  Settings,
   UserCheck,
   UserX,
   Shield,
   Crown,
   User,
 } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 type UserRole = "subscriber" | "admin" | "super_admin"
 
@@ -341,14 +324,14 @@ export default function AdminUsersPage() {
     }
   }
 
-  const getRoleBadgeVariant = (role: UserRole) => {
+  const getRoleLabel = (role: UserRole) => {
     switch (role) {
       case "super_admin":
-        return "default"
+        return "Super Admin"
       case "admin":
-        return "secondary"
+        return "Admin"
       default:
-        return "outline"
+        return "Subscriber"
     }
   }
 
@@ -358,9 +341,8 @@ export default function AdminUsersPage() {
   const adminUsers = users.filter(
     (user) => user.role === "admin" || user.role === "super_admin"
   ).length
-  const subscriberUsers = users.filter(
-    (user) => user.role === "subscriber"
-  ).length
+  const subscriberUsers = users.filter((user) => user.role === "subscriber")
+    .length
 
   if (loading) {
     return (
@@ -379,192 +361,214 @@ export default function AdminUsersPage() {
     <div className="container mx-auto space-y-8 px-4 py-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
-          <p className="text-muted-foreground">{t("description")}</p>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+            {t("title")}
+          </h1>
+          <p className="text-gray-600 dark:text-gray-300">{t("description")}</p>
         </div>
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+              <Plus className="mr-2 h-4 w-4" />
+              {t("createUser")}
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl bg-white dark:bg-gray-900">
+            <DialogHeader>
+              <DialogTitle className="text-gray-900 dark:text-white">
+                {t("createNewUser")}
+              </DialogTitle>
+              <DialogDescription className="text-gray-600 dark:text-gray-400">
+                Create a new user account with specified role and details
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleCreateUser} className="space-y-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={createFormData.email}
+                    onChange={(e) =>
+                      setCreateFormData({
+                        ...createFormData,
+                        email: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="password">Password *</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={createFormData.password}
+                    onChange={(e) =>
+                      setCreateFormData({
+                        ...createFormData,
+                        password: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <Label htmlFor="first_name">First Name *</Label>
+                  <Input
+                    id="first_name"
+                    value={createFormData.first_name}
+                    onChange={(e) =>
+                      setCreateFormData({
+                        ...createFormData,
+                        first_name: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="last_name">Last Name *</Label>
+                  <Input
+                    id="last_name"
+                    value={createFormData.last_name}
+                    onChange={(e) =>
+                      setCreateFormData({
+                        ...createFormData,
+                        last_name: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="role">Role *</Label>
+                <Select
+                  value={createFormData.role}
+                  onValueChange={(value: UserRole) =>
+                    setCreateFormData({ ...createFormData, role: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="subscriber">Subscriber</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="super_admin">Super Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsCreateDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Creating..." : "Create User"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Statistics Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="text-muted-foreground h-4 w-4" />
+            <CardTitle className="text-sm font-medium text-gray-900 dark:text-white">
+              Total Users
+            </CardTitle>
+            <Users className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalUsers}</div>
-            <p className="text-muted-foreground text-xs">
+            <div className="text-2xl font-bold text-gray-900 dark:text-white">
+              {totalUsers}
+            </div>
+            <p className="text-xs text-gray-600 dark:text-gray-400">
               All registered users
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-            <UserCheck className="h-4 w-4 text-green-500" />
+            <CardTitle className="text-sm font-medium text-gray-900 dark:text-white">
+              Active Users
+            </CardTitle>
+            <UserCheck className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{activeUsers}</div>
-            <p className="text-muted-foreground text-xs">Currently active</p>
+            <div className="text-2xl font-bold text-gray-900 dark:text-white">
+              {activeUsers}
+            </div>
+            <p className="text-xs text-gray-600 dark:text-gray-400">
+              Currently active
+            </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Admins</CardTitle>
-            <Shield className="h-4 w-4 text-blue-500" />
+            <CardTitle className="text-sm font-medium text-gray-900 dark:text-white">
+              Admins
+            </CardTitle>
+            <Shield className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{adminUsers}</div>
-            <p className="text-muted-foreground text-xs">Admin & Super Admin</p>
+            <div className="text-2xl font-bold text-gray-900 dark:text-white">
+              {adminUsers}
+            </div>
+            <p className="text-xs text-gray-600 dark:text-gray-400">
+              Admin & Super Admin
+            </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Subscribers</CardTitle>
-            <User className="h-4 w-4 text-gray-500" />
+            <CardTitle className="text-sm font-medium text-gray-900 dark:text-white">
+              Subscribers
+            </CardTitle>
+            <User className="h-4 w-4 text-gray-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{subscriberUsers}</div>
-            <p className="text-muted-foreground text-xs">Regular subscribers</p>
+            <div className="text-2xl font-bold text-gray-900 dark:text-white">
+              {subscriberUsers}
+            </div>
+            <p className="text-xs text-gray-600 dark:text-gray-400">
+              Regular subscribers
+            </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Search and Create User */}
-      <Card>
+      {/* User List */}
+      <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>{t("userList")}</CardTitle>
-              <CardDescription>
-                Manage and monitor all platform users
-              </CardDescription>
-            </div>
-            <Dialog
-              open={isCreateDialogOpen}
-              onOpenChange={setIsCreateDialogOpen}
-            >
-              <DialogTrigger asChild>
-                <Button className="bg-primary hover:bg-primary/90">
-                  <Plus className="mr-2 h-4 w-4" />
-                  {t("createUser")}
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl bg-white dark:bg-gray-900">
-                <DialogHeader>
-                  <DialogTitle>{t("createNewUser")}</DialogTitle>
-                  <DialogDescription>
-                    Create a new user account with specified role and details
-                  </DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleCreateUser} className="space-y-4">
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div>
-                      <Label htmlFor="email">Email *</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={createFormData.email}
-                        onChange={(e) =>
-                          setCreateFormData({
-                            ...createFormData,
-                            email: e.target.value,
-                          })
-                        }
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="password">Password *</Label>
-                      <Input
-                        id="password"
-                        type="password"
-                        value={createFormData.password}
-                        onChange={(e) =>
-                          setCreateFormData({
-                            ...createFormData,
-                            password: e.target.value,
-                          })
-                        }
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div>
-                      <Label htmlFor="first_name">First Name *</Label>
-                      <Input
-                        id="first_name"
-                        value={createFormData.first_name}
-                        onChange={(e) =>
-                          setCreateFormData({
-                            ...createFormData,
-                            first_name: e.target.value,
-                          })
-                        }
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="last_name">Last Name *</Label>
-                      <Input
-                        id="last_name"
-                        value={createFormData.last_name}
-                        onChange={(e) =>
-                          setCreateFormData({
-                            ...createFormData,
-                            last_name: e.target.value,
-                          })
-                        }
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="role">Role *</Label>
-                    <Select
-                      value={createFormData.role}
-                      onValueChange={(value: UserRole) =>
-                        setCreateFormData({ ...createFormData, role: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="subscriber">Subscriber</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="super_admin">Super Admin</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <DialogFooter>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setIsCreateDialogOpen(false)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button type="submit" disabled={isSubmitting}>
-                      {isSubmitting ? "Creating..." : "Create User"}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
-          </div>
+          <CardTitle className="flex items-center text-gray-900 dark:text-white">
+            <Users className="mr-2 h-5 w-5" />
+            {t("userList")}
+          </CardTitle>
+          <CardDescription className="text-gray-600 dark:text-gray-300">
+            {t("description")}
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 flex items-center space-x-2">
-            <div className="relative flex-1">
-              <Search className="text-muted-foreground absolute left-2 top-2.5 h-4 w-4" />
+          <div className="mb-4">
+            <div className="relative">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Search users by email, name, or role..."
                 value={searchTerm}
@@ -574,98 +578,93 @@ export default function AdminUsersPage() {
             </div>
           </div>
 
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredUsers.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center">
-                      No users found.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredUsers.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">
-                        <div>
-                          <div className="font-semibold">
-                            {user.full_name ||
-                              `${user.first_name || ""} ${user.last_name || ""}`}
-                          </div>
-                          <div className="text-muted-foreground text-sm">
-                            {user.email}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={getRoleBadgeVariant(user.role)}
-                          className="flex w-fit items-center gap-1"
-                        >
-                          {getRoleIcon(user.role)}
-                          {user.role.replace("_", " ")}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={user.is_active ? "default" : "secondary"}
-                        >
-                          {user.is_active ? (
-                            <>
-                              <UserCheck className="mr-1 h-3 w-3" />
-                              Active
-                            </>
-                          ) : (
-                            <>
-                              <UserX className="mr-1 h-3 w-3" />
-                              Suspended
-                            </>
-                          )}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
+          <div className="space-y-4">
+            {filteredUsers.length === 0 ? (
+              <div className="flex h-32 items-center justify-center text-center">
+                <p className="text-gray-500 dark:text-gray-400">
+                  No users found.
+                </p>
+              </div>
+            ) : (
+              filteredUsers.map((user) => (
+                <div
+                  key={user.id}
+                  className="flex items-center justify-between rounded-lg border border-gray-200 p-3 dark:border-gray-700"
+                >
+                  <div className="flex items-center space-x-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-red-600 to-orange-600 text-sm font-medium text-white">
+                      {(user.first_name || user.email).charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        {user.full_name ||
+                          `${user.first_name || ""} ${user.last_name || ""}`}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {user.email}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <div className="text-right">
+                      <div className="flex items-center">
+                        {getRoleIcon(user.role)}
+                        <p className="ml-1 text-sm font-medium text-gray-900 dark:text-white">
+                          {getRoleLabel(user.role)}
+                        </p>
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
                         {new Date(user.created_at).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => openEditDialog(user)}
-                            >
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit User
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => openDeleteDialog(user)}
-                              className="text-red-600"
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete User
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                      </p>
+                    </div>
+                    <div
+                      className={cn(
+                        "rounded-full px-2 py-1 text-xs font-medium",
+                        user.is_active
+                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                          : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                      )}
+                    >
+                      {user.is_active ? "Active" : "Suspended"}
+                    </div>
+                    <div className="flex space-x-1">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 w-8 p-0"
+                      >
+                        <Mail className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 w-8 p-0"
+                        onClick={() => openEditDialog(user)}
+                      >
+                        <Settings className="h-3 w-3" />
+                      </Button>
+                      {user.is_active ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                        >
+                          <UserX className="h-3 w-3" />
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 w-8 p-0 text-green-600 hover:text-green-700"
+                        >
+                          <UserCheck className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </CardContent>
       </Card>
@@ -674,8 +673,10 @@ export default function AdminUsersPage() {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-w-2xl bg-white dark:bg-gray-900">
           <DialogHeader>
-            <DialogTitle>Edit User</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-gray-900 dark:text-white">
+              Edit User
+            </DialogTitle>
+            <DialogDescription className="text-gray-600 dark:text-gray-400">
               Update user information and permissions
             </DialogDescription>
           </DialogHeader>
@@ -770,15 +771,20 @@ export default function AdminUsersPage() {
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent className="bg-white dark:bg-gray-900">
           <DialogHeader>
-            <DialogTitle>Delete User</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-gray-900 dark:text-white">
+              Delete User
+            </DialogTitle>
+            <DialogDescription className="text-gray-600 dark:text-gray-400">
               Are you sure you want to delete this user? This action cannot be
               undone.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            <p className="text-muted-foreground text-sm">
-              User: <span className="font-semibold">{selectedUser?.email}</span>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              User:{" "}
+              <span className="font-semibold text-gray-900 dark:text-white">
+                {selectedUser?.email}
+              </span>
             </p>
           </div>
           <DialogFooter>
