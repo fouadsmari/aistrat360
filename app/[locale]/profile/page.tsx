@@ -132,7 +132,6 @@ export default function ProfilePage() {
 
       // Handle subscription data
       if (subError && subError.code !== "PGRST116") {
-        console.error("Error fetching subscription:", subError)
         setSubscription(null)
       } else {
         setSubscription(subscriptionData)
@@ -141,7 +140,6 @@ export default function ProfilePage() {
       if (error) {
         // If profile doesn't exist, show a basic profile
         // The profile should be created automatically by the database trigger
-        console.error("Profile not found, using default:", error)
         setProfile({
           id: user.id,
           email: user.email || "",
@@ -186,7 +184,6 @@ export default function ProfilePage() {
         })
       }
     } catch (error) {
-      console.error("Error:", error)
       // Show basic profile even if error
       setProfile({
         id: "temp",
@@ -335,7 +332,6 @@ export default function ProfilePage() {
         .single()
 
       if (error) {
-        console.error("Error updating profile:", error)
         showToast({
           message: t("updateError"),
           type: "error",
@@ -381,7 +377,6 @@ export default function ProfilePage() {
         }, 500)
       }
     } catch (error) {
-      console.error("Error:", error)
       showToast({
         message: t("updateError"),
         type: "error",
