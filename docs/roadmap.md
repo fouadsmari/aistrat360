@@ -92,6 +92,14 @@
   - ✅ Sauvegarde préférences langue dans base de données
   - ✅ Tests unitaires mis à jour et fonctionnels
 
+- **[2025-08-26]** Correction boucle infinie page admin users
+  - ✅ Identifié la cause : useCallback avec dépendance showToast qui change à chaque render
+  - ✅ Supprimé useCallback et mis fetchUsers comme fonction normale
+  - ✅ Retiré fetchUsers des dépendances de useEffect pour éviter la boucle
+  - ✅ Supprimé tous les console.log de débogage selon instructions maitre.md
+  - ✅ Vérifié avec npm run check-deploy - 0 erreurs ESLint, build réussi
+  - ✅ Tests unitaires passent tous (21 passed)
+
 ---
 
-_Dernière mise à jour : 2025-08-25_
+_Dernière mise à jour : 2025-08-26_

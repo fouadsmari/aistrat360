@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect } from "react"
 import { useTranslations } from "next-intl"
 import { useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -113,29 +113,23 @@ export default function AdminUsersPage() {
   const [editFormData, setEditFormData] = useState<Partial<UserProfile>>({})
 
   // Fetch all users via API (uses service role)
-  const fetchUsers = useCallback(async () => {
-    console.log("🔄 fetchUsers called")
+  const fetchUsers = async () => {
     setLoading(true)
     try {
-      console.log("📡 Calling /api/admin/users")
       const response = await fetch("/api/admin/users")
-      console.log("📡 Response status:", response.status)
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: Failed to fetch users`)
       }
 
       const data = await response.json()
-      console.log("📡 Response data:", data)
 
       if (data.error) {
         throw new Error(data.error)
       }
 
-      console.log("✅ Setting users:", data.users?.length || 0)
       setUsers(data.users || [])
     } catch (error) {
-      console.error("❌ Error fetching users:", error)
       showToast({
         message:
           error instanceof Error ? error.message : "Failed to fetch users",
@@ -145,11 +139,12 @@ export default function AdminUsersPage() {
     } finally {
       setLoading(false)
     }
-  }, [showToast])
+  }
 
   useEffect(() => {
     fetchUsers()
-  }, [fetchUsers])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Create new user via API
   const handleCreateUser = async (e: React.FormEvent) => {
@@ -194,7 +189,6 @@ export default function AdminUsersPage() {
       })
       setIsCreateDialogOpen(false)
     } catch (error) {
-      console.error("❌ Error creating user:", error)
       showToast({
         message:
           error instanceof Error ? error.message : "Failed to create user",
@@ -234,7 +228,6 @@ export default function AdminUsersPage() {
       setIsEditDialogOpen(false)
       setSelectedUser(null)
     } catch (error) {
-      console.error("Error updating user:", error)
       showToast({
         message:
           error instanceof Error ? error.message : "Failed to update user",
@@ -273,7 +266,6 @@ export default function AdminUsersPage() {
         type: "success",
       })
     } catch (error) {
-      console.error("Error updating user status:", error)
       showToast({
         message:
           error instanceof Error
@@ -310,7 +302,6 @@ export default function AdminUsersPage() {
       setIsDeleteDialogOpen(false)
       setSelectedUser(null)
     } catch (error) {
-      console.error("Error deleting user:", error)
       showToast({
         message:
           error instanceof Error ? error.message : "Failed to delete user",

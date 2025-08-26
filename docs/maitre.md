@@ -15,6 +15,7 @@
 10. ✅ **OBLIGATOIRE** vérifier si une fonctionnalité similaire existe déjà pour ne pas se répéter
 11. ✅ **OBLIGATOIRE** Si tu as mal compris ma demande de me poser des questions pour mieux comprendre
 12. ❌ **INTERDIT ABSOLU** de faire quelque chose qui vas à l'encontre des recommandations et ou le fonctionnement de l'app et me revenir avec des explications.
+13. ✅ **OBLIGATOIRE** aprés avoir fini tu dois faire un check deploy et et faire un push vers github
 
 ✅ **OBLIGATOIRE** : Pendant que tu corrige un bug ou développe une nouvelle fonctionnalité
 
@@ -34,6 +35,7 @@
 14. il faut faire un check deploy aprés avoir terminé ton implémentation ou correction de bug, si erreurs corrige les
 15. **VÉRIFIER obligatoire** aprés avoir fini il faut s'assurer si une erreur dans la console log et ou des bug nextjs s'affiche dans le navigateur si oui ne reviens pas vers moi sans les corriger.
 16. pour toute modification et gestion de base tu as le cli tu pourra tout faire toi même
+17. ✅ **OBLIGATOIRE** aprés avoir fini tu dois faire un check deploy et et faire un push vers github
 
 ## 🗄️ MÉTHODE SUPABASE POUR APPLIQUER LES MIGRATIONS
 
