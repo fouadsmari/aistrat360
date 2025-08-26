@@ -63,6 +63,7 @@ interface UserProfile {
   country?: string
   created_at: string
   updated_at?: string
+  password?: string // For editing only, not stored in profile
 }
 
 interface CreateUserData {
@@ -144,11 +145,11 @@ export default function AdminUsersPage() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [showToast])
 
   useEffect(() => {
     fetchUsers()
-  }, [])
+  }, [fetchUsers])
 
   // Create new user via API
   const handleCreateUser = async (e: React.FormEvent) => {
@@ -275,7 +276,9 @@ export default function AdminUsersPage() {
       console.error("Error updating user status:", error)
       showToast({
         message:
-          error instanceof Error ? error.message : "Failed to update user status",
+          error instanceof Error
+            ? error.message
+            : "Failed to update user status",
         type: "error",
       })
     } finally {
@@ -382,8 +385,9 @@ export default function AdminUsersPage() {
   const adminUsers = users.filter(
     (user) => user.role === "admin" || user.role === "super_admin"
   ).length
-  const subscriberUsers = users.filter((user) => user.role === "subscriber")
-    .length
+  const subscriberUsers = users.filter(
+    (user) => user.role === "subscriber"
+  ).length
 
   if (loading) {
     return (
@@ -405,7 +409,9 @@ export default function AdminUsersPage() {
           <h1 className="bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-3xl font-bold tracking-tight text-transparent">
             {t("title")}
           </h1>
-          <p className="mt-2 text-gray-500 dark:text-gray-400">{t("description")}</p>
+          <p className="mt-2 text-gray-500 dark:text-gray-400">
+            {t("description")}
+          </p>
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
@@ -531,8 +537,12 @@ export default function AdminUsersPage() {
             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">
               Total Users
             </CardTitle>
-            <div className={cn("rounded-lg p-2", "bg-blue-50 dark:bg-blue-950/30")}>
-              <Users className={cn("h-4 w-4", "text-blue-600 dark:text-blue-400")} />
+            <div
+              className={cn("rounded-lg p-2", "bg-blue-50 dark:bg-blue-950/30")}
+            >
+              <Users
+                className={cn("h-4 w-4", "text-blue-600 dark:text-blue-400")}
+              />
             </div>
           </CardHeader>
           <CardContent>
@@ -553,8 +563,15 @@ export default function AdminUsersPage() {
             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">
               Active Users
             </CardTitle>
-            <div className={cn("rounded-lg p-2", "bg-green-50 dark:bg-green-950/30")}>
-              <UserCheck className={cn("h-4 w-4", "text-green-600 dark:text-green-400")} />
+            <div
+              className={cn(
+                "rounded-lg p-2",
+                "bg-green-50 dark:bg-green-950/30"
+              )}
+            >
+              <UserCheck
+                className={cn("h-4 w-4", "text-green-600 dark:text-green-400")}
+              />
             </div>
           </CardHeader>
           <CardContent>
@@ -575,8 +592,18 @@ export default function AdminUsersPage() {
             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">
               Admins
             </CardTitle>
-            <div className={cn("rounded-lg p-2", "bg-violet-50 dark:bg-violet-950/30")}>
-              <Shield className={cn("h-4 w-4", "text-violet-600 dark:text-violet-400")} />
+            <div
+              className={cn(
+                "rounded-lg p-2",
+                "bg-violet-50 dark:bg-violet-950/30"
+              )}
+            >
+              <Shield
+                className={cn(
+                  "h-4 w-4",
+                  "text-violet-600 dark:text-violet-400"
+                )}
+              />
             </div>
           </CardHeader>
           <CardContent>
@@ -597,8 +624,18 @@ export default function AdminUsersPage() {
             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">
               Subscribers
             </CardTitle>
-            <div className={cn("rounded-lg p-2", "bg-orange-50 dark:bg-orange-950/30")}>
-              <User className={cn("h-4 w-4", "text-orange-600 dark:text-orange-400")} />
+            <div
+              className={cn(
+                "rounded-lg p-2",
+                "bg-orange-50 dark:bg-orange-950/30"
+              )}
+            >
+              <User
+                className={cn(
+                  "h-4 w-4",
+                  "text-orange-600 dark:text-orange-400"
+                )}
+              />
             </div>
           </CardHeader>
           <CardContent>
@@ -781,7 +818,7 @@ export default function AdminUsersPage() {
                 />
               </div>
             </div>
-            
+
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <Label htmlFor="edit_first_name">First Name</Label>
