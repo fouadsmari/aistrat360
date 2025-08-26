@@ -41,6 +41,7 @@ import {
   Shield,
   Crown,
   User,
+  Trash2,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -243,6 +244,45 @@ export default function AdminUsersPage() {
     }
   }
 
+  // Toggle user status (activate/deactivate)
+  const handleToggleUserStatus = async (user: UserProfile) => {
+    setIsSubmitting(true)
+    try {
+      const newStatus = !user.is_active
+      const response = await fetch(`/api/admin/users?id=${user.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...user,
+          is_active: newStatus,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update user status")
+      }
+
+      await fetchUsers()
+      showToast({
+        message: `User ${newStatus ? "activated" : "suspended"} successfully`,
+        type: "success",
+      })
+    } catch (error) {
+      console.error("Error updating user status:", error)
+      showToast({
+        message:
+          error instanceof Error ? error.message : "Failed to update user status",
+        type: "error",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   // Delete user via API
   const handleDeleteUser = async () => {
     if (!selectedUser) return
@@ -281,6 +321,7 @@ export default function AdminUsersPage() {
   const openEditDialog = (user: UserProfile) => {
     setSelectedUser(user)
     setEditFormData({
+      email: user.email,
       first_name: user.first_name || "",
       last_name: user.last_name || "",
       role: user.role,
@@ -667,6 +708,7 @@ export default function AdminUsersPage() {
                           size="sm"
                           variant="outline"
                           className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                          onClick={() => handleToggleUserStatus(user)}
                         >
                           <UserX className="h-3 w-3" />
                         </Button>
@@ -675,10 +717,19 @@ export default function AdminUsersPage() {
                           size="sm"
                           variant="outline"
                           className="h-8 w-8 p-0 text-green-600 hover:text-green-700"
+                          onClick={() => handleToggleUserStatus(user)}
                         >
                           <UserCheck className="h-3 w-3" />
                         </Button>
                       )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                        onClick={() => openDeleteDialog(user)}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -702,6 +753,37 @@ export default function AdminUsersPage() {
           <form onSubmit={handleUpdateUser} className="space-y-4">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
+                <Label htmlFor="edit_email">Email</Label>
+                <Input
+                  id="edit_email"
+                  type="email"
+                  value={editFormData.email || ""}
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      email: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit_password">New Password (optional)</Label>
+                <Input
+                  id="edit_password"
+                  type="password"
+                  placeholder="Leave empty to keep current password"
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      password: e.target.value,
+                    })
+                  }
+                />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
                 <Label htmlFor="edit_first_name">First Name</Label>
                 <Input
                   id="edit_first_name"
@@ -723,6 +805,91 @@ export default function AdminUsersPage() {
                     setEditFormData({
                       ...editFormData,
                       last_name: e.target.value,
+                    })
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <Label htmlFor="edit_phone">Phone</Label>
+                <Input
+                  id="edit_phone"
+                  value={editFormData.phone || ""}
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      phone: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit_company">Company</Label>
+                <Input
+                  id="edit_company"
+                  value={editFormData.company || ""}
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      company: e.target.value,
+                    })
+                  }
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="edit_address">Address</Label>
+              <Input
+                id="edit_address"
+                value={editFormData.address || ""}
+                onChange={(e) =>
+                  setEditFormData({
+                    ...editFormData,
+                    address: e.target.value,
+                  })
+                }
+              />
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div>
+                <Label htmlFor="edit_city">City</Label>
+                <Input
+                  id="edit_city"
+                  value={editFormData.city || ""}
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      city: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit_postal_code">Postal Code</Label>
+                <Input
+                  id="edit_postal_code"
+                  value={editFormData.postal_code || ""}
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      postal_code: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit_country">Country</Label>
+                <Input
+                  id="edit_country"
+                  value={editFormData.country || ""}
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      country: e.target.value,
                     })
                   }
                 />

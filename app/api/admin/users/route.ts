@@ -92,11 +92,14 @@ export async function PUT(request: Request) {
     const { error: profileError } = await supabaseAdmin
       .from("profiles")
       .update({
+        email: userData.email,
         first_name: userData.first_name,
         last_name: userData.last_name,
         full_name: `${userData.first_name} ${userData.last_name}`,
         role: userData.role,
         is_active: userData.is_active,
+        phone: userData.phone,
+        company: userData.company,
         address: userData.address,
         city: userData.city,
         postal_code: userData.postal_code,
@@ -108,25 +111,36 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: profileError.message }, { status: 500 })
     }
 
-    // Met à jour les métadonnées auth si besoin
+    // Prepare auth update data
+    const authUpdateData: any = {
+      user_metadata: {
+        first_name: userData.first_name,
+        last_name: userData.last_name,
+        full_name: `${userData.first_name} ${userData.last_name}`,
+        role: userData.role,
+      },
+      app_metadata: {
+        role: userData.role,
+      },
+    }
+
+    // Add email and password if provided
+    if (userData.email) {
+      authUpdateData.email = userData.email
+    }
+    if (userData.password && userData.password.trim() !== "") {
+      authUpdateData.password = userData.password
+    }
+
+    // Met à jour les métadonnées auth
     const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(
       userId,
-      {
-        user_metadata: {
-          first_name: userData.first_name,
-          last_name: userData.last_name,
-          full_name: `${userData.first_name} ${userData.last_name}`,
-          role: userData.role,
-        },
-        app_metadata: {
-          role: userData.role,
-        },
-      }
+      authUpdateData
     )
 
     if (authError) {
-      console.error("Auth metadata update error:", authError)
-      // Continue quand même car le profil est mis à jour
+      console.error("Auth update error:", authError)
+      return NextResponse.json({ error: authError.message }, { status: 500 })
     }
 
     return NextResponse.json({ message: "User updated successfully" })
