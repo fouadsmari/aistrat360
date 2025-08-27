@@ -6,15 +6,17 @@
 
 ## ✅ Terminé
 
-- **[2025-08-27]** Correction bugs modification plans d'abonnement via admin panel
-  - ✅ Identifié le problème : incohérence dans l'enum subscription_plan (professional vs pro)
+- **[2025-08-27]** Correction complète bugs modification et affichage plans d'abonnement
+  - ✅ **BUG CRITIQUE RÉSOLU** : Les plans d'abonnement s'affichaient toujours "Gratuit" malgré les modifications réussies
+  - ✅ **Cause racine identifiée** : API traitait `profile.subscriptions` comme tableau alors que Supabase retourne un objet
+  - ✅ **Correction** : `profile.subscriptions[0]` → `profile.subscriptions` dans l'API GET
   - ✅ Créé migration 024_fix_subscription_plan_enum.sql pour corriger l'enum
   - ✅ Créé migration 025_simple_fix_subscription_plans.sql pour nettoyer les données
   - ✅ Corrigé la logique de mise à jour d'abonnement dans l'API (upsert -> update/insert conditionnel)
   - ✅ Amélioration de la gestion d'erreurs pour les modifications d'abonnement
-  - ✅ Ajout de logs détaillés pour déboguer puis supprimés après correction
-  - ✅ Tests fonctionnels de modification des plans : free, starter, pro, advanced
-  - ✅ Build et tests réussis sans erreurs
+  - ✅ Ajout de logs détaillés pour déboguer puis supprimés après correction selon maitre.md
+  - ✅ **RÉSULTAT** : Modification ET affichage des plans fonctionne parfaitement (free, starter, pro, advanced)
+  - ✅ Build et tests réussis sans erreurs (21/21)
 
 - **[2025-08-24]** Création de l'application SaaS avec NextJS et shadcn
   - ✅ Initialisation environnement NextJS avec TypeScript
