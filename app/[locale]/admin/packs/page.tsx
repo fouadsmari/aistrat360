@@ -83,6 +83,8 @@ type PackFormData = z.infer<typeof packFormSchema>
 
 export default function PacksManagementPage() {
   const t = useTranslations("admin")
+  const tPacks = useTranslations("admin.packs")
+  const tCommon = useTranslations("common")
   const [packs, setPacks] = useState<SubscriptionPack[]>([])
   const [loading, setLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -123,7 +125,7 @@ export default function PacksManagementPage() {
       }
     } catch (error) {
       console.error("Error fetching packs:", error)
-      toast.error("Failed to load packs")
+      toast.error(tPacks('messages.loadError'))
     } finally {
       setLoading(false)
     }
@@ -153,8 +155,8 @@ export default function PacksManagementPage() {
       if (response.ok) {
         toast.success(
           editingPack
-            ? "Pack updated successfully"
-            : "Pack created successfully"
+            ? tPacks('messages.updateSuccess')
+            : tPacks('messages.createSuccess')
         )
         setIsDialogOpen(false)
         setEditingPack(null)
@@ -165,7 +167,7 @@ export default function PacksManagementPage() {
       }
     } catch (error) {
       console.error("Error saving pack:", error)
-      toast.error("Failed to save pack")
+      toast.error(editingPack ? tPacks('messages.updateError') : tPacks('messages.createError'))
     }
   }
 
@@ -190,7 +192,7 @@ export default function PacksManagementPage() {
   const handleDelete = async (pack: SubscriptionPack) => {
     if (
       !confirm(
-        `Are you sure you want to delete the ${pack.display_name_en} pack?`
+        tPacks('messages.deleteConfirm').replace('{name}', pack.display_name_en)
       )
     ) {
       return
@@ -204,57 +206,62 @@ export default function PacksManagementPage() {
       const result = await response.json()
 
       if (response.ok) {
-        toast.success("Pack deleted successfully")
+        toast.success(tPacks('messages.deleteSuccess'))
         fetchPacks()
       } else {
         throw new Error(result.error || "Failed to delete pack")
       }
     } catch (error) {
       console.error("Error deleting pack:", error)
-      toast.error("Failed to delete pack")
+      toast.error(tPacks('messages.deleteError'))
     }
   }
 
   const formatQuotaValue = (value: number, unit?: string) => {
-    if (value === -1) return "Unlimited"
+    if (value === -1) return tPacks('unlimited')
     return `${value}${unit ? ` ${unit}` : ""}`
   }
 
   const formatPrice = (price: number) => {
-    return price === 0 ? "Free" : `$${price.toFixed(2)}`
+    return price === 0 ? tPacks('free') : `€${price.toFixed(2)}`
   }
 
   return (
-    <div className="container mx-auto space-y-6 p-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Subscription Packs Management
+          <h1 className="bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-3xl font-bold tracking-tight text-transparent">
+            {tPacks('title')}
           </h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
-            Manage pricing tiers, features, and quotas for your subscription
-            packs
+          <p className="mt-2 text-gray-500 dark:text-gray-400">
+            {tPacks('subtitle')} - Configuration des tarifs et quotas
           </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button
-              onClick={() => {
-                setEditingPack(null)
-                form.reset()
-              }}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Add Pack
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
+        <div className="flex gap-2">
+          <Button variant="outline" className="border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800">
+            <Settings className="mr-2 h-4 w-4" />
+            {tPacks('synchronize')}
+          </Button>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button
+                onClick={() => {
+                  setEditingPack(null)
+                  form.reset()
+                }}
+                className="bg-gradient-to-r from-red-600 to-orange-600 text-white hover:from-red-700 hover:to-orange-700"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                {tPacks('createPack')}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto border-gray-200/30 bg-white/95 dark:border-gray-800/20 dark:bg-gray-900/95">
             <DialogHeader>
-              <DialogTitle>
-                {editingPack ? "Edit Pack" : "Create New Pack"}
+              <DialogTitle className="text-gray-900 dark:text-white">
+                {editingPack ? tPacks('editPack') : tPacks('createPack')}
               </DialogTitle>
-              <DialogDescription>
-                Configure the pack details, pricing, and quotas
+              <DialogDescription className="text-gray-600 dark:text-gray-300">
+                {tPacks('subtitle')}
               </DialogDescription>
             </DialogHeader>
 
@@ -264,10 +271,16 @@ export default function PacksManagementPage() {
                 className="space-y-6"
               >
                 <Tabs defaultValue="basic" className="w-full">
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="basic">Basic Info</TabsTrigger>
-                    <TabsTrigger value="pricing">Pricing</TabsTrigger>
-                    <TabsTrigger value="quotas">Quotas</TabsTrigger>
+                  <TabsList className="grid w-full grid-cols-3 bg-gray-100 dark:bg-gray-800">
+                    <TabsTrigger value="basic" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900">
+                      {tPacks('basicInfo')}
+                    </TabsTrigger>
+                    <TabsTrigger value="pricing" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900">
+                      {tPacks('pricing')}
+                    </TabsTrigger>
+                    <TabsTrigger value="quotas" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900">
+                      {tPacks('quotas')}
+                    </TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="basic" className="space-y-4">
@@ -277,11 +290,11 @@ export default function PacksManagementPage() {
                         name="name"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Pack Name</FormLabel>
+                            <FormLabel className="text-gray-700 dark:text-gray-300">{tPacks('packName')}</FormLabel>
                             <FormControl>
                               <select
                                 {...field}
-                                className="w-full rounded-md border border-gray-300 px-3 py-2"
+                                className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                               >
                                 <option value="free">Free</option>
                                 <option value="starter">Starter</option>
@@ -299,7 +312,7 @@ export default function PacksManagementPage() {
                         name="sort_order"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Sort Order</FormLabel>
+                            <FormLabel className="text-gray-700 dark:text-gray-300">{tPacks('sortOrder')}</FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
@@ -307,6 +320,7 @@ export default function PacksManagementPage() {
                                 onChange={(e) =>
                                   field.onChange(Number(e.target.value))
                                 }
+                                className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
                               />
                             </FormControl>
                             <FormMessage />
@@ -321,9 +335,9 @@ export default function PacksManagementPage() {
                         name="display_name_en"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Display Name (English)</FormLabel>
+                            <FormLabel className="text-gray-700 dark:text-gray-300">{tPacks('displayNameEn')}</FormLabel>
                             <FormControl>
-                              <Input {...field} />
+                              <Input {...field} className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -335,9 +349,9 @@ export default function PacksManagementPage() {
                         name="display_name_fr"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Display Name (French)</FormLabel>
+                            <FormLabel className="text-gray-700 dark:text-gray-300">{tPacks('displayNameFr')}</FormLabel>
                             <FormControl>
-                              <Input {...field} />
+                              <Input {...field} className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -351,9 +365,9 @@ export default function PacksManagementPage() {
                         name="description_en"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Description (English)</FormLabel>
+                            <FormLabel className="text-gray-700 dark:text-gray-300">{tPacks('descriptionEn')}</FormLabel>
                             <FormControl>
-                              <Textarea {...field} />
+                              <Textarea {...field} className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -365,9 +379,9 @@ export default function PacksManagementPage() {
                         name="description_fr"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Description (French)</FormLabel>
+                            <FormLabel className="text-gray-700 dark:text-gray-300">{tPacks('descriptionFr')}</FormLabel>
                             <FormControl>
-                              <Textarea {...field} />
+                              <Textarea {...field} className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -387,7 +401,7 @@ export default function PacksManagementPage() {
                                 onCheckedChange={field.onChange}
                               />
                             </FormControl>
-                            <FormLabel>Enabled</FormLabel>
+                            <FormLabel className="text-gray-700 dark:text-gray-300">{tPacks('enabled')}</FormLabel>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -404,7 +418,7 @@ export default function PacksManagementPage() {
                                 onCheckedChange={field.onChange}
                               />
                             </FormControl>
-                            <FormLabel>Popular</FormLabel>
+                            <FormLabel className="text-gray-700 dark:text-gray-300">{tPacks('popular')}</FormLabel>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -419,7 +433,7 @@ export default function PacksManagementPage() {
                         name="price_monthly"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Monthly Price ($)</FormLabel>
+                            <FormLabel className="text-gray-700 dark:text-gray-300">{tPacks('monthlyPrice')}</FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
@@ -428,6 +442,7 @@ export default function PacksManagementPage() {
                                 onChange={(e) =>
                                   field.onChange(Number(e.target.value))
                                 }
+                                className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
                               />
                             </FormControl>
                             <FormMessage />
@@ -440,7 +455,7 @@ export default function PacksManagementPage() {
                         name="price_yearly"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Yearly Price ($)</FormLabel>
+                            <FormLabel className="text-gray-700 dark:text-gray-300">{tPacks('yearlyPrice')}</FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
@@ -449,6 +464,7 @@ export default function PacksManagementPage() {
                                 onChange={(e) =>
                                   field.onChange(Number(e.target.value))
                                 }
+                                className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
                               />
                             </FormControl>
                             <FormMessage />
@@ -465,8 +481,8 @@ export default function PacksManagementPage() {
                         name="quotas.projects"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>
-                              Max Projects (-1 for unlimited)
+                            <FormLabel className="text-gray-700 dark:text-gray-300">
+                              {tPacks('maxProjects')}
                             </FormLabel>
                             <FormControl>
                               <Input
@@ -475,6 +491,7 @@ export default function PacksManagementPage() {
                                 onChange={(e) =>
                                   field.onChange(Number(e.target.value))
                                 }
+                                className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
                               />
                             </FormControl>
                             <FormMessage />
@@ -487,8 +504,8 @@ export default function PacksManagementPage() {
                         name="quotas.storage_gb"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>
-                              Storage (GB) (-1 for unlimited)
+                            <FormLabel className="text-gray-700 dark:text-gray-300">
+                              {tPacks('storageGb')}
                             </FormLabel>
                             <FormControl>
                               <Input
@@ -497,6 +514,7 @@ export default function PacksManagementPage() {
                                 onChange={(e) =>
                                   field.onChange(Number(e.target.value))
                                 }
+                                className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
                               />
                             </FormControl>
                             <FormMessage />
@@ -509,8 +527,8 @@ export default function PacksManagementPage() {
                         name="quotas.api_calls_per_month"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>
-                              API Calls/Month (-1 for unlimited)
+                            <FormLabel className="text-gray-700 dark:text-gray-300">
+                              {tPacks('apiCalls')}
                             </FormLabel>
                             <FormControl>
                               <Input
@@ -519,6 +537,7 @@ export default function PacksManagementPage() {
                                 onChange={(e) =>
                                   field.onChange(Number(e.target.value))
                                 }
+                                className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
                               />
                             </FormControl>
                             <FormMessage />
@@ -531,8 +550,8 @@ export default function PacksManagementPage() {
                         name="quotas.team_members"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>
-                              Team Members (-1 for unlimited)
+                            <FormLabel className="text-gray-700 dark:text-gray-300">
+                              {tPacks('teamMembers')}
                             </FormLabel>
                             <FormControl>
                               <Input
@@ -541,6 +560,7 @@ export default function PacksManagementPage() {
                                 onChange={(e) =>
                                   field.onChange(Number(e.target.value))
                                 }
+                                className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
                               />
                             </FormControl>
                             <FormMessage />
@@ -560,27 +580,32 @@ export default function PacksManagementPage() {
                       setEditingPack(null)
                       form.reset()
                     }}
+                    className="border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
                   >
-                    Cancel
+                    {tPacks('actions.cancel')}
                   </Button>
-                  <Button type="submit">
-                    {editingPack ? "Update Pack" : "Create Pack"}
+                  <Button 
+                    type="submit"
+                    className="bg-gradient-to-r from-red-600 to-orange-600 text-white hover:from-red-700 hover:to-orange-700"
+                  >
+                    {editingPack ? tPacks('actions.update') : tPacks('actions.create')}
                   </Button>
                 </DialogFooter>
               </form>
             </Form>
           </DialogContent>
-        </Dialog>
+          </Dialog>
+        </div>
       </div>
 
-      <Card>
+      <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
             <Package className="h-5 w-5" />
-            Subscription Packs
+            {tPacks('title')}
           </CardTitle>
-          <CardDescription>
-            Manage your subscription tiers and pricing
+          <CardDescription className="text-gray-600 dark:text-gray-300">
+            {tPacks('subtitle')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -592,11 +617,11 @@ export default function PacksManagementPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Pack</TableHead>
-                  <TableHead>Pricing</TableHead>
-                  <TableHead>Quotas</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead className="text-gray-700 dark:text-gray-300">Pack</TableHead>
+                  <TableHead className="text-gray-700 dark:text-gray-300">Tarification</TableHead>
+                  <TableHead className="text-gray-700 dark:text-gray-300">Quotas</TableHead>
+                  <TableHead className="text-gray-700 dark:text-gray-300">Statut</TableHead>
+                  <TableHead className="text-gray-700 dark:text-gray-300">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -605,13 +630,13 @@ export default function PacksManagementPage() {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <div>
-                          <div className="flex items-center gap-2 font-medium">
+                          <div className="flex items-center gap-2 font-medium text-gray-900 dark:text-white">
                             {pack.display_name_en}
                             {pack.is_popular && (
-                              <Badge variant="secondary">Popular</Badge>
+                              <Badge className="bg-gradient-to-r from-purple-600 to-violet-600 text-white">Populaire</Badge>
                             )}
                           </div>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-sm text-gray-500 dark:text-gray-400">
                             {pack.description_en}
                           </div>
                         </div>
@@ -619,42 +644,45 @@ export default function PacksManagementPage() {
                     </TableCell>
                     <TableCell>
                       <div className="space-y-1">
-                        <div>{formatPrice(pack.price_monthly)}/month</div>
-                        <div className="text-sm text-gray-500">
-                          {formatPrice(pack.price_yearly)}/year
+                        <div className="text-gray-900 dark:text-white">{formatPrice(pack.price_monthly)}/mois</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          {formatPrice(pack.price_yearly)}/an
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="space-y-1 text-sm">
-                        <div>
-                          Projects: {formatQuotaValue(pack.quotas.projects)}
+                        <div className="text-gray-700 dark:text-gray-300">
+                          Projets: <span className="font-medium text-gray-900 dark:text-white">{formatQuotaValue(pack.quotas.projects)}</span>
                         </div>
-                        <div>
-                          Storage:{" "}
-                          {formatQuotaValue(pack.quotas.storage_gb, "GB")}
+                        <div className="text-gray-700 dark:text-gray-300">
+                          Stockage:{" "}
+                          <span className="font-medium text-gray-900 dark:text-white">{formatQuotaValue(pack.quotas.storage_gb, "GB")}</span>
                         </div>
-                        <div>
+                        <div className="text-gray-700 dark:text-gray-300">
                           API:{" "}
-                          {formatQuotaValue(
+                          <span className="font-medium text-gray-900 dark:text-white">{formatQuotaValue(
                             pack.quotas.api_calls_per_month,
                             "calls/mo"
-                          )}
+                          )}</span>
                         </div>
-                        <div>
-                          Team:{" "}
-                          {formatQuotaValue(
+                        <div className="text-gray-700 dark:text-gray-300">
+                          Équipe:{" "}
+                          <span className="font-medium text-gray-900 dark:text-white">{formatQuotaValue(
                             pack.quotas.team_members,
-                            "members"
-                          )}
+                            "membres"
+                          )}</span>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <Badge
-                        variant={pack.is_enabled ? "default" : "secondary"}
+                        className={pack.is_enabled 
+                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" 
+                          : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400"
+                        }
                       >
-                        {pack.is_enabled ? "Enabled" : "Disabled"}
+                        {pack.is_enabled ? tPacks('status.enabled') : tPacks('status.disabled')}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -663,6 +691,7 @@ export default function PacksManagementPage() {
                           variant="outline"
                           size="sm"
                           onClick={() => handleEdit(pack)}
+                          className="border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -670,6 +699,7 @@ export default function PacksManagementPage() {
                           variant="outline"
                           size="sm"
                           onClick={() => handleDelete(pack)}
+                          className="border-gray-200 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-gray-700 dark:text-red-400 dark:hover:bg-red-950/20"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
