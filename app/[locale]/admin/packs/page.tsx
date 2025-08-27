@@ -42,6 +42,7 @@ import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useForm } from "react-hook-form"
+import { useCallback } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import {
@@ -111,7 +112,7 @@ export default function PacksManagementPage() {
     },
   })
 
-  const fetchPacks = async () => {
+  const fetchPacks = useCallback(async () => {
     try {
       setLoading(true)
       const response = await fetch("/api/admin/packs")
@@ -123,23 +124,22 @@ export default function PacksManagementPage() {
         throw new Error(result.error || "Failed to fetch packs")
       }
     } catch (error) {
-      console.error("Error fetching packs:", error)
       toast.error(t("messages.loadError"))
     } finally {
       setLoading(false)
     }
-  }
+  }, [t])
 
   useEffect(() => {
     fetchPacks()
-  }, [])
+  }, [fetchPacks])
 
   const onSubmit = async (data: PackFormData) => {
     try {
       const url = editingPack
         ? `/api/admin/packs/${editingPack.id}`
         : "/api/admin/packs"
-      const method = editingPack ? "PUT" : "POST"
+      const method = "POST"
 
       const response = await fetch(url, {
         method,
@@ -165,7 +165,6 @@ export default function PacksManagementPage() {
         throw new Error(result.error || "Operation failed")
       }
     } catch (error) {
-      console.error("Error saving pack:", error)
       toast.error(
         editingPack ? t("messages.updateError") : t("messages.createError")
       )
@@ -213,7 +212,6 @@ export default function PacksManagementPage() {
         throw new Error(result.error || "Failed to delete pack")
       }
     } catch (error) {
-      console.error("Error deleting pack:", error)
       toast.error(t("messages.deleteError"))
     }
   }

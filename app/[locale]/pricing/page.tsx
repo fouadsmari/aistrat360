@@ -151,7 +151,6 @@ export default function PricingPage() {
         // 3. Handle the webhook to update subscription
       }
     } catch (error) {
-      console.error("Error selecting pack:", error)
       showToast({
         message: tCommon("error"),
         type: "error",

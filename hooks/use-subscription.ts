@@ -60,7 +60,6 @@ export function useSubscription(): UseSubscriptionReturn {
       setSubscription(subscription)
       setPack(pack)
     } catch (err) {
-      console.error("Error fetching subscription data:", err)
       setError(
         err instanceof Error ? err.message : "Failed to fetch subscription"
       )

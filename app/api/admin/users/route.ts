@@ -3,6 +3,17 @@ import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { createServerClient } from "@supabase/ssr"
 
+// Generate secure random password
+function generateSecurePassword(): string {
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*"
+  let password = ""
+  for (let i = 0; i < 16; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length))
+  }
+  return password
+}
+
 // Service role client pour bypasser RLS
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -144,7 +155,7 @@ async function createUser(userData: any) {
     const { data: authUser, error: authError } =
       await supabaseAdmin.auth.admin.createUser({
         email: userData.email,
-        password: userData.password || "TempPass123!", // Mot de passe temporaire
+        password: userData.password || generateSecurePassword(),
         email_confirm: true,
         user_metadata: {
           first_name: userData.first_name,

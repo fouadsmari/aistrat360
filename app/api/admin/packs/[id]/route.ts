@@ -52,7 +52,6 @@ export async function GET(
       message: "Pack fetched successfully",
     })
   } catch (error) {
-    console.error("Error in GET /api/admin/packs/[id]:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -60,7 +59,7 @@ export async function GET(
   }
 }
 
-export async function PUT(
+export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -156,7 +155,6 @@ export async function PUT(
       .single()
 
     if (error) {
-      console.error("Error updating pack:", error)
       return NextResponse.json(
         { error: "Failed to update pack" },
         { status: 500 }
@@ -168,7 +166,6 @@ export async function PUT(
       message: "Pack updated successfully",
     })
   } catch (error) {
-    console.error("Error in PUT /api/admin/packs/[id]:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -219,7 +216,6 @@ export async function DELETE(
       .limit(1)
 
     if (subError) {
-      console.error("Error checking pack usage:", subError)
       return NextResponse.json(
         { error: "Failed to check pack usage" },
         { status: 500 }
@@ -240,7 +236,6 @@ export async function DELETE(
       .eq("id", id)
 
     if (error) {
-      console.error("Error deleting pack:", error)
       return NextResponse.json(
         { error: "Failed to delete pack" },
         { status: 500 }
@@ -251,7 +246,6 @@ export async function DELETE(
       message: "Pack deleted successfully",
     })
   } catch (error) {
-    console.error("Error in DELETE /api/admin/packs/[id]:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

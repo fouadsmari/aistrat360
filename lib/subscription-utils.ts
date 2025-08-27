@@ -185,13 +185,11 @@ export async function getSubscriptionPacks(): Promise<SubscriptionPack[]> {
       .order("sort_order", { ascending: true })
 
     if (error && error.code !== "PGRST116") {
-      console.warn("Error fetching subscription packs:", error)
       return HARDCODED_PACKS
     }
 
     return data || HARDCODED_PACKS
   } catch (error) {
-    console.warn("Error fetching subscription packs:", error)
     return HARDCODED_PACKS
   }
 }
@@ -222,13 +220,11 @@ export async function getUserSubscription(
       .single()
 
     if (error && error.code !== "PGRST116") {
-      console.warn("Error fetching user subscription:", error)
       return null
     }
 
     return data
   } catch (error) {
-    console.warn("Error fetching user subscription:", error)
     return null
   }
 }
@@ -273,7 +269,6 @@ export async function upsertSubscription(
 
     return data
   } catch (error) {
-    console.error("Error upserting subscription:", error)
     return null
   }
 }

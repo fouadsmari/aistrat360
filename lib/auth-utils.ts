@@ -13,7 +13,6 @@ export async function refreshUserSession() {
       await supabase.auth.refreshSession()
 
     if (sessionError) {
-      console.warn("Error refreshing session:", sessionError)
       return { success: false, error: sessionError }
     }
 
@@ -26,7 +25,6 @@ export async function refreshUserSession() {
         .single()
 
       if (profileError) {
-        console.warn("Error refetching profile:", profileError)
         return { success: false, error: profileError }
       }
 
@@ -35,7 +33,6 @@ export async function refreshUserSession() {
 
     return { success: true, user: sessionData.user, profile: null }
   } catch (error) {
-    console.error("Error refreshing user session:", error)
     return { success: false, error }
   }
 }
@@ -49,7 +46,6 @@ export async function signOutUser() {
     await supabase.auth.signOut()
     window.location.href = "/login"
   } catch (error) {
-    console.error("Error signing out:", error)
     window.location.href = "/login"
   }
 }

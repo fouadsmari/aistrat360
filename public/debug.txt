@@ -1,4 +1,0 @@
-Debug file - App should be working
-Last build: 2025-08-25
-Routes: /fr, /en, /fr/login, /en/login
-Framework: Next.js 15.5.0

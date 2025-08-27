@@ -37,13 +37,13 @@ export function Header({ onMenuClick, isMobile = false }: HeaderProps) {
       const { error } = await supabase.auth.signOut()
 
       if (error) {
-        console.error("Erreur lors de la déconnexion:", error.message)
+        // Handle error silently
       } else {
         // Rediriger vers la page de connexion après déconnexion
         router.push(`/${locale}/login`)
       }
     } catch (error) {
-      console.error("Erreur inattendue lors de la déconnexion:", error)
+      // Handle error silently
     }
   }
 

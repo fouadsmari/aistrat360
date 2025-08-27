@@ -85,7 +85,7 @@ export default function SignupPage() {
           .eq("id", data.user.id)
 
         if (profileError) {
-          console.error("Error updating profile:", profileError)
+          // Profile creation failed - handled by trigger
         }
 
         router.push(`/${locale}/dashboard`)

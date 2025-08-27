@@ -40,7 +40,6 @@ export async function GET() {
       .order("sort_order", { ascending: true })
 
     if (packsError) {
-      console.error("Error fetching packs:", packsError)
       return NextResponse.json(
         { error: "Failed to fetch packs", data: HARDCODED_PACKS },
         { status: 200 }
@@ -52,7 +51,6 @@ export async function GET() {
       message: "Packs fetched successfully",
     })
   } catch (error) {
-    console.error("Error in GET /api/admin/packs:", error)
     return NextResponse.json(
       { error: "Internal server error", data: HARDCODED_PACKS },
       { status: 500 }
@@ -150,7 +148,6 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error("Error creating/updating pack:", error)
       return NextResponse.json(
         { error: "Failed to create/update pack" },
         { status: 500 }
@@ -162,7 +159,6 @@ export async function POST(request: NextRequest) {
       message: "Pack created/updated successfully",
     })
   } catch (error) {
-    console.error("Error in POST /api/admin/packs:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
