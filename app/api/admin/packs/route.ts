@@ -23,7 +23,10 @@ export async function GET() {
       .eq("id", user.id)
       .single()
 
-    if (profileError || (profile?.role !== "super_admin" && profile?.role !== "admin")) {
+    if (
+      profileError ||
+      (profile?.role !== "super_admin" && profile?.role !== "admin")
+    ) {
       return NextResponse.json(
         { error: "Access denied. Admin role required." },
         { status: 403 }
@@ -78,7 +81,10 @@ export async function POST(request: NextRequest) {
       .eq("id", user.id)
       .single()
 
-    if (profileError || (profile?.role !== "super_admin" && profile?.role !== "admin")) {
+    if (
+      profileError ||
+      (profile?.role !== "super_admin" && profile?.role !== "admin")
+    ) {
       return NextResponse.json(
         { error: "Access denied. Admin role required." },
         { status: 403 }

@@ -64,7 +64,7 @@ interface UserProfile {
   created_at: string
   updated_at?: string
   password?: string // For editing only, not stored in profile
-  subscription_plan?: 'free' | 'starter' | 'pro' | 'advanced'
+  subscription_plan?: "free" | "starter" | "pro" | "advanced"
   subscription_status?: string
   subscription_details?: any
 }
@@ -210,7 +210,7 @@ export default function AdminUsersPage() {
     setIsSubmitting(true)
     try {
       const response = await fetch(`/api/admin/users?id=${selectedUser.id}`, {
-        method: "PUT",
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
@@ -247,7 +247,7 @@ export default function AdminUsersPage() {
     try {
       const newStatus = !user.is_active
       const response = await fetch(`/api/admin/users?id=${user.id}`, {
-        method: "PUT",
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
@@ -329,7 +329,7 @@ export default function AdminUsersPage() {
       city: user.city || "",
       postal_code: user.postal_code || "",
       country: user.country || "",
-      subscription_plan: user.subscription_plan || 'free',
+      subscription_plan: user.subscription_plan || "free",
     })
     setIsEditDialogOpen(true)
   }
@@ -374,24 +374,26 @@ export default function AdminUsersPage() {
     }
   }
 
-  const getPackBadge = (plan: string = 'free') => {
+  const getPackBadge = (plan: string = "free") => {
     const packColors = {
       free: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300",
-      starter: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+      starter:
+        "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
       pro: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
-      advanced: "bg-gold-100 text-gold-800 dark:bg-yellow-900/30 dark:text-yellow-400"
+      advanced:
+        "bg-gold-100 text-gold-800 dark:bg-yellow-900/30 dark:text-yellow-400",
     }
-    
+
     const packLabels = {
       free: "Gratuit",
       starter: "Starter",
-      pro: "Pro", 
-      advanced: "Avancé"
+      pro: "Pro",
+      advanced: "Avancé",
     }
 
     return {
       color: packColors[plan as keyof typeof packColors] || packColors.free,
-      label: packLabels[plan as keyof typeof packLabels] || packLabels.free
+      label: packLabels[plan as keyof typeof packLabels] || packLabels.free,
     }
   }
 
@@ -726,7 +728,7 @@ export default function AdminUsersPage() {
                           {getRoleLabel(user.role)}
                         </p>
                       </div>
-                      <div className="flex items-center space-x-2 mt-1">
+                      <div className="mt-1 flex items-center space-x-2">
                         <div
                           className={cn(
                             "rounded-full px-2 py-1 text-xs font-medium",
@@ -736,7 +738,7 @@ export default function AdminUsersPage() {
                           {getPackBadge(user.subscription_plan).label}
                         </div>
                       </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                         {new Date(user.created_at).toLocaleDateString()}
                       </p>
                     </div>
@@ -999,10 +1001,14 @@ export default function AdminUsersPage() {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="edit_subscription_plan">Plan d&apos;Abonnement</Label>
+                <Label htmlFor="edit_subscription_plan">
+                  Plan d&apos;Abonnement
+                </Label>
                 <Select
-                  value={editFormData.subscription_plan || 'free'}
-                  onValueChange={(value: 'free' | 'starter' | 'pro' | 'advanced') =>
+                  value={editFormData.subscription_plan || "free"}
+                  onValueChange={(
+                    value: "free" | "starter" | "pro" | "advanced"
+                  ) =>
                     setEditFormData({
                       ...editFormData,
                       subscription_plan: value,

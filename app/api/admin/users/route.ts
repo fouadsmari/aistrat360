@@ -40,7 +40,8 @@ async function checkAdminAccess() {
     return { authorized: false, error: "Unauthorized" }
   }
 
-  const { data: profile } = await supabase
+  // Use admin client to bypass RLS for profile check
+  const { data: profile } = await supabaseAdmin
     .from("profiles")
     .select("role")
     .eq("id", user.id)
@@ -64,11 +65,12 @@ export async function GET() {
     if (!authorized) {
       return NextResponse.json({ error: authError }, { status: 403 })
     }
-    
+
     // Récupère les profils avec les abonnements joints
     const { data: profiles, error } = await supabaseAdmin
       .from("profiles")
-      .select(`
+      .select(
+        `
         *,
         subscriptions (
           plan,
@@ -78,7 +80,8 @@ export async function GET() {
           trial_start,
           trial_end
         )
-      `)
+      `
+      )
       .order("created_at", { ascending: false })
 
     if (error) {
@@ -86,11 +89,11 @@ export async function GET() {
     }
 
     // Transforme les données pour inclure le plan directement dans l'objet utilisateur
-    const usersWithSubscriptions = profiles.map(profile => ({
+    const usersWithSubscriptions = profiles.map((profile) => ({
       ...profile,
-      subscription_plan: profile.subscriptions?.[0]?.plan || 'free',
-      subscription_status: profile.subscriptions?.[0]?.status || 'active',
-      subscription_details: profile.subscriptions?.[0] || null
+      subscription_plan: profile.subscriptions?.[0]?.plan || "free",
+      subscription_status: profile.subscriptions?.[0]?.status || "active",
+      subscription_details: profile.subscriptions?.[0] || null,
     }))
 
     return NextResponse.json({ users: usersWithSubscriptions })
@@ -102,7 +105,7 @@ export async function GET() {
   }
 }
 
-// POST - Crée un nouvel utilisateur
+// POST - Gère création ET mise à jour d'utilisateurs (Vercel compatible)
 export async function POST(request: Request) {
   try {
     // Check admin access
@@ -111,8 +114,27 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: accessError }, { status: 403 })
     }
 
+    const { searchParams } = new URL(request.url)
+    const userId = searchParams.get("id")
     const userData = await request.json()
 
+    // Si userId fourni, c'est une mise à jour, sinon c'est une création
+    if (userId) {
+      return await updateUser(userId, userData)
+    } else {
+      return await createUser(userData)
+    }
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    )
+  }
+}
+
+// Fonction pour créer un utilisateur
+async function createUser(userData: any) {
+  try {
     // Crée l'utilisateur avec auth.admin
     const { data: authUser, error: authError } =
       await supabaseAdmin.auth.admin.createUser({
@@ -150,19 +172,9 @@ export async function POST(request: Request) {
   }
 }
 
-// PUT - Met à jour un utilisateur
-export async function PUT(request: Request) {
+// Fonction pour mettre à jour un utilisateur
+async function updateUser(userId: string, userData: any) {
   try {
-    // Check admin access
-    const { authorized, error: accessError } = await checkAdminAccess()
-    if (!authorized) {
-      return NextResponse.json({ error: accessError }, { status: 403 })
-    }
-
-    const { searchParams } = new URL(request.url)
-    const userId = searchParams.get("id")
-    const userData = await request.json()
-
     if (!userId) {
       return NextResponse.json({ error: "User ID required" }, { status: 400 })
     }
@@ -225,13 +237,18 @@ export async function PUT(request: Request) {
     }
 
     // Met à jour l'abonnement si un plan est fourni
-    if (userData.subscription_plan && ['free', 'starter', 'pro', 'advanced'].includes(userData.subscription_plan)) {
+    if (
+      userData.subscription_plan &&
+      ["free", "starter", "pro", "advanced"].includes(
+        userData.subscription_plan
+      )
+    ) {
       try {
         const now = new Date()
         const subscriptionData = {
           user_id: userId,
           plan: userData.subscription_plan,
-          status: userData.subscription_status || 'active',
+          status: userData.subscription_status || "active",
           current_period_start: now.toISOString(),
           current_period_end: null,
           trial_start: null,

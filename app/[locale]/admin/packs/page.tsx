@@ -124,7 +124,7 @@ export default function PacksManagementPage() {
       }
     } catch (error) {
       console.error("Error fetching packs:", error)
-      toast.error(t('messages.loadError'))
+      toast.error(t("messages.loadError"))
     } finally {
       setLoading(false)
     }
@@ -154,8 +154,8 @@ export default function PacksManagementPage() {
       if (response.ok) {
         toast.success(
           editingPack
-            ? t('messages.updateSuccess')
-            : t('messages.createSuccess')
+            ? t("messages.updateSuccess")
+            : t("messages.createSuccess")
         )
         setIsDialogOpen(false)
         setEditingPack(null)
@@ -166,7 +166,9 @@ export default function PacksManagementPage() {
       }
     } catch (error) {
       console.error("Error saving pack:", error)
-      toast.error(editingPack ? t('messages.updateError') : t('messages.createError'))
+      toast.error(
+        editingPack ? t("messages.updateError") : t("messages.createError")
+      )
     }
   }
 
@@ -205,24 +207,24 @@ export default function PacksManagementPage() {
       const result = await response.json()
 
       if (response.ok) {
-        toast.success(t('messages.deleteSuccess'))
+        toast.success(t("messages.deleteSuccess"))
         fetchPacks()
       } else {
         throw new Error(result.error || "Failed to delete pack")
       }
     } catch (error) {
       console.error("Error deleting pack:", error)
-      toast.error(t('messages.deleteError'))
+      toast.error(t("messages.deleteError"))
     }
   }
 
   const formatQuotaValue = (value: number, unit?: string) => {
-    if (value === -1) return t('unlimited')
+    if (value === -1) return t("unlimited")
     return `${value}${unit ? ` ${unit}` : ""}`
   }
 
   const formatPrice = (price: number) => {
-    return price === 0 ? t('free') : `€${price.toFixed(2)}`
+    return price === 0 ? t("free") : `€${price.toFixed(2)}`
   }
 
   return (
@@ -230,16 +232,19 @@ export default function PacksManagementPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-3xl font-bold tracking-tight text-transparent">
-            {t('title')}
+            {t("title")}
           </h1>
           <p className="mt-2 text-gray-500 dark:text-gray-400">
-            {t('subtitle')} - Configuration des tarifs et quotas
+            {t("subtitle")} - Configuration des tarifs et quotas
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800">
+          <Button
+            variant="outline"
+            className="border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+          >
             <Settings className="mr-2 h-4 w-4" />
-            {t('synchronize')}
+            {t("synchronize")}
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
@@ -251,348 +256,389 @@ export default function PacksManagementPage() {
                 className="bg-gradient-to-r from-red-600 to-orange-600 text-white hover:from-red-700 hover:to-orange-700"
               >
                 <Plus className="mr-2 h-4 w-4" />
-                {t('createPack')}
+                {t("createPack")}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto border-gray-200/30 bg-white/95 dark:border-gray-800/20 dark:bg-gray-900/95">
-            <DialogHeader>
-              <DialogTitle className="text-gray-900 dark:text-white">
-                {editingPack ? t('editPack') : t('createPack')}
-              </DialogTitle>
-              <DialogDescription className="text-gray-600 dark:text-gray-300">
-                {t('subtitle')}
-              </DialogDescription>
-            </DialogHeader>
+              <DialogHeader>
+                <DialogTitle className="text-gray-900 dark:text-white">
+                  {editingPack ? t("editPack") : t("createPack")}
+                </DialogTitle>
+                <DialogDescription className="text-gray-600 dark:text-gray-300">
+                  {t("subtitle")}
+                </DialogDescription>
+              </DialogHeader>
 
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-6"
-              >
-                <Tabs defaultValue="basic" className="w-full">
-                  <TabsList className="grid w-full grid-cols-3 bg-gray-100 dark:bg-gray-800">
-                    <TabsTrigger value="basic" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900">
-                      {t('basicInfo')}
-                    </TabsTrigger>
-                    <TabsTrigger value="pricing" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900">
-                      {t('pricing')}
-                    </TabsTrigger>
-                    <TabsTrigger value="quotas" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900">
-                      {t('quotas')}
-                    </TabsTrigger>
-                  </TabsList>
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-6"
+                >
+                  <Tabs defaultValue="basic" className="w-full">
+                    <TabsList className="grid w-full grid-cols-3 bg-gray-100 dark:bg-gray-800">
+                      <TabsTrigger
+                        value="basic"
+                        className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900"
+                      >
+                        {t("basicInfo")}
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="pricing"
+                        className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900"
+                      >
+                        {t("pricing")}
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="quotas"
+                        className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900"
+                      >
+                        {t("quotas")}
+                      </TabsTrigger>
+                    </TabsList>
 
-                  <TabsContent value="basic" className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-700 dark:text-gray-300">{t('packName')}</FormLabel>
-                            <FormControl>
-                              <select
-                                {...field}
-                                className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                              >
-                                <option value="free">Free</option>
-                                <option value="starter">Starter</option>
-                                <option value="pro">Pro</option>
-                                <option value="advanced">Advanced</option>
-                              </select>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                    <TabsContent value="basic" className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-700 dark:text-gray-300">
+                                {t("packName")}
+                              </FormLabel>
+                              <FormControl>
+                                <select
+                                  {...field}
+                                  className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                                >
+                                  <option value="free">Free</option>
+                                  <option value="starter">Starter</option>
+                                  <option value="pro">Pro</option>
+                                  <option value="advanced">Advanced</option>
+                                </select>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                      <FormField
-                        control={form.control}
-                        name="sort_order"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-700 dark:text-gray-300">{t('sortOrder')}</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                {...field}
-                                onChange={(e) =>
-                                  field.onChange(Number(e.target.value))
-                                }
-                                className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+                        <FormField
+                          control={form.control}
+                          name="sort_order"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-700 dark:text-gray-300">
+                                {t("sortOrder")}
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  {...field}
+                                  onChange={(e) =>
+                                    field.onChange(Number(e.target.value))
+                                  }
+                                  className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="display_name_en"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-700 dark:text-gray-300">{t('displayNameEn')}</FormLabel>
-                            <FormControl>
-                              <Input {...field} className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="display_name_en"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-700 dark:text-gray-300">
+                                {t("displayNameEn")}
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                      <FormField
-                        control={form.control}
-                        name="display_name_fr"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-700 dark:text-gray-300">{t('displayNameFr')}</FormLabel>
-                            <FormControl>
-                              <Input {...field} className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+                        <FormField
+                          control={form.control}
+                          name="display_name_fr"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-700 dark:text-gray-300">
+                                {t("displayNameFr")}
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="description_en"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-700 dark:text-gray-300">{t('descriptionEn')}</FormLabel>
-                            <FormControl>
-                              <Textarea {...field} className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="description_en"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-700 dark:text-gray-300">
+                                {t("descriptionEn")}
+                              </FormLabel>
+                              <FormControl>
+                                <Textarea
+                                  {...field}
+                                  className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                      <FormField
-                        control={form.control}
-                        name="description_fr"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-700 dark:text-gray-300">{t('descriptionFr')}</FormLabel>
-                            <FormControl>
-                              <Textarea {...field} className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+                        <FormField
+                          control={form.control}
+                          name="description_fr"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-700 dark:text-gray-300">
+                                {t("descriptionFr")}
+                              </FormLabel>
+                              <FormControl>
+                                <Textarea
+                                  {...field}
+                                  className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
 
-                    <div className="flex gap-4">
-                      <FormField
-                        control={form.control}
-                        name="is_enabled"
-                        render={({ field }) => (
-                          <FormItem className="flex items-center space-x-2">
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <FormLabel className="text-gray-700 dark:text-gray-300">{t('enabled')}</FormLabel>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      <div className="flex gap-4">
+                        <FormField
+                          control={form.control}
+                          name="is_enabled"
+                          render={({ field }) => (
+                            <FormItem className="flex items-center space-x-2">
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                              <FormLabel className="text-gray-700 dark:text-gray-300">
+                                {t("enabled")}
+                              </FormLabel>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                      <FormField
-                        control={form.control}
-                        name="is_popular"
-                        render={({ field }) => (
-                          <FormItem className="flex items-center space-x-2">
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <FormLabel className="text-gray-700 dark:text-gray-300">{t('popular')}</FormLabel>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </TabsContent>
+                        <FormField
+                          control={form.control}
+                          name="is_popular"
+                          render={({ field }) => (
+                            <FormItem className="flex items-center space-x-2">
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                              <FormLabel className="text-gray-700 dark:text-gray-300">
+                                {t("popular")}
+                              </FormLabel>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </TabsContent>
 
-                  <TabsContent value="pricing" className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="price_monthly"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-700 dark:text-gray-300">{t('monthlyPrice')}</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                step="0.01"
-                                {...field}
-                                onChange={(e) =>
-                                  field.onChange(Number(e.target.value))
-                                }
-                                className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                    <TabsContent value="pricing" className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="price_monthly"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-700 dark:text-gray-300">
+                                {t("monthlyPrice")}
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  {...field}
+                                  onChange={(e) =>
+                                    field.onChange(Number(e.target.value))
+                                  }
+                                  className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                      <FormField
-                        control={form.control}
-                        name="price_yearly"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-700 dark:text-gray-300">{t('yearlyPrice')}</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                step="0.01"
-                                {...field}
-                                onChange={(e) =>
-                                  field.onChange(Number(e.target.value))
-                                }
-                                className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </TabsContent>
+                        <FormField
+                          control={form.control}
+                          name="price_yearly"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-700 dark:text-gray-300">
+                                {t("yearlyPrice")}
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  {...field}
+                                  onChange={(e) =>
+                                    field.onChange(Number(e.target.value))
+                                  }
+                                  className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </TabsContent>
 
-                  <TabsContent value="quotas" className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="quotas.projects"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-700 dark:text-gray-300">
-                              {t('maxProjects')}
-                            </FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                {...field}
-                                onChange={(e) =>
-                                  field.onChange(Number(e.target.value))
-                                }
-                                className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                    <TabsContent value="quotas" className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="quotas.projects"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-700 dark:text-gray-300">
+                                {t("maxProjects")}
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  {...field}
+                                  onChange={(e) =>
+                                    field.onChange(Number(e.target.value))
+                                  }
+                                  className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                      <FormField
-                        control={form.control}
-                        name="quotas.storage_gb"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-700 dark:text-gray-300">
-                              {t('storageGb')}
-                            </FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                {...field}
-                                onChange={(e) =>
-                                  field.onChange(Number(e.target.value))
-                                }
-                                className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                        <FormField
+                          control={form.control}
+                          name="quotas.storage_gb"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-700 dark:text-gray-300">
+                                {t("storageGb")}
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  {...field}
+                                  onChange={(e) =>
+                                    field.onChange(Number(e.target.value))
+                                  }
+                                  className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                      <FormField
-                        control={form.control}
-                        name="quotas.api_calls_per_month"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-700 dark:text-gray-300">
-                              {t('apiCalls')}
-                            </FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                {...field}
-                                onChange={(e) =>
-                                  field.onChange(Number(e.target.value))
-                                }
-                                className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                        <FormField
+                          control={form.control}
+                          name="quotas.api_calls_per_month"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-700 dark:text-gray-300">
+                                {t("apiCalls")}
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  {...field}
+                                  onChange={(e) =>
+                                    field.onChange(Number(e.target.value))
+                                  }
+                                  className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                      <FormField
-                        control={form.control}
-                        name="quotas.team_members"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-700 dark:text-gray-300">
-                              {t('teamMembers')}
-                            </FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                {...field}
-                                onChange={(e) =>
-                                  field.onChange(Number(e.target.value))
-                                }
-                                className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </TabsContent>
-                </Tabs>
+                        <FormField
+                          control={form.control}
+                          name="quotas.team_members"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-700 dark:text-gray-300">
+                                {t("teamMembers")}
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  {...field}
+                                  onChange={(e) =>
+                                    field.onChange(Number(e.target.value))
+                                  }
+                                  className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </TabsContent>
+                  </Tabs>
 
-                <DialogFooter>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      setIsDialogOpen(false)
-                      setEditingPack(null)
-                      form.reset()
-                    }}
-                    className="border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
-                  >
-                    {t('actions.cancel')}
-                  </Button>
-                  <Button 
-                    type="submit"
-                    className="bg-gradient-to-r from-red-600 to-orange-600 text-white hover:from-red-700 hover:to-orange-700"
-                  >
-                    {editingPack ? t('actions.update') : t('actions.create')}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </Form>
-          </DialogContent>
+                  <DialogFooter>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setIsDialogOpen(false)
+                        setEditingPack(null)
+                        form.reset()
+                      }}
+                      className="border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+                    >
+                      {t("actions.cancel")}
+                    </Button>
+                    <Button
+                      type="submit"
+                      className="bg-gradient-to-r from-red-600 to-orange-600 text-white hover:from-red-700 hover:to-orange-700"
+                    >
+                      {editingPack ? t("actions.update") : t("actions.create")}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
           </Dialog>
         </div>
       </div>
@@ -601,10 +647,10 @@ export default function PacksManagementPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
             <Package className="h-5 w-5" />
-            {t('title')}
+            {t("title")}
           </CardTitle>
           <CardDescription className="text-gray-600 dark:text-gray-300">
-            {t('subtitle')}
+            {t("subtitle")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -616,11 +662,21 @@ export default function PacksManagementPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-gray-700 dark:text-gray-300">Pack</TableHead>
-                  <TableHead className="text-gray-700 dark:text-gray-300">Tarification</TableHead>
-                  <TableHead className="text-gray-700 dark:text-gray-300">Quotas</TableHead>
-                  <TableHead className="text-gray-700 dark:text-gray-300">Statut</TableHead>
-                  <TableHead className="text-gray-700 dark:text-gray-300">Actions</TableHead>
+                  <TableHead className="text-gray-700 dark:text-gray-300">
+                    Pack
+                  </TableHead>
+                  <TableHead className="text-gray-700 dark:text-gray-300">
+                    Tarification
+                  </TableHead>
+                  <TableHead className="text-gray-700 dark:text-gray-300">
+                    Quotas
+                  </TableHead>
+                  <TableHead className="text-gray-700 dark:text-gray-300">
+                    Statut
+                  </TableHead>
+                  <TableHead className="text-gray-700 dark:text-gray-300">
+                    Actions
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -632,7 +688,9 @@ export default function PacksManagementPage() {
                           <div className="flex items-center gap-2 font-medium text-gray-900 dark:text-white">
                             {pack.display_name_en}
                             {pack.is_popular && (
-                              <Badge className="bg-gradient-to-r from-purple-600 to-violet-600 text-white">Populaire</Badge>
+                              <Badge className="bg-gradient-to-r from-purple-600 to-violet-600 text-white">
+                                Populaire
+                              </Badge>
                             )}
                           </div>
                           <div className="text-sm text-gray-500 dark:text-gray-400">
@@ -643,7 +701,9 @@ export default function PacksManagementPage() {
                     </TableCell>
                     <TableCell>
                       <div className="space-y-1">
-                        <div className="text-gray-900 dark:text-white">{formatPrice(pack.price_monthly)}/mois</div>
+                        <div className="text-gray-900 dark:text-white">
+                          {formatPrice(pack.price_monthly)}/mois
+                        </div>
                         <div className="text-sm text-gray-500 dark:text-gray-400">
                           {formatPrice(pack.price_yearly)}/an
                         </div>
@@ -652,36 +712,48 @@ export default function PacksManagementPage() {
                     <TableCell>
                       <div className="space-y-1 text-sm">
                         <div className="text-gray-700 dark:text-gray-300">
-                          Projets: <span className="font-medium text-gray-900 dark:text-white">{formatQuotaValue(pack.quotas.projects)}</span>
+                          Projets:{" "}
+                          <span className="font-medium text-gray-900 dark:text-white">
+                            {formatQuotaValue(pack.quotas.projects)}
+                          </span>
                         </div>
                         <div className="text-gray-700 dark:text-gray-300">
                           Stockage:{" "}
-                          <span className="font-medium text-gray-900 dark:text-white">{formatQuotaValue(pack.quotas.storage_gb, "GB")}</span>
+                          <span className="font-medium text-gray-900 dark:text-white">
+                            {formatQuotaValue(pack.quotas.storage_gb, "GB")}
+                          </span>
                         </div>
                         <div className="text-gray-700 dark:text-gray-300">
                           API:{" "}
-                          <span className="font-medium text-gray-900 dark:text-white">{formatQuotaValue(
-                            pack.quotas.api_calls_per_month,
-                            "calls/mo"
-                          )}</span>
+                          <span className="font-medium text-gray-900 dark:text-white">
+                            {formatQuotaValue(
+                              pack.quotas.api_calls_per_month,
+                              "calls/mo"
+                            )}
+                          </span>
                         </div>
                         <div className="text-gray-700 dark:text-gray-300">
                           Équipe:{" "}
-                          <span className="font-medium text-gray-900 dark:text-white">{formatQuotaValue(
-                            pack.quotas.team_members,
-                            "membres"
-                          )}</span>
+                          <span className="font-medium text-gray-900 dark:text-white">
+                            {formatQuotaValue(
+                              pack.quotas.team_members,
+                              "membres"
+                            )}
+                          </span>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <Badge
-                        className={pack.is_enabled 
-                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" 
-                          : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400"
+                        className={
+                          pack.is_enabled
+                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                            : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400"
                         }
                       >
-                        {pack.is_enabled ? t('status.enabled') : t('status.disabled')}
+                        {pack.is_enabled
+                          ? t("status.enabled")
+                          : t("status.disabled")}
                       </Badge>
                     </TableCell>
                     <TableCell>

@@ -7,10 +7,11 @@ import { createSupabaseClient } from "./supabase"
 export async function refreshUserSession() {
   try {
     const supabase = createSupabaseClient()
-    
+
     // Force refresh the session
-    const { data: sessionData, error: sessionError } = await supabase.auth.refreshSession()
-    
+    const { data: sessionData, error: sessionError } =
+      await supabase.auth.refreshSession()
+
     if (sessionError) {
       console.warn("Error refreshing session:", sessionError)
       return { success: false, error: sessionError }
@@ -46,9 +47,9 @@ export async function signOutUser() {
   try {
     const supabase = createSupabaseClient()
     await supabase.auth.signOut()
-    window.location.href = '/login'
+    window.location.href = "/login"
   } catch (error) {
     console.error("Error signing out:", error)
-    window.location.href = '/login'
+    window.location.href = "/login"
   }
 }
