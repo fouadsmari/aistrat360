@@ -2,7 +2,6 @@ import { createClient } from "@supabase/supabase-js"
 import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { createServerClient } from "@supabase/ssr"
-import { upsertSubscription } from "@/lib/subscription-utils"
 
 // Service role client pour bypasser RLS
 const supabaseAdmin = createClient(
@@ -228,7 +227,26 @@ export async function PUT(request: Request) {
     // Met à jour l'abonnement si un plan est fourni
     if (userData.subscription_plan && ['free', 'starter', 'pro', 'advanced'].includes(userData.subscription_plan)) {
       try {
-        await upsertSubscription(userId, userData.subscription_plan, userData.subscription_status || 'active')
+        const now = new Date()
+        const subscriptionData = {
+          user_id: userId,
+          plan: userData.subscription_plan,
+          status: userData.subscription_status || 'active',
+          current_period_start: now.toISOString(),
+          current_period_end: null,
+          trial_start: null,
+          trial_end: null,
+          cancel_at_period_end: false,
+        }
+
+        // Utilise supabaseAdmin pour bypasser RLS
+        const { error: subscriptionError } = await supabaseAdmin
+          .from("subscriptions")
+          .upsert(subscriptionData)
+
+        if (subscriptionError) {
+          console.warn("Error updating subscription:", subscriptionError)
+        }
       } catch (subscriptionError) {
         console.warn("Error updating subscription:", subscriptionError)
         // Ne pas faire échouer la mise à jour si l'abonnement échoue
