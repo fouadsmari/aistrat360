@@ -119,6 +119,53 @@
         "deleteFailed": "Failed to delete user"
       }
     },
+    "packManagement": {
+      "title": "Subscription Packs Management",
+      "subtitle": "Manage pricing tiers, features, and quotas",
+      "createPack": "Create Pack",
+      "editPack": "Edit Pack",
+      "deletePack": "Delete Pack",
+      "synchronize": "Synchronize",
+      "packName": "Pack Name",
+      "displayNameEn": "Display Name (English)",
+      "displayNameFr": "Display Name (French)",
+      "descriptionEn": "Description (English)",
+      "descriptionFr": "Description (French)",
+      "monthlyPrice": "Monthly Price ($)",
+      "yearlyPrice": "Yearly Price ($)",
+      "enabled": "Enabled",
+      "popular": "Popular",
+      "sortOrder": "Sort Order",
+      "basicInfo": "Basic Info",
+      "pricing": "Pricing",
+      "quotas": "Quotas",
+      "maxProjects": "Max Projects (-1 for unlimited)",
+      "storageGb": "Storage (GB) (-1 for unlimited)",
+      "apiCalls": "API Calls/Month (-1 for unlimited)",
+      "teamMembers": "Team Members (-1 for unlimited)",
+      "unlimited": "Unlimited",
+      "free": "Free",
+      "status": {
+        "enabled": "Enabled",
+        "disabled": "Disabled"
+      },
+      "actions": {
+        "create": "Create Pack",
+        "update": "Update Pack",
+        "cancel": "Cancel",
+        "delete": "Delete"
+      },
+      "messages": {
+        "createSuccess": "Pack created successfully",
+        "updateSuccess": "Pack updated successfully",
+        "deleteSuccess": "Pack deleted successfully",
+        "createError": "Failed to create pack",
+        "updateError": "Failed to update pack",
+        "deleteError": "Failed to delete pack",
+        "loadError": "Failed to load packs",
+        "deleteConfirm": "Are you sure you want to delete the {name} pack?"
+      }
+    },
     "systemStatus": {
       "title": "System Status",
       "serverStatus": "Server Status",
@@ -203,53 +250,6 @@
       "userDashboard": "User Dashboard",
       "support": "Support",
       "settings": "Settings"
-    },
-    "packs": {
-      "title": "Subscription Packs Management",
-      "subtitle": "Manage pricing tiers, features, and quotas",
-      "createPack": "Create Pack",
-      "editPack": "Edit Pack",
-      "deletePack": "Delete Pack",
-      "synchronize": "Synchronize",
-      "packName": "Pack Name",
-      "displayNameEn": "Display Name (English)",
-      "displayNameFr": "Display Name (French)",
-      "descriptionEn": "Description (English)",
-      "descriptionFr": "Description (French)",
-      "monthlyPrice": "Monthly Price ($)",
-      "yearlyPrice": "Yearly Price ($)",
-      "enabled": "Enabled",
-      "popular": "Popular",
-      "sortOrder": "Sort Order",
-      "basicInfo": "Basic Info",
-      "pricing": "Pricing",
-      "quotas": "Quotas",
-      "maxProjects": "Max Projects (-1 for unlimited)",
-      "storageGb": "Storage (GB) (-1 for unlimited)",
-      "apiCalls": "API Calls/Month (-1 for unlimited)",
-      "teamMembers": "Team Members (-1 for unlimited)",
-      "unlimited": "Unlimited",
-      "free": "Free",
-      "status": {
-        "enabled": "Enabled",
-        "disabled": "Disabled"
-      },
-      "actions": {
-        "create": "Create Pack",
-        "update": "Update Pack",
-        "cancel": "Cancel",
-        "delete": "Delete"
-      },
-      "messages": {
-        "createSuccess": "Pack created successfully",
-        "updateSuccess": "Pack updated successfully",
-        "deleteSuccess": "Pack deleted successfully",
-        "createError": "Failed to create pack",
-        "updateError": "Failed to update pack",
-        "deleteError": "Failed to delete pack",
-        "loadError": "Failed to load packs",
-        "deleteConfirm": "Are you sure you want to delete the {name} pack?"
-      }
     }
   },
   "dashboard": {

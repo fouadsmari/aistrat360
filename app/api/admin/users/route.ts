@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js"
 import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { createServerClient } from "@supabase/ssr"
+import { upsertSubscription } from "@/lib/subscription-utils"
 
 // Service role client pour bypasser RLS
 const supabaseAdmin = createClient(
@@ -56,7 +57,7 @@ async function checkAdminAccess() {
   return { authorized: true, userId: user.id, role: profile.role }
 }
 
-// GET - Récupère tous les utilisateurs (service role bypass RLS)
+// GET - Récupère tous les utilisateurs avec leurs abonnements (service role bypass RLS)
 export async function GET() {
   try {
     // Check admin access
@@ -64,16 +65,36 @@ export async function GET() {
     if (!authorized) {
       return NextResponse.json({ error: authError }, { status: 403 })
     }
+    
+    // Récupère les profils avec les abonnements joints
     const { data: profiles, error } = await supabaseAdmin
       .from("profiles")
-      .select("*")
+      .select(`
+        *,
+        subscriptions (
+          plan,
+          status,
+          current_period_start,
+          current_period_end,
+          trial_start,
+          trial_end
+        )
+      `)
       .order("created_at", { ascending: false })
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({ users: profiles })
+    // Transforme les données pour inclure le plan directement dans l'objet utilisateur
+    const usersWithSubscriptions = profiles.map(profile => ({
+      ...profile,
+      subscription_plan: profile.subscriptions?.[0]?.plan || 'free',
+      subscription_status: profile.subscriptions?.[0]?.status || 'active',
+      subscription_details: profile.subscriptions?.[0] || null
+    }))
+
+    return NextResponse.json({ users: usersWithSubscriptions })
   } catch (error) {
     return NextResponse.json(
       { error: "Internal server error" },
@@ -202,6 +223,16 @@ export async function PUT(request: Request) {
         { error: authError?.message || authError },
         { status: 500 }
       )
+    }
+
+    // Met à jour l'abonnement si un plan est fourni
+    if (userData.subscription_plan && ['free', 'starter', 'pro', 'advanced'].includes(userData.subscription_plan)) {
+      try {
+        await upsertSubscription(userId, userData.subscription_plan, userData.subscription_status || 'active')
+      } catch (subscriptionError) {
+        console.warn("Error updating subscription:", subscriptionError)
+        // Ne pas faire échouer la mise à jour si l'abonnement échoue
+      }
     }
 
     return NextResponse.json({ message: "User updated successfully" })

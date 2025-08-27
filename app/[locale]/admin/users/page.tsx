@@ -64,6 +64,9 @@ interface UserProfile {
   created_at: string
   updated_at?: string
   password?: string // For editing only, not stored in profile
+  subscription_plan?: 'free' | 'starter' | 'pro' | 'advanced'
+  subscription_status?: string
+  subscription_details?: any
 }
 
 interface CreateUserData {
@@ -326,6 +329,7 @@ export default function AdminUsersPage() {
       city: user.city || "",
       postal_code: user.postal_code || "",
       country: user.country || "",
+      subscription_plan: user.subscription_plan || 'free',
     })
     setIsEditDialogOpen(true)
   }
@@ -367,6 +371,27 @@ export default function AdminUsersPage() {
         return "Admin"
       default:
         return "Subscriber"
+    }
+  }
+
+  const getPackBadge = (plan: string = 'free') => {
+    const packColors = {
+      free: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300",
+      starter: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+      pro: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
+      advanced: "bg-gold-100 text-gold-800 dark:bg-yellow-900/30 dark:text-yellow-400"
+    }
+    
+    const packLabels = {
+      free: "Gratuit",
+      starter: "Starter",
+      pro: "Pro", 
+      advanced: "Avancé"
+    }
+
+    return {
+      color: packColors[plan as keyof typeof packColors] || packColors.free,
+      label: packLabels[plan as keyof typeof packLabels] || packLabels.free
     }
   }
 
@@ -695,13 +720,23 @@ export default function AdminUsersPage() {
                   </div>
                   <div className="flex items-center space-x-4">
                     <div className="text-right">
-                      <div className="flex items-center">
+                      <div className="flex items-center space-x-2">
                         {getRoleIcon(user.role)}
-                        <p className="ml-1 text-sm font-medium text-gray-900 dark:text-white">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
                           {getRoleLabel(user.role)}
                         </p>
                       </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <div className="flex items-center space-x-2 mt-1">
+                        <div
+                          className={cn(
+                            "rounded-full px-2 py-1 text-xs font-medium",
+                            getPackBadge(user.subscription_plan).color
+                          )}
+                        >
+                          {getPackBadge(user.subscription_plan).label}
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         {new Date(user.created_at).toLocaleDateString()}
                       </p>
                     </div>
@@ -924,7 +959,7 @@ export default function AdminUsersPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div>
                 <Label htmlFor="edit_role">Role</Label>
                 <Select
@@ -960,6 +995,28 @@ export default function AdminUsersPage() {
                   <SelectContent>
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="suspended">Suspended</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="edit_subscription_plan">Plan d&apos;Abonnement</Label>
+                <Select
+                  value={editFormData.subscription_plan || 'free'}
+                  onValueChange={(value: 'free' | 'starter' | 'pro' | 'advanced') =>
+                    setEditFormData({
+                      ...editFormData,
+                      subscription_plan: value,
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="free">Gratuit</SelectItem>
+                    <SelectItem value="starter">Starter</SelectItem>
+                    <SelectItem value="pro">Pro</SelectItem>
+                    <SelectItem value="advanced">Avancé</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

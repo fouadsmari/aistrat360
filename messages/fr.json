@@ -119,6 +119,53 @@
         "deleteFailed": "Échec de suppression de l'utilisateur"
       }
     },
+    "packManagement": {
+      "title": "Gestion des Packs d'Abonnement",
+      "subtitle": "Gérer les tarifs, fonctionnalités et quotas",
+      "createPack": "Créer un Pack",
+      "editPack": "Modifier le Pack",
+      "deletePack": "Supprimer le Pack",
+      "synchronize": "Synchroniser",
+      "packName": "Nom du Pack",
+      "displayNameEn": "Nom d'affichage (Anglais)",
+      "displayNameFr": "Nom d'affichage (Français)",
+      "descriptionEn": "Description (Anglais)",
+      "descriptionFr": "Description (Français)",
+      "monthlyPrice": "Prix Mensuel (€)",
+      "yearlyPrice": "Prix Annuel (€)",
+      "enabled": "Activé",
+      "popular": "Populaire",
+      "sortOrder": "Ordre de Tri",
+      "basicInfo": "Informations",
+      "pricing": "Tarification",
+      "quotas": "Quotas",
+      "maxProjects": "Max Projets (-1 pour illimité)",
+      "storageGb": "Stockage (GB) (-1 pour illimité)",
+      "apiCalls": "Appels API/Mois (-1 pour illimité)",
+      "teamMembers": "Membres Équipe (-1 pour illimité)",
+      "unlimited": "Illimité",
+      "free": "Gratuit",
+      "status": {
+        "enabled": "Activé",
+        "disabled": "Désactivé"
+      },
+      "actions": {
+        "create": "Créer le Pack",
+        "update": "Mettre à Jour",
+        "cancel": "Annuler",
+        "delete": "Supprimer"
+      },
+      "messages": {
+        "createSuccess": "Pack créé avec succès",
+        "updateSuccess": "Pack mis à jour avec succès",
+        "deleteSuccess": "Pack supprimé avec succès",
+        "createError": "Échec de création du pack",
+        "updateError": "Échec de mise à jour du pack",
+        "deleteError": "Échec de suppression du pack",
+        "loadError": "Échec de chargement des packs",
+        "deleteConfirm": "Êtes-vous sûr de vouloir supprimer le pack {name} ?"
+      }
+    },
     "systemStatus": {
       "title": "État du système",
       "serverStatus": "État du serveur",
@@ -203,53 +250,6 @@
       "userDashboard": "Dashboard Utilisateur",
       "support": "Support",
       "settings": "Paramètres"
-    },
-    "packs": {
-      "title": "Gestion des Packs d'Abonnement",
-      "subtitle": "Gérer les tarifs, fonctionnalités et quotas",
-      "createPack": "Créer un Pack",
-      "editPack": "Modifier le Pack",
-      "deletePack": "Supprimer le Pack",
-      "synchronize": "Synchroniser",
-      "packName": "Nom du Pack",
-      "displayNameEn": "Nom d'affichage (Anglais)",
-      "displayNameFr": "Nom d'affichage (Français)",
-      "descriptionEn": "Description (Anglais)",
-      "descriptionFr": "Description (Français)",
-      "monthlyPrice": "Prix Mensuel (€)",
-      "yearlyPrice": "Prix Annuel (€)",
-      "enabled": "Activé",
-      "popular": "Populaire",
-      "sortOrder": "Ordre de Tri",
-      "basicInfo": "Informations",
-      "pricing": "Tarification",
-      "quotas": "Quotas",
-      "maxProjects": "Max Projets (-1 pour illimité)",
-      "storageGb": "Stockage (GB) (-1 pour illimité)",
-      "apiCalls": "Appels API/Mois (-1 pour illimité)",
-      "teamMembers": "Membres Équipe (-1 pour illimité)",
-      "unlimited": "Illimité",
-      "free": "Gratuit",
-      "status": {
-        "enabled": "Activé",
-        "disabled": "Désactivé"
-      },
-      "actions": {
-        "create": "Créer le Pack",
-        "update": "Mettre à Jour",
-        "cancel": "Annuler",
-        "delete": "Supprimer"
-      },
-      "messages": {
-        "createSuccess": "Pack créé avec succès",
-        "updateSuccess": "Pack mis à jour avec succès",
-        "deleteSuccess": "Pack supprimé avec succès",
-        "createError": "Échec de création du pack",
-        "updateError": "Échec de mise à jour du pack",
-        "deleteError": "Échec de suppression du pack",
-        "loadError": "Échec de chargement des packs",
-        "deleteConfirm": "Êtes-vous sûr de vouloir supprimer le pack {name} ?"
-      }
     }
   },
   "dashboard": {
