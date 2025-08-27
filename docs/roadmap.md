@@ -6,6 +6,16 @@
 
 ## ✅ Terminé
 
+- **[2025-08-27]** Correction bugs modification plans d'abonnement via admin panel
+  - ✅ Identifié le problème : incohérence dans l'enum subscription_plan (professional vs pro)
+  - ✅ Créé migration 024_fix_subscription_plan_enum.sql pour corriger l'enum
+  - ✅ Créé migration 025_simple_fix_subscription_plans.sql pour nettoyer les données
+  - ✅ Corrigé la logique de mise à jour d'abonnement dans l'API (upsert -> update/insert conditionnel)
+  - ✅ Amélioration de la gestion d'erreurs pour les modifications d'abonnement
+  - ✅ Ajout de logs détaillés pour déboguer puis supprimés après correction
+  - ✅ Tests fonctionnels de modification des plans : free, starter, pro, advanced
+  - ✅ Build et tests réussis sans erreurs
+
 - **[2025-08-24]** Création de l'application SaaS avec NextJS et shadcn
   - ✅ Initialisation environnement NextJS avec TypeScript
   - ✅ Installation et configuration shadcn/ui avec tous les composants nécessaires
@@ -111,4 +121,4 @@
 
 ---
 
-_Dernière mise à jour : 2025-08-26_
+_Dernière mise à jour : 2025-08-27_

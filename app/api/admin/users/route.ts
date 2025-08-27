@@ -244,6 +244,18 @@ async function updateUser(userId: string, userData: any) {
       )
     ) {
       try {
+        // Vérifie d'abord si un abonnement existe déjà
+        const { data: existingSubscription, error: selectError } =
+          await supabaseAdmin
+            .from("subscriptions")
+            .select("*")
+            .eq("user_id", userId)
+            .single()
+
+        if (selectError && selectError.code !== "PGRST116") {
+          throw selectError
+        }
+
         const now = new Date()
         const subscriptionData = {
           user_id: userId,
@@ -256,17 +268,31 @@ async function updateUser(userId: string, userData: any) {
           cancel_at_period_end: false,
         }
 
-        // Utilise supabaseAdmin pour bypasser RLS
-        const { error: subscriptionError } = await supabaseAdmin
-          .from("subscriptions")
-          .upsert(subscriptionData)
+        if (existingSubscription) {
+          const { error: subscriptionError } = await supabaseAdmin
+            .from("subscriptions")
+            .update(subscriptionData)
+            .eq("user_id", userId)
 
-        if (subscriptionError) {
-          console.warn("Error updating subscription:", subscriptionError)
+          if (subscriptionError) {
+            throw subscriptionError
+          }
+        } else {
+          const { error: subscriptionError } = await supabaseAdmin
+            .from("subscriptions")
+            .insert(subscriptionData)
+
+          if (subscriptionError) {
+            throw subscriptionError
+          }
         }
       } catch (subscriptionError) {
-        console.warn("Error updating subscription:", subscriptionError)
-        // Ne pas faire échouer la mise à jour si l'abonnement échoue
+        return NextResponse.json(
+          {
+            error: `Failed to update subscription: ${subscriptionError instanceof Error ? subscriptionError.message : String(subscriptionError)}`,
+          },
+          { status: 500 }
+        )
       }
     }
 

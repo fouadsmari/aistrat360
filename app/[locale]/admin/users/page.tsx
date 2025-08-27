@@ -208,6 +208,7 @@ export default function AdminUsersPage() {
     if (!selectedUser) return
 
     setIsSubmitting(true)
+
     try {
       const response = await fetch(`/api/admin/users?id=${selectedUser.id}`, {
         method: "POST",
@@ -224,6 +225,7 @@ export default function AdminUsersPage() {
       }
 
       await fetchUsers()
+
       showToast({
         message: "User updated successfully",
         type: "success",
