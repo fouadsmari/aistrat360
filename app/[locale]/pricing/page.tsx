@@ -28,11 +28,16 @@ import {
 import { createSupabaseClient } from "@/lib/supabase"
 import { cn } from "@/lib/utils"
 import {
-  getSubscriptionPlans,
+  getSubscriptionPacks,
+  getSubscriptionPlans, // Legacy support
   getUserSubscription,
   upsertSubscription,
   getYearlyDiscount,
   formatPrice,
+  formatQuotaText,
+  getUserPackDetails,
+  hasFeatureAccess,
+  type SubscriptionPack,
   type SubscriptionPlan,
   type UserSubscription,
 } from "@/lib/subscription-utils"
@@ -45,20 +50,20 @@ export default function PricingPage() {
   const locale = params.locale as string
   const { showToast, ToastComponent } = useToast()
 
-  const [plans, setPlans] = useState<SubscriptionPlan[]>([])
+  const [packs, setPacks] = useState<SubscriptionPack[]>([])
   const [currentSubscription, setCurrentSubscription] =
     useState<UserSubscription | null>(null)
   const [loading, setLoading] = useState(true)
   const [isYearly, setIsYearly] = useState(false)
   const [processingPlan, setProcessingPlan] = useState<string | null>(null)
 
-  const fetchPlansAndSubscription = async () => {
+  const fetchPacksAndSubscription = async () => {
     try {
       const supabase = createSupabaseClient()
 
-      // Get plans (always available)
-      const plans = await getSubscriptionPlans()
-      setPlans(plans.sort((a, b) => a.sort_order - b.sort_order))
+      // Get packs (always available)
+      const packs = await getSubscriptionPacks()
+      setPacks(packs.sort((a, b) => a.sort_order - b.sort_order))
 
       // Check if user is authenticated
       const {
@@ -87,12 +92,12 @@ export default function PricingPage() {
   }
 
   useEffect(() => {
-    fetchPlansAndSubscription()
+    fetchPacksAndSubscription()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const handleSelectPlan = async (plan: SubscriptionPlan) => {
-    setProcessingPlan(plan.name)
+  const handleSelectPack = async (pack: SubscriptionPack) => {
+    setProcessingPlan(pack.name)
     try {
       const supabase = createSupabaseClient()
       const {
@@ -111,31 +116,31 @@ export default function PricingPage() {
       // Here you would typically integrate with a payment processor like Stripe
       // For now, we'll just update the subscription in the database directly
 
-      if (plan.name === "trial") {
-        // Handle trial signup
+      if (pack.name === "free") {
+        // Handle free pack signup/downgrade
         const subscription = await upsertSubscription(
           user.id,
-          plan.name,
-          "trial"
+          pack.name,
+          "active"
         )
 
         if (!subscription) {
-          throw new Error("Failed to create trial subscription")
+          throw new Error("Failed to create free subscription")
         }
 
         showToast({
-          message: `${t("freeTrial")} started!`,
+          message: `Switched to ${locale === "fr" ? pack.display_name_fr : pack.display_name_en} pack!`,
           type: "success",
           duration: 4000,
         })
 
         // Refresh the data
-        fetchPlansAndSubscription()
+        fetchPacksAndSubscription()
       } else {
-        // For paid plans, you would redirect to payment processor
+        // For paid packs, you would redirect to payment processor
         // For demo purposes, we'll show a message
         showToast({
-          message: `Redirecting to payment for ${locale === "fr" ? plan.display_name_fr : plan.display_name_en}...`,
+          message: `Redirecting to payment for ${locale === "fr" ? pack.display_name_fr : pack.display_name_en}...`,
           type: "info",
           duration: 4000,
         })
@@ -146,7 +151,7 @@ export default function PricingPage() {
         // 3. Handle the webhook to update subscription
       }
     } catch (error) {
-      console.error("Error selecting plan:", error)
+      console.error("Error selecting pack:", error)
       showToast({
         message: tCommon("error"),
         type: "error",
@@ -157,9 +162,9 @@ export default function PricingPage() {
     }
   }
 
-  const getPlanIcon = (planName: string) => {
-    switch (planName) {
-      case "trial":
+  const getPackIcon = (packName: string) => {
+    switch (packName) {
+      case "free":
         return <Sparkles className="h-6 w-6" />
       case "starter":
         return <Zap className="h-6 w-6" />
@@ -172,36 +177,38 @@ export default function PricingPage() {
     }
   }
 
-  const getButtonText = (plan: SubscriptionPlan) => {
-    if (currentSubscription?.plan === plan.name) {
+  const getButtonText = (pack: SubscriptionPack) => {
+    if (currentSubscription?.plan === pack.name) {
       return t("currentPlan")
     }
 
-    if (plan.name === "trial") {
-      return t("startTrial")
+    if (pack.name === "free") {
+      return currentSubscription?.plan && currentSubscription.plan !== "free"
+        ? "Switch to Free"
+        : t("startTrial")
     }
 
-    if (plan.name === "advanced") {
+    if (pack.name === "advanced") {
       return t("contactSales")
     }
 
     return t("selectPlan")
   }
 
-  const getButtonVariant = (plan: SubscriptionPlan) => {
-    if (currentSubscription?.plan === plan.name) {
+  const getButtonVariant = (pack: SubscriptionPack) => {
+    if (currentSubscription?.plan === pack.name) {
       return "secondary" as const
     }
 
-    if (plan.is_popular) {
+    if (pack.is_popular) {
       return "default" as const
     }
 
     return "outline" as const
   }
 
-  const isCurrentPlan = (planName: string) => {
-    return currentSubscription?.plan === planName
+  const isCurrentPack = (packName: string) => {
+    return currentSubscription?.plan === packName
   }
 
   const formatPriceDisplay = (monthly: number, yearly: number) => {
@@ -259,7 +266,7 @@ export default function PricingPage() {
             )}
           >
             {t("yearlyBilling")}
-            {plans.some(
+            {packs.some(
               (p) => getDiscountPercent(p.price_monthly, p.price_yearly) > 0
             ) && (
               <Badge
@@ -273,31 +280,31 @@ export default function PricingPage() {
         </div>
       </div>
 
-      {/* Plans Grid */}
+      {/* Packs Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {plans.map((plan) => {
+        {packs.map((pack) => {
           const yearlyDiscount = getDiscountPercent(
-            plan.price_monthly,
-            plan.price_yearly
+            pack.price_monthly,
+            pack.price_yearly
           )
           const displayName =
-            locale === "fr" ? plan.display_name_fr : plan.display_name_en
+            locale === "fr" ? pack.display_name_fr : pack.display_name_en
           const description =
-            locale === "fr" ? plan.description_fr : plan.description_en
+            locale === "fr" ? pack.description_fr : pack.description_en
 
           return (
             <Card
-              key={plan.id}
+              key={pack.id}
               className={cn(
                 "relative border-2 transition-all duration-300 hover:shadow-lg",
-                plan.is_popular
+                pack.is_popular
                   ? "border-violet-500 bg-violet-50/50 dark:bg-violet-950/20"
                   : "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900",
-                isCurrentPlan(plan.name) &&
+                isCurrentPack(pack.name) &&
                   "ring-2 ring-green-500 ring-offset-2"
               )}
             >
-              {plan.is_popular && (
+              {pack.is_popular && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                   <Badge className="bg-gradient-to-r from-violet-600 to-purple-600 text-white">
                     <Star className="mr-1 h-3 w-3" />
@@ -306,7 +313,7 @@ export default function PricingPage() {
                 </div>
               )}
 
-              {isCurrentPlan(plan.name) && (
+              {isCurrentPack(pack.name) && (
                 <div className="absolute -top-3 right-4">
                   <Badge
                     variant="secondary"
@@ -322,12 +329,12 @@ export default function PricingPage() {
                   <div
                     className={cn(
                       "rounded-lg p-2",
-                      plan.is_popular
+                      pack.is_popular
                         ? "bg-gradient-to-br from-violet-600 to-purple-600 text-white"
                         : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
                     )}
                   >
-                    {getPlanIcon(plan.name)}
+                    {getPackIcon(pack.name)}
                   </div>
                   <div>
                     <CardTitle className="text-xl">{displayName}</CardTitle>
@@ -343,17 +350,17 @@ export default function PricingPage() {
                   <div className="flex items-baseline space-x-2">
                     <span className="text-4xl font-bold">
                       {formatPriceDisplay(
-                        plan.price_monthly,
-                        plan.price_yearly
+                        pack.price_monthly,
+                        pack.price_yearly
                       )}
                     </span>
-                    {plan.price_monthly > 0 && (
+                    {pack.price_monthly > 0 && (
                       <span className="text-gray-500">
                         {isYearly ? t("perMonth") : t("perMonth")}
                       </span>
                     )}
                   </div>
-                  {plan.price_monthly > 0 && (
+                  {pack.price_monthly > 0 && (
                     <p className="text-sm text-gray-500">
                       {isYearly ? t("billedYearly") : t("billedMonthly")}
                     </p>
@@ -370,8 +377,31 @@ export default function PricingPage() {
 
                 <Separator className="mb-6" />
 
+                {/* Quotas Display */}
+                <div className="mb-4 space-y-2">
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Quotas:
+                  </h4>
+                  <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 dark:text-gray-400">
+                    <div>Projects: {formatQuotaText(pack.quotas.projects)}</div>
+                    <div>
+                      Storage: {formatQuotaText(pack.quotas.storage_gb, "GB")}
+                    </div>
+                    <div>
+                      API Calls:{" "}
+                      {formatQuotaText(pack.quotas.api_calls_per_month, "/mo")}
+                    </div>
+                    <div>
+                      Team:{" "}
+                      {formatQuotaText(pack.quotas.team_members, "members")}
+                    </div>
+                  </div>
+                </div>
+
+                <Separator className="mb-6" />
+
                 <ul className="space-y-3">
-                  {plan.features.map((feature, index) => (
+                  {pack.features.map((feature, index) => (
                     <li key={index} className="flex items-start space-x-2">
                       <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-green-600" />
                       <span className="text-sm text-gray-600 dark:text-gray-300">
@@ -384,25 +414,25 @@ export default function PricingPage() {
 
               <CardFooter>
                 <Button
-                  onClick={() => handleSelectPlan(plan)}
+                  onClick={() => handleSelectPack(pack)}
                   disabled={
-                    isCurrentPlan(plan.name) || processingPlan === plan.name
+                    isCurrentPack(pack.name) || processingPlan === pack.name
                   }
-                  variant={getButtonVariant(plan)}
+                  variant={getButtonVariant(pack)}
                   className={cn(
                     "w-full",
-                    plan.is_popular &&
-                      !isCurrentPlan(plan.name) &&
+                    pack.is_popular &&
+                      !isCurrentPack(pack.name) &&
                       "bg-gradient-to-r from-violet-600 to-purple-600 text-white hover:from-violet-700 hover:to-purple-700"
                   )}
                 >
-                  {processingPlan === plan.name ? (
+                  {processingPlan === pack.name ? (
                     <>
                       <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                       {tCommon("loading")}...
                     </>
                   ) : (
-                    getButtonText(plan)
+                    getButtonText(pack)
                   )}
                 </Button>
               </CardFooter>

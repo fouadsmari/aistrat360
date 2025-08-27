@@ -1,18 +1,38 @@
 import { createSupabaseClient } from "./supabase"
 
-export interface SubscriptionPlan {
+export interface SubscriptionPackFeature {
+  en: string
+  fr: string
+}
+
+export interface SubscriptionPackQuotas {
+  projects: number // -1 for unlimited
+  storage_gb: number // -1 for unlimited
+  api_calls_per_month: number // -1 for unlimited
+  team_members: number // -1 for unlimited
+  [key: string]: number // Allow additional quota fields
+}
+
+export interface SubscriptionPack {
   id: string
-  name: string
+  name: "free" | "starter" | "pro" | "advanced"
   display_name_en: string
   display_name_fr: string
   description_en: string
   description_fr: string
   price_monthly: number
   price_yearly: number
-  features: Array<{ en: string; fr: string }>
+  features: SubscriptionPackFeature[]
+  quotas: SubscriptionPackQuotas
   is_enabled: boolean
   is_popular: boolean
   sort_order: number
+  created_at?: string
+  updated_at?: string
+}
+
+// Legacy interface for backward compatibility
+export interface SubscriptionPlan extends SubscriptionPack {
   trial_days: number
 }
 
@@ -31,29 +51,33 @@ export interface UserSubscription {
   stripe_subscription_id: string | null
 }
 
-export const HARDCODED_PLANS: SubscriptionPlan[] = [
+export const HARDCODED_PACKS: SubscriptionPack[] = [
   {
-    id: "trial",
-    name: "trial",
-    display_name_en: "Trial",
-    display_name_fr: "Essai",
-    description_en: "Try our platform for free",
-    description_fr: "Essayez notre plateforme gratuitement",
+    id: "free",
+    name: "free",
+    display_name_en: "Free",
+    display_name_fr: "Gratuit",
+    description_en: "Free access to basic features",
+    description_fr: "Accès gratuit aux fonctionnalités de base",
     price_monthly: 0,
     price_yearly: 0,
     features: [
       {
-        en: "Access to basic features",
+        en: "Basic features access",
         fr: "Accès aux fonctionnalités de base",
       },
       { en: "1 project", fr: "1 projet" },
-      { en: "Email support", fr: "Support par email" },
-      { en: "14-day trial", fr: "14 jours d'essai" },
+      { en: "Community support", fr: "Support communautaire" },
     ],
+    quotas: {
+      projects: 1,
+      storage_gb: 1,
+      api_calls_per_month: 1000,
+      team_members: 1,
+    },
     is_enabled: true,
     is_popular: false,
     sort_order: 0,
-    trial_days: 14,
   },
   {
     id: "starter",
@@ -71,10 +95,15 @@ export const HARDCODED_PLANS: SubscriptionPlan[] = [
       { en: "Email support", fr: "Support par email" },
       { en: "Mobile app access", fr: "Accès à l'application mobile" },
     ],
+    quotas: {
+      projects: 5,
+      storage_gb: 10,
+      api_calls_per_month: 10000,
+      team_members: 3,
+    },
     is_enabled: true,
     is_popular: false,
     sort_order: 1,
-    trial_days: 0,
   },
   {
     id: "pro",
@@ -94,10 +123,15 @@ export const HARDCODED_PLANS: SubscriptionPlan[] = [
       { en: "Team collaboration", fr: "Collaboration d'équipe" },
       { en: "API access", fr: "Accès API" },
     ],
+    quotas: {
+      projects: 25,
+      storage_gb: 100,
+      api_calls_per_month: 100000,
+      team_members: 10,
+    },
     is_enabled: true,
     is_popular: true,
     sort_order: 2,
-    trial_days: 0,
   },
   {
     id: "advanced",
@@ -118,33 +152,59 @@ export const HARDCODED_PLANS: SubscriptionPlan[] = [
       { en: "SLA guarantee", fr: "Garantie SLA" },
       { en: "Dedicated account manager", fr: "Gestionnaire de compte dédié" },
     ],
+    quotas: {
+      projects: -1,
+      storage_gb: 1000,
+      api_calls_per_month: -1,
+      team_members: -1,
+    },
     is_enabled: true,
     is_popular: false,
     sort_order: 3,
-    trial_days: 0,
   },
 ]
 
+// Legacy export for backward compatibility
+export const HARDCODED_PLANS: SubscriptionPlan[] = HARDCODED_PACKS.map(
+  (pack) => ({
+    ...pack,
+    trial_days: pack.name === "free" ? 0 : 0,
+  })
+)
+
 /**
- * Fetch subscription plans from database or return hardcoded fallback
+ * Fetch subscription packs from database or return hardcoded fallback
  */
-export async function getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
+export async function getSubscriptionPacks(): Promise<SubscriptionPack[]> {
   try {
     const supabase = createSupabaseClient()
     const { data, error } = await supabase
-      .from("subscription_plans")
+      .from("subscription_packs")
       .select("*")
       .eq("is_enabled", true)
       .order("sort_order", { ascending: true })
 
     if (error && error.code !== "PGRST116") {
-      return HARDCODED_PLANS
+      console.warn("Error fetching subscription packs:", error)
+      return HARDCODED_PACKS
     }
 
-    return data || HARDCODED_PLANS
+    return data || HARDCODED_PACKS
   } catch (error) {
-    return HARDCODED_PLANS
+    console.warn("Error fetching subscription packs:", error)
+    return HARDCODED_PACKS
   }
+}
+
+/**
+ * Legacy function for backward compatibility
+ */
+export async function getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
+  const packs = await getSubscriptionPacks()
+  return packs.map((pack) => ({
+    ...pack,
+    trial_days: pack.name === "free" ? 0 : 0,
+  }))
 }
 
 /**
@@ -178,35 +238,26 @@ export async function getUserSubscription(
  */
 export async function upsertSubscription(
   userId: string,
-  planName: string,
-  status: string = "trial"
+  packName: "free" | "starter" | "pro" | "advanced",
+  status: string = "active"
 ): Promise<UserSubscription | null> {
   try {
     const supabase = createSupabaseClient()
 
-    const plan = HARDCODED_PLANS.find((p) => p.name === planName)
-    if (!plan) {
-      throw new Error(`Plan ${planName} not found`)
+    const pack = HARDCODED_PACKS.find((p) => p.name === packName)
+    if (!pack) {
+      throw new Error(`Pack ${packName} not found`)
     }
 
     const now = new Date()
-    let trialEnd: Date | null = null
-    let periodEnd: Date | null = null
-
-    if (status === "trial" && plan.trial_days > 0) {
-      trialEnd = new Date(now)
-      trialEnd.setDate(trialEnd.getDate() + plan.trial_days)
-      periodEnd = trialEnd
-    }
-
     const subscriptionData = {
       user_id: userId,
-      plan: planName,
+      plan: packName,
       status,
       current_period_start: now.toISOString(),
-      current_period_end: periodEnd?.toISOString() || null,
-      trial_start: status === "trial" ? now.toISOString() : null,
-      trial_end: trialEnd?.toISOString() || null,
+      current_period_end: null,
+      trial_start: null,
+      trial_end: null,
       cancel_at_period_end: false,
     }
 
@@ -282,4 +333,88 @@ export function getTrialDaysRemaining(
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 
   return Math.max(0, diffDays)
+}
+
+/**
+ * Get pack by name
+ */
+export function getPackByName(packName: string): SubscriptionPack | null {
+  return HARDCODED_PACKS.find((pack) => pack.name === packName) || null
+}
+
+/**
+ * Check if user has access to a feature based on their pack
+ */
+export function hasFeatureAccess(
+  userPack: string | null,
+  requiredPack: "free" | "starter" | "pro" | "advanced"
+): boolean {
+  if (!userPack) return requiredPack === "free"
+
+  const packHierarchy: Record<string, number> = {
+    free: 0,
+    starter: 1,
+    pro: 2,
+    advanced: 3,
+  }
+
+  const userLevel = packHierarchy[userPack] ?? 0
+  const requiredLevel = packHierarchy[requiredPack] ?? 0
+
+  return userLevel >= requiredLevel
+}
+
+/**
+ * Check if user can use quota (projects, storage, etc.)
+ */
+export function canUseQuota(
+  userPack: string | null,
+  quotaType: keyof SubscriptionPackQuotas,
+  currentUsage: number
+): boolean {
+  const pack = userPack ? getPackByName(userPack) : null
+  if (!pack) return false
+
+  const quotaLimit = pack.quotas[quotaType]
+  if (quotaLimit === -1) return true // Unlimited
+
+  return currentUsage < quotaLimit
+}
+
+/**
+ * Get remaining quota for a user
+ */
+export function getRemainingQuota(
+  userPack: string | null,
+  quotaType: keyof SubscriptionPackQuotas,
+  currentUsage: number
+): number {
+  const pack = userPack ? getPackByName(userPack) : null
+  if (!pack) return 0
+
+  const quotaLimit = pack.quotas[quotaType]
+  if (quotaLimit === -1) return -1 // Unlimited
+
+  return Math.max(0, quotaLimit - currentUsage)
+}
+
+/**
+ * Format quota display text
+ */
+export function formatQuotaText(quotaValue: number, unit: string = ""): string {
+  if (quotaValue === -1) return `Unlimited${unit ? ` ${unit}` : ""}`
+  return `${quotaValue}${unit ? ` ${unit}` : ""}`
+}
+
+/**
+ * Get user's subscription pack details
+ */
+export async function getUserPackDetails(userId: string): Promise<{
+  subscription: UserSubscription | null
+  pack: SubscriptionPack | null
+}> {
+  const subscription = await getUserSubscription(userId)
+  const pack = subscription ? getPackByName(subscription.plan) : null
+
+  return { subscription, pack }
 }

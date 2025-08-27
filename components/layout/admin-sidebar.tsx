@@ -23,6 +23,7 @@ import {
   Globe,
   Lock,
   Zap,
+  Package,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -62,6 +63,11 @@ export function AdminSidebar({
       title: t("subscriptions"),
       icon: UserCheck,
       href: "/admin/subscriptions",
+    },
+    {
+      title: "Packs",
+      icon: Package,
+      href: "/admin/packs",
     },
     {
       title: t("revenueAnalytics"),
