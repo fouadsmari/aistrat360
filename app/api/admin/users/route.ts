@@ -89,12 +89,17 @@ export async function GET() {
     }
 
     // Transforme les données pour inclure le plan directement dans l'objet utilisateur
-    const usersWithSubscriptions = profiles.map((profile) => ({
-      ...profile,
-      subscription_plan: profile.subscriptions?.[0]?.plan || "free",
-      subscription_status: profile.subscriptions?.[0]?.status || "active",
-      subscription_details: profile.subscriptions?.[0] || null,
-    }))
+    const usersWithSubscriptions = profiles.map((profile) => {
+      // CORRECTION : subscriptions est un objet unique, pas un tableau !
+      const subscription = profile.subscriptions
+
+      return {
+        ...profile,
+        subscription_plan: subscription?.plan || "free",
+        subscription_status: subscription?.status || "active",
+        subscription_details: subscription || null,
+      }
+    })
 
     return NextResponse.json({ users: usersWithSubscriptions })
   } catch (error) {
@@ -174,25 +179,11 @@ async function createUser(userData: any) {
 
 // Fonction pour mettre à jour un utilisateur
 async function updateUser(userId: string, userData: any) {
-  console.log("🔥🔥🔥 === DÉBUT API updateUser ===")
-  console.log("🆔 User ID reçu:", userId)
-  console.log(
-    "📊 Données utilisateur reçues:",
-    JSON.stringify(userData, null, 2)
-  )
-  console.log("🎯 Plan d'abonnement dans userData:", {
-    plan: userData.subscription_plan,
-    type: typeof userData.subscription_plan,
-    valeur_brute: JSON.stringify(userData.subscription_plan),
-  })
-
   try {
     if (!userId) {
-      console.error("❌ User ID manquant!")
       return NextResponse.json({ error: "User ID required" }, { status: 400 })
     }
 
-    console.log("📝 Mise à jour du profil utilisateur...")
     // Met à jour le profil
     const { error: profileError } = await supabaseAdmin
       .from("profiles")
@@ -213,10 +204,8 @@ async function updateUser(userId: string, userData: any) {
       .eq("id", userId)
 
     if (profileError) {
-      console.error("❌ Erreur mise à jour profil:", profileError)
       return NextResponse.json({ error: profileError.message }, { status: 500 })
     }
-    console.log("✅ Profil utilisateur mis à jour avec succès")
 
     // Prepare auth update data
     const authUpdateData: any = {
@@ -253,116 +242,67 @@ async function updateUser(userId: string, userData: any) {
     }
 
     // Met à jour l'abonnement si un plan est fourni
-    console.log("🎯 Vérification du plan d'abonnement...")
-    console.log("🎯 Plan fourni:", userData.subscription_plan)
-    console.log("🎯 Plans valides:", ["free", "starter", "pro", "advanced"])
-
-    if (userData.subscription_plan) {
-      console.log("🎯 Plan détecté, vérification de la validité...")
-      const isValidPlan = ["free", "starter", "pro", "advanced"].includes(
+    if (
+      userData.subscription_plan &&
+      ["free", "starter", "pro", "advanced"].includes(
         userData.subscription_plan
       )
-      console.log("🎯 Plan valide?", isValidPlan)
+    ) {
+      try {
+        // Vérifie d'abord si un abonnement existe déjà
+        const { data: existingSubscription, error: selectError } =
+          await supabaseAdmin
+            .from("subscriptions")
+            .select("*")
+            .eq("user_id", userId)
+            .single()
 
-      if (isValidPlan) {
-        console.log("✅ Plan valide détecté:", userData.subscription_plan)
-        try {
-          // Vérifie d'abord si un abonnement existe déjà
-          console.log(
-            "🔍 Recherche d'un abonnement existant pour user:",
-            userId
-          )
-          const { data: existingSubscription, error: selectError } =
-            await supabaseAdmin
-              .from("subscriptions")
-              .select("*")
-              .eq("user_id", userId)
-              .single()
-
-          console.log("📋 Abonnement existant trouvé:", existingSubscription)
-          console.log("📋 Erreur de recherche:", selectError)
-
-          if (selectError && selectError.code !== "PGRST116") {
-            console.error("❌ Erreur lors de la recherche:", selectError)
-            throw selectError
-          }
-
-          const now = new Date()
-          const subscriptionData = {
-            user_id: userId,
-            plan: userData.subscription_plan,
-            status: userData.subscription_status || "active",
-            current_period_start: now.toISOString(),
-            current_period_end: null,
-            trial_start: null,
-            trial_end: null,
-            cancel_at_period_end: false,
-          }
-
-          console.log(
-            "💾 Données d'abonnement à sauvegarder:",
-            subscriptionData
-          )
-
-          if (existingSubscription) {
-            console.log("🔄 Mise à jour de l'abonnement existant...")
-            const { error: subscriptionError } = await supabaseAdmin
-              .from("subscriptions")
-              .update(subscriptionData)
-              .eq("user_id", userId)
-
-            if (subscriptionError) {
-              console.error(
-                "❌ Erreur mise à jour abonnement:",
-                subscriptionError
-              )
-              throw subscriptionError
-            }
-            console.log("✅ Abonnement mis à jour avec succès")
-          } else {
-            console.log("➕ Création d'un nouvel abonnement...")
-            const { error: subscriptionError } = await supabaseAdmin
-              .from("subscriptions")
-              .insert(subscriptionData)
-
-            if (subscriptionError) {
-              console.error("❌ Erreur création abonnement:", subscriptionError)
-              throw subscriptionError
-            }
-            console.log("✅ Nouvel abonnement créé avec succès")
-          }
-        } catch (subscriptionError) {
-          console.error(
-            "💥 ERREUR CRITIQUE lors de la gestion de l'abonnement:",
-            subscriptionError
-          )
-          return NextResponse.json(
-            {
-              error: `Failed to update subscription: ${subscriptionError instanceof Error ? subscriptionError.message : String(subscriptionError)}`,
-            },
-            { status: 500 }
-          )
+        if (selectError && selectError.code !== "PGRST116") {
+          throw selectError
         }
-      } else {
-        console.warn("⚠️ Plan fourni invalide:", {
+
+        const now = new Date()
+        const subscriptionData = {
+          user_id: userId,
           plan: userData.subscription_plan,
-          type: typeof userData.subscription_plan,
-          plansValides: ["free", "starter", "pro", "advanced"],
-        })
+          status: userData.subscription_status || "active",
+          current_period_start: now.toISOString(),
+          current_period_end: null,
+          trial_start: null,
+          trial_end: null,
+          cancel_at_period_end: false,
+        }
+
+        if (existingSubscription) {
+          const { error: subscriptionError } = await supabaseAdmin
+            .from("subscriptions")
+            .update(subscriptionData)
+            .eq("user_id", userId)
+
+          if (subscriptionError) {
+            throw subscriptionError
+          }
+        } else {
+          const { error: subscriptionError } = await supabaseAdmin
+            .from("subscriptions")
+            .insert(subscriptionData)
+
+          if (subscriptionError) {
+            throw subscriptionError
+          }
+        }
+      } catch (subscriptionError) {
+        return NextResponse.json(
+          {
+            error: `Failed to update subscription: ${subscriptionError instanceof Error ? subscriptionError.message : String(subscriptionError)}`,
+          },
+          { status: 500 }
+        )
       }
-    } else {
-      console.log("ℹ️ Aucun plan d'abonnement fourni dans les données")
     }
 
-    console.log("🎉🎉🎉 === FIN API updateUser (SUCCÈS) ===")
     return NextResponse.json({ message: "User updated successfully" })
   } catch (error) {
-    console.error("💥💥💥 === ERREUR CRITIQUE API updateUser ===", error)
-    console.error("💥 Type erreur:", typeof error)
-    console.error(
-      "💥 Message erreur:",
-      error instanceof Error ? error.message : String(error)
-    )
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -209,47 +209,21 @@ export default function AdminUsersPage() {
 
     setIsSubmitting(true)
 
-    // LOG DÉTAILLÉ - DÉBUT MODIFICATION
-    console.log("🔥 === DÉBUT MODIFICATION UTILISATEUR ===")
-    console.log("👤 User sélectionné:", {
-      id: selectedUser.id,
-      email: selectedUser.email,
-      currentPlan: selectedUser.subscription_plan,
-    })
-    console.log("📋 Données du formulaire editFormData:", editFormData)
-    console.log("🎯 Plan à modifier:", {
-      ancien: selectedUser.subscription_plan,
-      nouveau: editFormData.subscription_plan,
-      type: typeof editFormData.subscription_plan,
-    })
-
     try {
-      const requestPayload = JSON.stringify(editFormData)
-      console.log("📤 Payload envoyé à l'API:", requestPayload)
-
       const response = await fetch(`/api/admin/users?id=${selectedUser.id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: requestPayload,
+        body: JSON.stringify(editFormData),
       })
 
-      console.log("📥 Status de réponse:", response.status)
-      console.log(
-        "📥 Headers de réponse:",
-        Object.fromEntries(response.headers.entries())
-      )
-
       const data = await response.json()
-      console.log("📥 Réponse complète de l'API:", data)
 
       if (!response.ok) {
-        console.error("❌ ERREUR API:", data.error)
         throw new Error(data.error || "Failed to update user")
       }
 
-      console.log("✅ Réponse API réussie, rechargement des utilisateurs...")
       await fetchUsers()
 
       showToast({
@@ -258,14 +232,7 @@ export default function AdminUsersPage() {
       })
       setIsEditDialogOpen(false)
       setSelectedUser(null)
-      console.log("🎉 === FIN MODIFICATION UTILISATEUR (SUCCÈS) ===")
     } catch (error) {
-      console.error("💥 === ERREUR CRITIQUE ===", error)
-      console.error("💥 Type d'erreur:", typeof error)
-      console.error(
-        "💥 Message d'erreur:",
-        error instanceof Error ? error.message : String(error)
-      )
       showToast({
         message:
           error instanceof Error ? error.message : "Failed to update user",
