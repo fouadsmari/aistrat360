@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createSupabaseServerClient } from "@/lib/supabase-server"
+import { ProfitabilityPredictor } from "@/lib/profitability-predictor"
 import { z } from "zod"
 
 const analyseRequestSchema = z.object({
@@ -93,9 +94,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // TODO: Start background processing (queue job)
-    // For now, we'll just return the analysis ID
-    // Later this will trigger DataForSEO API calls and AI processing
+    // Start background processing
+    // In production, you'd use a queue system like BullMQ or similar
+    // For now, we'll process directly but return immediately
+    processAnalysis(analysis.id, validatedData).catch(console.error)
 
     return NextResponse.json({
       success: true,
@@ -170,5 +172,59 @@ export async function GET(request: NextRequest) {
       { error: "Internal server error" },
       { status: 500 }
     )
+  }
+}
+
+/**
+ * Process analysis in background
+ */
+async function processAnalysis(
+  analysisId: string,
+  input: z.infer<typeof analyseRequestSchema>
+) {
+  const supabase = await createSupabaseServerClient()
+  const predictor = new ProfitabilityPredictor()
+
+  try {
+    // Update progress callback
+    const updateProgress = async (progress: number, status: string) => {
+      await supabase
+        .from("profitability_analyses")
+        .update({
+          progress,
+          status: progress === 100 ? "completed" : "processing",
+        })
+        .eq("id", analysisId)
+    }
+
+    // Start processing
+    await updateProgress(5, "Initialisation de l'analyse...")
+
+    // Run prediction
+    const prediction = await predictor.predictProfitability(
+      {
+        websiteUrl: input.websiteUrl,
+        budget: input.budget,
+        objective: input.objective,
+        keywords: input.keywords,
+      },
+      analysisId,
+      updateProgress
+    )
+
+    // Analysis completed successfully
+    console.log(`✅ Analysis ${analysisId} completed successfully`)
+  } catch (error) {
+    console.error(`❌ Analysis ${analysisId} failed:`, error)
+    
+    // Update status to failed
+    await supabase
+      .from("profitability_analyses")
+      .update({
+        status: "failed",
+        progress: 0,
+        completed_at: new Date().toISOString(),
+      })
+      .eq("id", analysisId)
   }
 }

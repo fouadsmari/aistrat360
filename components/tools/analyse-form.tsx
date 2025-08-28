@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -56,6 +57,7 @@ interface AnalyseFormProps {
 
 export function AnalyseForm({ userQuota }: AnalyseFormProps) {
   const t = useTranslations("tools.analyse")
+  const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [progress, setProgress] = useState(0)
 
@@ -103,8 +105,9 @@ export function AnalyseForm({ userQuota }: AnalyseFormProps) {
       setProgress(100)
 
       if (response.ok) {
-        // TODO: Handle success - redirect to results or show in-page results
-        console.log("Analysis started successfully")
+        const result = await response.json()
+        // Redirect to results page
+        router.push(`/tools/analyse/${result.analysisId}`)
       } else {
         throw new Error("Failed to start analysis")
       }
