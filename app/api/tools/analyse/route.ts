@@ -100,16 +100,48 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Start background processing
-    // In production, you'd use a queue system like BullMQ or similar
-    // For now, we'll process directly but return immediately
-    processAnalysis(analysis.id, validatedData).catch(console.error)
+    // Process analysis synchronously instead of background for Vercel compatibility
+    console.log(`🚀 SERVER: Starting synchronous analysis for ${analysis.id}`)
 
-    return NextResponse.json({
-      success: true,
-      analysisId: analysis.id,
-      message: "Analysis started successfully",
-    })
+    try {
+      // Process the analysis directly in this request
+      await processAnalysis(analysis.id, validatedData)
+      console.log(
+        `✅ SERVER: Analysis completed successfully for ${analysis.id}`
+      )
+
+      return NextResponse.json({
+        success: true,
+        analysisId: analysis.id,
+        message: "Analysis completed successfully",
+        status: "completed",
+      })
+    } catch (error) {
+      console.error(`❌ SERVER: Analysis failed for ${analysis.id}:`, error)
+
+      // Update analysis to failed status
+      await supabase
+        .from("profitability_analyses")
+        .update({
+          status: "failed",
+          progress: 0,
+          completed_at: new Date().toISOString(),
+          result_data: {
+            error: error instanceof Error ? error.message : "Unknown error",
+          },
+        })
+        .eq("id", analysis.id)
+
+      return NextResponse.json(
+        {
+          success: false,
+          analysisId: analysis.id,
+          message: "Analysis failed",
+          error: error instanceof Error ? error.message : "Unknown error",
+        },
+        { status: 500 }
+      )
+    }
   } catch (error) {
     console.error("Analysis API error:", error)
 

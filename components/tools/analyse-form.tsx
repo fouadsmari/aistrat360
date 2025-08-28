@@ -112,8 +112,19 @@ export function AnalyseForm({ userQuota }: AnalyseFormProps) {
         const result = await response.json()
         console.log("✅ CLIENT: API success, got result", result)
 
-        // Start polling for progress
         const analysisId = result.analysisId
+
+        // Check if analysis completed immediately (synchronous processing)
+        if (result.status === "completed") {
+          console.log(
+            "🎉 CLIENT: Analysis completed immediately, redirecting..."
+          )
+          setProgress(100)
+          router.push(`/tools/analyse/${analysisId}`)
+          return
+        }
+
+        // If not completed, start polling for progress
         console.log(
           "🔄 CLIENT: Starting progress polling for analysis",
           analysisId
