@@ -151,16 +151,75 @@ export class DataForSEOClient {
 
       return []
     } catch (error) {
-      // Return fallback data
-      const fallbackData = keywords.map((keyword) => ({
-        keyword,
-        search_volume: Math.floor(Math.random() * 1000) + 100, // Random between 100-1100
-        cpc: Math.random() * 3 + 0.5, // Random between 0.5-3.5
-        competition: Math.random(), // Random between 0-1
-        monthly_searches: [],
-      }))
+      console.error("❌ DataForSEO API error:", error)
+      throw new Error("Failed to get keyword data from DataForSEO API")
+    }
+  }
 
-      return fallbackData
+  /**
+   * Get HTML content from website using DataForSEO
+   */
+  async getWebsiteHTML(websiteUrl: string): Promise<string> {
+    const inputData = {
+      url: websiteUrl,
+      enable_content_parsing: true,
+      enable_javascript: true,
+    }
+
+    // Check cache first
+    const cached = await this.cache.getCachedResponse(
+      inputData,
+      "dataforseo",
+      "website_html"
+    )
+    if (cached) {
+      return cached
+    }
+
+    try {
+      const response = await fetch(
+        `${this.config.baseUrl}/v3/on_page/page_screenshot/live`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: this.authHeader,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify([
+            {
+              url: websiteUrl,
+              enable_content_parsing: true,
+              enable_javascript: true,
+              custom_user_agent: "Mozilla/5.0 (compatible; DataForSEO/1.0)",
+            },
+          ]),
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error(`DataForSEO API error: ${response.statusText}`)
+      }
+
+      const data = await response.json()
+
+      if (data.tasks?.[0]?.result?.[0]) {
+        const htmlContent = data.tasks[0].result[0].content?.plain_text || ""
+        
+        // Cache the result for 7 days (HTML content changes less frequently)
+        await this.cache.setCachedResponse(
+          inputData,
+          "dataforseo",
+          "website_html",
+          htmlContent
+        )
+
+        return htmlContent
+      }
+
+      throw new Error("No HTML content received from DataForSEO")
+    } catch (error) {
+      console.error("❌ DataForSEO HTML fetch error:", error)
+      throw new Error("Failed to fetch website HTML from DataForSEO API")
     }
   }
 
@@ -234,22 +293,8 @@ export class DataForSEOClient {
 
       return []
     } catch (error) {
-      // Return fallback keywords based on domain analysis
-      const domain = target.replace(/^https?:\/\//, "").replace(/^www\./, "")
-      const fallbackKeywords = [
-        domain.split(".")[0], // Domain name
-        `${domain.split(".")[0]} service`,
-        `${domain.split(".")[0]} professionnel`,
-        `${domain.split(".")[0]} en ligne`,
-        `${domain.split(".")[0]} france`,
-        "service client",
-        "devis gratuit",
-        "consultant",
-        "entreprise",
-        "solution",
-      ]
-
-      return fallbackKeywords
+      console.error("❌ DataForSEO keywords API error:", error)
+      throw new Error("Failed to get keyword suggestions from DataForSEO API")
     }
   }
 

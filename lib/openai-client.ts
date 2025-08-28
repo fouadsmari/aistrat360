@@ -73,61 +73,97 @@ export class OpenAIClient {
 
       return result
     } catch (error) {
-      // Return intelligent fallback based on prompt content
-      const promptLower = prompt.toLowerCase()
-      let industry = "general"
-      let businessType = "b2c"
-      let keywords: string[] = []
-
-      // Basic industry detection from prompt
-      if (promptLower.includes("restaurant") || promptLower.includes("food")) {
-        industry = "restaurant"
-        keywords = ["restaurant", "cuisine", "menu", "réservation", "livraison"]
-      } else if (
-        promptLower.includes("consulting") ||
-        promptLower.includes("conseil")
-      ) {
-        industry = "consulting"
-        businessType = "b2b"
-        keywords = [
-          "consultant",
-          "conseil",
-          "expertise",
-          "accompagnement",
-          "formation",
-        ]
-      } else if (
-        promptLower.includes("ecommerce") ||
-        promptLower.includes("boutique")
-      ) {
-        industry = "ecommerce"
-        keywords = [
-          "boutique en ligne",
-          "achat",
-          "livraison",
-          "produits",
-          "catalogue",
-        ]
-      } else {
-        // Generic service keywords
-        keywords = [
-          "service",
-          "professionnel",
-          "devis",
-          "contact",
-          "entreprise",
-        ]
-      }
-
-      return {
-        industry,
-        businessType,
-        keywords,
-        targetAudience: "clients potentiels",
-        competitiveness: "medium",
-        businessModel: "service",
-      }
+      console.error("❌ OpenAI API error:", error)
+      throw new Error("Failed to get AI analysis from OpenAI API")
     }
+  }
+
+  /**
+   * Extract exactly 3 targeted keywords for Google Ads from website content
+   */
+  async extractTargetedKeywords(
+    htmlContent: string,
+    websiteUrl: string,
+    targetCountry: string,
+    objective: string
+  ): Promise<string[]> {
+    const countryMapping: Record<string, string> = {
+      CA: "Canada",
+      US: "États-Unis", 
+      FR: "France",
+      BE: "Belgique",
+      CH: "Suisse",
+      GB: "Royaume-Uni",
+      DE: "Allemagne",
+      ES: "Espagne",
+      IT: "Italie",
+      NL: "Pays-Bas"
+    }
+
+    const objectiveMapping: Record<string, string> = {
+      leads: "générer des prospects qualifiés",
+      sales: "augmenter les ventes directes",
+      traffic: "augmenter le trafic du site",
+      awareness: "améliorer la notoriété de la marque"
+    }
+
+    const inputData = {
+      htmlContent: htmlContent.substring(0, 3000),
+      websiteUrl,
+      targetCountry,
+      objective
+    }
+
+    // Check cache first
+    const cached = await this.cache.getCachedResponse(
+      inputData,
+      "openai",
+      "targeted_keywords"
+    )
+    if (cached) {
+      return cached
+    }
+
+    const prompt = `Tu es un expert Google Ads. Analyse ce contenu de site web et donne EXACTEMENT 3 mots-clés Google Ads ultra-pertinents.
+
+CONTEXTE OBLIGATOIRE:
+- Site web: ${websiteUrl}
+- Marché cible: ${countryMapping[targetCountry]}
+- Objectif: ${objectiveMapping[objective]}
+
+CONTENU DU SITE:
+${htmlContent.substring(0, 2500)}
+
+RÈGLES STRICTES:
+1. EXACTEMENT 3 mots-clés (pas plus, pas moins)
+2. Mots-clés spécifiques au marché ${countryMapping[targetCountry]}
+3. Intention commerciale claire (achat/service)
+4. Éviter les mots-clés trop génériques
+5. Adapter au vocabulaire local du pays cible
+
+FORMAT: Retourne UNIQUEMENT un JSON avec:
+{
+  "keywords": ["mot-clé 1", "mot-clé 2", "mot-clé 3"]
+}
+
+IMPORTANT: Aucun autre texte, juste le JSON.`
+
+    const result = await this.generateJSON(prompt, "gpt-4o-mini")
+    const keywords = result.keywords || []
+
+    if (keywords.length !== 3) {
+      throw new Error(`AI returned ${keywords.length} keywords instead of exactly 3`)
+    }
+
+    // Cache the result
+    await this.cache.setCachedResponse(
+      inputData,
+      "openai", 
+      "targeted_keywords",
+      keywords
+    )
+
+    return keywords
   }
 
   /**

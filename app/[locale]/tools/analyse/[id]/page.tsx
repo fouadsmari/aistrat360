@@ -11,15 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { KeywordTable } from "@/components/tools/keyword-table"
 import {
   Target,
   TrendingUp,
@@ -235,145 +227,11 @@ export default async function AnalysisResultPage({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="rounded-md border">
-                <Table>
-                  <TableCaption>
-                    {results.recommendedKeywords.length} mots-clés analysés pour
-                    le marché {results?.websiteAnalysis?.targetCountry || "FR"}
-                  </TableCaption>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="font-semibold">Mot-clé</TableHead>
-                      <TableHead className="text-right font-semibold">
-                        <div className="flex items-center justify-end gap-1">
-                          <BarChart3 className="h-4 w-4" />
-                          Volume/mois
-                        </div>
-                      </TableHead>
-                      <TableHead className="text-right font-semibold">
-                        <div className="flex items-center justify-end gap-1">
-                          <DollarSign className="h-4 w-4" />
-                          CPC
-                        </div>
-                      </TableHead>
-                      <TableHead className="text-right font-semibold">
-                        Difficulté
-                      </TableHead>
-                      <TableHead className="text-right font-semibold">
-                        Score ROI
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {results.recommendedKeywords.map((kw: any, i: number) => {
-                      const roiScore =
-                        kw.searchVolume && kw.cpc
-                          ? Math.round(kw.searchVolume / kw.cpc / 10)
-                          : 0
-                      const difficultyLevel =
-                        kw.difficulty < 0.3
-                          ? "Faible"
-                          : kw.difficulty < 0.7
-                            ? "Moyen"
-                            : "Élevé"
-                      const difficultyColor =
-                        kw.difficulty < 0.3
-                          ? "text-green-600"
-                          : kw.difficulty < 0.7
-                            ? "text-orange-600"
-                            : "text-red-600"
-
-                      return (
-                        <TableRow key={i}>
-                          <TableCell className="font-medium">
-                            <div className="max-w-xs">{kw.keyword}</div>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="font-semibold">
-                              {(kw.searchVolume || 0).toLocaleString()}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="font-semibold">
-                              {currencySymbol}
-                              {(kw.cpc || 0).toFixed(2)}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Badge
-                              variant="outline"
-                              className={`${difficultyColor} border-current`}
-                            >
-                              {difficultyLevel}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              <div className="h-2 w-12 rounded-full bg-gray-200">
-                                <div
-                                  className="h-2 rounded-full bg-gradient-to-r from-violet-500 to-purple-600"
-                                  style={{
-                                    width: `${Math.min(100, roiScore)}%`,
-                                  }}
-                                />
-                              </div>
-                              <span className="text-sm font-medium">
-                                {roiScore}
-                              </span>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      )
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
-
-              {/* Keywords Summary Stats */}
-              <div className="mt-6 grid gap-4 md:grid-cols-3">
-                <div className="rounded-lg bg-violet-50 p-4 text-center dark:bg-violet-900/10">
-                  <div className="text-2xl font-bold text-violet-600">
-                    {results.recommendedKeywords
-                      .reduce(
-                        (sum: number, kw: any) => sum + (kw.searchVolume || 0),
-                        0
-                      )
-                      .toLocaleString()}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Volume total/mois
-                  </div>
-                </div>
-                <div className="rounded-lg bg-green-50 p-4 text-center dark:bg-green-900/10">
-                  <div className="text-2xl font-bold text-green-600">
-                    {currencySymbol}
-                    {(
-                      results.recommendedKeywords.reduce(
-                        (sum: number, kw: any) => sum + (kw.cpc || 0),
-                        0
-                      ) / results.recommendedKeywords.length
-                    ).toFixed(2)}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    CPC moyen
-                  </div>
-                </div>
-                <div className="rounded-lg bg-orange-50 p-4 text-center dark:bg-orange-900/10">
-                  <div className="text-2xl font-bold text-orange-600">
-                    {Math.round(
-                      (results.recommendedKeywords.filter(
-                        (kw: any) => kw.difficulty < 0.5
-                      ).length /
-                        results.recommendedKeywords.length) *
-                        100
-                    )}
-                    %
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Mots-clés accessibles
-                  </div>
-                </div>
-              </div>
+              <KeywordTable
+                keywords={results.recommendedKeywords}
+                currencySymbol={currencySymbol}
+                targetCountry={results?.websiteAnalysis?.targetCountry || "FR"}
+              />
             </CardContent>
           </Card>
         )}
