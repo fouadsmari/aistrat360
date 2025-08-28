@@ -96,28 +96,28 @@ export default async function AnalysePage({ params }: AnalysePageProps) {
       {/* Hero Section */}
       <div className="space-y-4 text-center">
         <div className="flex items-center justify-center gap-2">
-          <Target className="text-primary h-8 w-8" />
-          <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-4xl font-bold text-transparent">
+          <Target className="h-8 w-8 text-violet-600 dark:text-violet-400" />
+          <h1 className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-4xl font-bold text-transparent">
             {t("title")}
           </h1>
           <Badge
             variant="secondary"
-            className="bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300"
+            className="bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300"
           >
             RÉVOLUTIONNAIRE
           </Badge>
         </div>
-        <p className="text-muted-foreground mx-auto max-w-3xl text-xl">
+        <p className="text-muted-foreground mx-auto max-w-3xl text-lg">
           {t("description")}
         </p>
       </div>
 
       {/* Key Features */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <Card className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/10">
+        <Card className="border-gray-200 hover:border-violet-200 transition-colors dark:border-gray-800 dark:hover:border-violet-700">
           <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-green-800 dark:text-green-200">
-              <Target className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-violet-600 dark:text-violet-400" />
               Analyse Automatique
             </CardTitle>
           </CardHeader>
@@ -130,10 +130,10 @@ export default async function AnalysePage({ params }: AnalysePageProps) {
           </CardContent>
         </Card>
 
-        <Card className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/10">
+        <Card className="border-gray-200 hover:border-violet-200 transition-colors dark:border-gray-800 dark:hover:border-violet-700">
           <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-blue-800 dark:text-blue-200">
-              <BarChart3 className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-violet-600 dark:text-violet-400" />
               Prédiction ROI
             </CardTitle>
           </CardHeader>
@@ -145,10 +145,10 @@ export default async function AnalysePage({ params }: AnalysePageProps) {
           </CardContent>
         </Card>
 
-        <Card className="border-purple-200 bg-purple-50 dark:border-purple-800 dark:bg-purple-900/10">
+        <Card className="border-gray-200 hover:border-violet-200 transition-colors dark:border-gray-800 dark:hover:border-violet-700">
           <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-purple-800 dark:text-purple-200">
-              <DollarSign className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5 text-violet-600 dark:text-violet-400" />
               Optimisation Budget
             </CardTitle>
           </CardHeader>

@@ -1,45 +1,82 @@
-import { ReactNode } from "react"
-import { getTranslations } from "next-intl/server"
-import { Card, CardContent } from "@/components/ui/card"
+"use client"
 
-interface ToolsLayoutProps {
-  children: ReactNode
-  params: Promise<{ locale: string }>
-}
+import { useState, useEffect } from "react"
+import { Header } from "@/components/layout/header"
+import { Sidebar } from "@/components/layout/sidebar"
+import { Sheet, SheetContent } from "@/components/ui/sheet"
+import { cn } from "@/lib/utils"
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ locale: string }>
-}) {
-  const { locale } = await params
-  const t = await getTranslations({ locale, namespace: "tools" })
-
-  return {
-    title: t("title"),
-    description: t("description"),
-  }
-}
-
-export default async function ToolsLayout({
+export default function ToolsLayout({
   children,
-  params,
-}: ToolsLayoutProps) {
-  const { locale } = await params
-  const t = await getTranslations({ locale, namespace: "tools" })
+}: {
+  children: React.ReactNode
+}) {
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768)
+      if (window.innerWidth < 768) {
+        setIsSidebarCollapsed(false)
+      }
+    }
+
+    checkScreenSize()
+    window.addEventListener("resize", checkScreenSize)
+    return () => window.removeEventListener("resize", checkScreenSize)
+  }, [])
+
+  const handleSidebarToggle = () => {
+    if (isMobile) {
+      setIsMobileSidebarOpen(!isMobileSidebarOpen)
+    } else {
+      setIsSidebarCollapsed(!isSidebarCollapsed)
+    }
+  }
 
   return (
-    <div className="container mx-auto space-y-6 py-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
-          <p className="text-muted-foreground mt-2">{t("description")}</p>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+      <div className="flex h-screen overflow-hidden">
+        {!isMobile && (
+          <Sidebar
+            isCollapsed={isSidebarCollapsed}
+            onToggle={handleSidebarToggle}
+            isMobile={false}
+          />
+        )}
+
+        {isMobile && (
+          <Sheet
+            open={isMobileSidebarOpen}
+            onOpenChange={setIsMobileSidebarOpen}
+          >
+            <SheetContent side="left" className="w-64 p-0">
+              <Sidebar
+                isCollapsed={false}
+                onToggle={() => setIsMobileSidebarOpen(false)}
+                isMobile={true}
+              />
+            </SheetContent>
+          </Sheet>
+        )}
+
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <Header onMenuClick={handleSidebarToggle} isMobile={isMobile} />
+
+          <main className="flex-1 overflow-y-auto">
+            <div
+              className={cn(
+                "p-4 md:p-6 lg:p-8",
+                "animate-in fade-in duration-500"
+              )}
+            >
+              {children}
+            </div>
+          </main>
         </div>
       </div>
-
-      <Card className="border-dashed">
-        <CardContent className="p-6">{children}</CardContent>
-      </Card>
     </div>
   )
 }

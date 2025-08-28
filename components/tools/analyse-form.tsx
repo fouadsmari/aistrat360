@@ -124,12 +124,12 @@ export function AnalyseForm({ userQuota }: AnalyseFormProps) {
   return (
     <div className="space-y-6">
       {/* Quota Display */}
-      <Card className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/10">
+      <Card className="border-violet-200 bg-violet-50 dark:border-violet-800 dark:bg-violet-900/10">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-blue-600" />
-              <span className="font-medium text-blue-800 dark:text-blue-200">
+              <Target className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+              <span className="font-medium text-violet-800 dark:text-violet-200">
                 {t("quota.remaining")}
               </span>
             </div>
@@ -283,7 +283,7 @@ export function AnalyseForm({ userQuota }: AnalyseFormProps) {
               <Button
                 type="submit"
                 size="lg"
-                className="w-full"
+                className="w-full bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white"
                 disabled={!canSubmit || isSubmitting}
               >
                 {isSubmitting ? (
@@ -292,7 +292,10 @@ export function AnalyseForm({ userQuota }: AnalyseFormProps) {
                     {t("form.submitting")}
                   </>
                 ) : (
-                  t("form.submit")
+                  <>
+                    <Target className="mr-2 h-4 w-4" />
+                    {t("form.submit")}
+                  </>
                 )}
               </Button>
 
