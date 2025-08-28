@@ -118,6 +118,10 @@ export async function POST(request: NextRequest) {
 
     try {
       // Process the analysis directly in this request
+      console.log(`🔧 SERVER: About to process analysis for ${analysis.id}`)
+      console.log(`🔧 SERVER: DataForSEO credentials available: ${!!process.env.DATAFORSEO_LOGIN}`)
+      console.log(`🔧 SERVER: OpenAI key available: ${!!process.env.OPENAI_API_KEY}`)
+      
       await processAnalysis(analysis.id, validatedData)
       console.log(
         `✅ SERVER: Analysis completed successfully for ${analysis.id}`
@@ -238,6 +242,7 @@ async function processAnalysis(
 
   try {
     console.log(`🚀 Starting analysis ${analysisId} for ${input.websiteUrl}`)
+    console.log(`🔧 Analysis input:`, JSON.stringify(input, null, 2))
 
     // Update progress callback
     const updateProgress = async (progress: number, status: string) => {
@@ -254,6 +259,8 @@ async function processAnalysis(
     // Start processing
     await updateProgress(5, "Initialisation de l'analyse...")
 
+    console.log(`🔧 About to call predictor.predictProfitability...`)
+    
     // Run prediction with timeout
     const prediction = await Promise.race([
       predictor.predictProfitability(
@@ -277,8 +284,18 @@ async function processAnalysis(
     ])
 
     console.log(`✅ Analysis ${analysisId} completed successfully`)
+    console.log(`🔧 Prediction result summary:`, {
+      hasWebsiteAnalysis: !!prediction.websiteAnalysis,
+      hasROI: !!prediction.roiPrediction,
+      keywordCount: prediction.recommendedKeywords?.length || 0
+    })
   } catch (error) {
     console.error(`❌ Analysis ${analysisId} failed:`, error)
+    console.error(`❌ Full error details:`, {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : 'No message',
+      stack: error instanceof Error ? error.stack?.split('\n').slice(0, 5) : 'No stack'
+    })
 
     // Update status to failed with error details
     await supabase
