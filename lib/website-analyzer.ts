@@ -33,39 +33,67 @@ export class WebsiteAnalyzer {
    */
   async analyzeWebsite(websiteUrl: string): Promise<WebsiteInsights> {
     try {
+      console.log(`🔍 WebsiteAnalyzer: Starting analysis for ${websiteUrl}`)
+
       // Extract domain from URL
       const url = new URL(websiteUrl)
       const domain = url.hostname.replace("www.", "")
+      console.log(`🌐 WebsiteAnalyzer: Extracted domain: ${domain}`)
 
       // Check cache first
+      console.log(`🔍 WebsiteAnalyzer: Checking cache for ${websiteUrl}`)
       const cached = await this.cache.getCachedResponse(
         { url: websiteUrl },
         "website_analyzer",
         "full_analysis"
       )
       if (cached) {
+        console.log(`✅ WebsiteAnalyzer: Cache HIT - returning cached analysis`)
         return cached
       }
+      console.log(
+        `❌ WebsiteAnalyzer: Cache MISS - proceeding with fresh analysis`
+      )
 
       // Step 1: Get website content from page
+      console.log(`📄 WebsiteAnalyzer: Step 1 - Fetching website content...`)
       const websiteContent = await this.fetchWebsiteContent(websiteUrl)
+      console.log(
+        `✅ WebsiteAnalyzer: Step 1 complete - Got ${websiteContent.length} chars of content`
+      )
 
       // Step 2: Get keywords suggestions from DataForSEO
+      console.log(
+        `🔍 WebsiteAnalyzer: Step 2 - Getting keyword suggestions for ${domain}...`
+      )
       const suggestedKeywords = await this.dataForSEO.getKeywordsForSite(domain)
+      console.log(
+        `✅ WebsiteAnalyzer: Step 2 complete - Got ${suggestedKeywords.length} keyword suggestions`
+      )
 
       // Step 3: Analyze with AI
+      console.log(`🤖 WebsiteAnalyzer: Step 3 - Analyzing with AI...`)
       const aiAnalysis = await this.analyzeWithAI({
         url: websiteUrl,
         domain,
         content: websiteContent,
         existingKeywords: suggestedKeywords.slice(0, 10),
       })
+      console.log(
+        `✅ WebsiteAnalyzer: Step 3 complete - AI analysis done for industry: ${aiAnalysis.industry}`
+      )
 
       // Step 4: Combine all insights
+      console.log(`📊 WebsiteAnalyzer: Step 4 - Combining insights...`)
       const targetCountry = this.detectCountry(domain, websiteContent)
+      const detectedLanguage = this.detectLanguage(websiteContent, domain)
+      console.log(
+        `🌍 WebsiteAnalyzer: Detected country: ${targetCountry}, language: ${detectedLanguage}`
+      )
+
       const insights: WebsiteInsights = {
         domain,
-        detectedLanguage: this.detectLanguage(websiteContent, domain),
+        detectedLanguage,
         targetCountry,
         currency: this.getCurrency(targetCountry),
         currencySymbol: this.getCurrencySymbol(targetCountry),
@@ -82,36 +110,62 @@ export class WebsiteAnalyzer {
         businessModel: aiAnalysis.businessModel,
         targetAudience: aiAnalysis.targetAudience,
       }
+      console.log(
+        `✅ WebsiteAnalyzer: Step 4 complete - Final insights prepared`
+      )
+      console.log(
+        `📋 WebsiteAnalyzer: Summary - ${insights.suggestedKeywords.length} keywords, ${insights.currency} currency, ${insights.industry} industry`
+      )
 
       // Cache the results for 90 days
+      console.log(`💾 WebsiteAnalyzer: Step 5 - Caching results for 90 days...`)
       await this.cache.setCachedResponse(
         { url: websiteUrl },
         "website_analyzer",
         "full_analysis",
         insights
       )
+      console.log(`✅ WebsiteAnalyzer: Step 5 complete - Results cached`)
 
+      console.log(`🎉 WebsiteAnalyzer: ANALYSIS COMPLETE for ${domain}`)
       return insights
     } catch (error) {
+      console.error(
+        `❌ WebsiteAnalyzer: ANALYSIS FAILED for ${websiteUrl}:`,
+        error
+      )
+      console.error(`❌ WebsiteAnalyzer: Error details:`, {
+        name: error instanceof Error ? error.name : "Unknown",
+        message: error instanceof Error ? error.message : "No message",
+      })
+
       // Return basic insights on error
+      console.log(
+        `🔄 WebsiteAnalyzer: Returning fallback insights for ${websiteUrl}`
+      )
       const url = new URL(websiteUrl)
       const domain = url.hostname.replace("www.", "")
       const fallbackCountry = this.detectCountry(domain, "")
 
-      return {
+      const fallbackInsights: WebsiteInsights = {
         domain,
         detectedLanguage: this.detectLanguage("", domain),
         targetCountry: fallbackCountry,
         currency: this.getCurrency(fallbackCountry),
         currencySymbol: this.getCurrencySymbol(fallbackCountry),
         industry: "general",
-        businessType: "b2c",
+        businessType: "b2c" as const,
         suggestedKeywords: [],
         websiteQuality: 50,
-        competitiveness: "medium",
+        competitiveness: "medium" as const,
         businessModel: "service",
         targetAudience: "general",
       }
+
+      console.log(
+        `✅ WebsiteAnalyzer: Fallback insights prepared for ${domain}`
+      )
+      return fallbackInsights
     }
   }
 
@@ -120,10 +174,16 @@ export class WebsiteAnalyzer {
    */
   private async fetchWebsiteContent(url: string): Promise<string> {
     try {
+      console.log(`🌐 fetchWebsiteContent: Starting fetch for ${url}`)
+
       // Add timeout to prevent hanging
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+      const timeoutId = setTimeout(() => {
+        console.log(`⏰ fetchWebsiteContent: Timeout reached for ${url}`)
+        controller.abort()
+      }, 10000) // 10 second timeout
 
+      console.log(`📡 fetchWebsiteContent: Making HTTP request to ${url}...`)
       const response = await fetch(url, {
         headers: {
           "User-Agent": "Mozilla/5.0 (compatible; GoogleAdsAnalyzer/1.0)",
@@ -132,14 +192,24 @@ export class WebsiteAnalyzer {
       })
 
       clearTimeout(timeoutId)
+      console.log(
+        `✅ fetchWebsiteContent: HTTP response received - Status: ${response.status}`
+      )
 
       if (!response.ok) {
         throw new Error(`Failed to fetch website: ${response.status}`)
       }
 
+      console.log(`📄 fetchWebsiteContent: Reading response text...`)
       const html = await response.text()
+      console.log(
+        `📝 fetchWebsiteContent: Got ${html.length} characters of HTML`
+      )
 
       // Extract text content from HTML (basic extraction)
+      console.log(
+        `🔧 fetchWebsiteContent: Extracting text content from HTML...`
+      )
       const textContent = html
         .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
         .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
@@ -148,11 +218,24 @@ export class WebsiteAnalyzer {
         .trim()
         .substring(0, 5000) // Limit to 5000 chars
 
+      console.log(
+        `✅ fetchWebsiteContent: Text extraction complete - ${textContent.length} chars extracted`
+      )
       return textContent
     } catch (error) {
+      console.error(`❌ fetchWebsiteContent: Failed to fetch ${url}:`, error)
+      console.error(`❌ fetchWebsiteContent: Error details:`, {
+        name: error instanceof Error ? error.name : "Unknown",
+        message: error instanceof Error ? error.message : "No message",
+      })
+
       // Return fallback content based on domain
       const domain = new URL(url).hostname.replace("www.", "")
-      return `Site web: ${domain}. Service professionnel en ligne.`
+      const fallbackContent = `Site web: ${domain}. Service professionnel en ligne.`
+      console.log(
+        `🔄 fetchWebsiteContent: Returning fallback content: "${fallbackContent}"`
+      )
+      return fallbackContent
     }
   }
 

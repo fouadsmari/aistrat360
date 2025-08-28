@@ -62,50 +62,84 @@ export class ProfitabilityPredictor {
     onProgress?: (progress: number, status: string) => Promise<void>
   ): Promise<ProfitabilityPrediction> {
     try {
+      console.log(
+        `🚀 [${analysisId}] Starting profitability prediction for ${input.websiteUrl}`
+      )
+
       // Step 1: Analyze website (10-30%)
+      console.log(`🌐 [${analysisId}] Step 1: Starting website analysis...`)
       await onProgress?.(10, "Analyse de votre site web en cours...")
+
       const websiteAnalysis = await this.websiteAnalyzer.analyzeWebsite(
         input.websiteUrl
       )
+      console.log(
+        `✅ [${analysisId}] Step 1 completed: Website analysis done for ${websiteAnalysis.domain}`
+      )
+      console.log(
+        `📊 [${analysisId}] Detected: ${websiteAnalysis.detectedLanguage}, ${websiteAnalysis.targetCountry}, ${websiteAnalysis.currency}`
+      )
+
       await onProgress?.(30, "Analyse du site terminée")
 
       // Step 2: Get keyword data (30-50%)
+      console.log(`🔍 [${analysisId}] Step 2: Starting keyword research...`)
       await onProgress?.(35, "Recherche des mots-clés pertinents...")
 
       // Combine suggested keywords with user keywords
       let allKeywords = [...websiteAnalysis.suggestedKeywords]
+      console.log(
+        `📝 [${analysisId}] Website suggested ${websiteAnalysis.suggestedKeywords.length} keywords`
+      )
+
       if (input.keywords) {
         const userKeywords = input.keywords
           .split(",")
           .map((k) => k.trim())
           .filter(Boolean)
         allKeywords = [...new Set([...allKeywords, ...userKeywords])]
+        console.log(
+          `➕ [${analysisId}] Added ${userKeywords.length} user keywords. Total: ${allKeywords.length}`
+        )
       }
 
       // Get keyword volumes and CPC data
+      console.log(
+        `🔢 [${analysisId}] Fetching keyword data for ${Math.min(30, allKeywords.length)} keywords...`
+      )
       const keywordData = await this.dataForSEO.getKeywordData(
         allKeywords.slice(0, 30) // Limit to 30 keywords
+      )
+      console.log(
+        `✅ [${analysisId}] Step 2 completed: Got data for ${keywordData.length} keywords`
       )
       await onProgress?.(50, "Données de mots-clés récupérées")
 
       // Step 3: Generate negative keywords (50-60%)
+      console.log(`🚫 [${analysisId}] Step 3: Generating negative keywords...`)
       await onProgress?.(55, "Génération des exclusions intelligentes...")
       const negativeKeywords = await this.openAI.generateNegativeKeywords(
         allKeywords.slice(0, 15),
         websiteAnalysis.industry,
         websiteAnalysis.businessType
       )
+      console.log(
+        `✅ [${analysisId}] Step 3 completed: Generated ${negativeKeywords.length} negative keywords`
+      )
       await onProgress?.(60, "Exclusions générées")
 
       // Step 4: Get traffic estimates (60-70%)
+      console.log(`📈 [${analysisId}] Step 4: Getting traffic estimates...`)
       await onProgress?.(65, "Estimation du trafic potentiel...")
       const trafficEstimates = await this.dataForSEO.getTrafficEstimates(
         allKeywords.slice(0, 20),
         input.budget / 500 // Estimate bid based on budget
       )
+      console.log(`✅ [${analysisId}] Step 4 completed: Traffic estimates done`)
       await onProgress?.(70, "Estimations de trafic calculées")
 
       // Step 5: Predict ROI (70-85%)
+      console.log(`💰 [${analysisId}] Step 5: Predicting ROI...`)
       await onProgress?.(75, "Calcul de votre ROI prédit...")
       const roiPrediction = await this.openAI.predictROI({
         keywords: keywordData,
@@ -115,29 +149,45 @@ export class ProfitabilityPredictor {
         objective: input.objective,
         competitiveness: websiteAnalysis.competitiveness,
       })
+      console.log(
+        `✅ [${analysisId}] Step 5 completed: ROI prediction done (${roiPrediction.roiPercentage}%)`
+      )
       await onProgress?.(85, "Prédictions ROI terminées")
 
       // Step 6: Generate recommendations (85-95%)
+      console.log(`💡 [${analysisId}] Step 6: Generating recommendations...`)
       await onProgress?.(90, "Génération des recommandations personnalisées...")
       const recommendations = this.generateRecommendations(
         websiteAnalysis,
         roiPrediction,
         input
       )
+      console.log(
+        `✅ [${analysisId}] Step 6 completed: ${recommendations.length} recommendations generated`
+      )
 
       // Step 7: Calculate budget allocation
+      console.log(`💸 [${analysisId}] Step 7: Calculating budget allocation...`)
       const budgetAllocation = this.calculateBudgetAllocation(
         websiteAnalysis,
         input.objective
       )
+      console.log(`✅ [${analysisId}] Step 7 completed: Budget allocation done`)
 
       // Step 8: Create monthly projections
+      console.log(`📅 [${analysisId}] Step 8: Creating monthly projections...`)
       const monthlyProjection = this.createMonthlyProjection(
         roiPrediction,
         input.budget
       )
+      console.log(
+        `✅ [${analysisId}] Step 8 completed: Monthly projections done`
+      )
 
-      // Format recommended keywords
+      // Step 9: Format recommended keywords
+      console.log(
+        `🔤 [${analysisId}] Step 9: Formatting recommended keywords...`
+      )
       const recommendedKeywords = keywordData
         .filter(
           (kw) =>
@@ -156,10 +206,14 @@ export class ProfitabilityPredictor {
           cpc: kw.cpc || 0,
           difficulty: kw.competition || 0.5,
         }))
+      console.log(
+        `✅ [${analysisId}] Step 9 completed: ${recommendedKeywords.length} keywords formatted`
+      )
 
       await onProgress?.(95, "Analyse complète terminée!")
 
       // Final result
+      console.log(`📦 [${analysisId}] Step 10: Preparing final result...`)
       const prediction: ProfitabilityPrediction = {
         websiteAnalysis,
         roiPrediction,
@@ -171,11 +225,28 @@ export class ProfitabilityPredictor {
       }
 
       // Save to database
+      console.log(`💾 [${analysisId}] Step 11: Saving to database...`)
       await this.savePrediction(analysisId, prediction)
+      console.log(
+        `✅ [${analysisId}] Step 11 completed: Results saved to database`
+      )
+
       await onProgress?.(100, "Résultats sauvegardés")
+      console.log(
+        `🎉 [${analysisId}] ANALYSIS COMPLETE! All steps finished successfully`
+      )
 
       return prediction
     } catch (error) {
+      console.error(`❌ [${analysisId}] ANALYSIS FAILED:`, error)
+      console.error(`❌ [${analysisId}] Error details:`, {
+        name: error instanceof Error ? error.name : "Unknown",
+        message: error instanceof Error ? error.message : "No message",
+        stack:
+          error instanceof Error
+            ? error.stack?.split("\n").slice(0, 3)
+            : "No stack",
+      })
       throw error
     }
   }
