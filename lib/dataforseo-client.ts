@@ -99,8 +99,10 @@ export class DataForSEOClient {
       "search_volume"
     )
     if (cached) {
+      console.log(`✅ [DATAFORSEO] Cache hit! Returning cached data`)
       return cached
     }
+    console.log(`⚠️ [DATAFORSEO] Cache miss, making API call...`)
 
     try {
       const response = await fetch(

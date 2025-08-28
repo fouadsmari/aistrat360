@@ -87,6 +87,13 @@ export class OpenAIClient {
     targetCountry: string,
     objective: string
   ): Promise<string[]> {
+    console.log(`\n🔷 [OPENAI] extractTargetedKeywords() called at ${new Date().toISOString()}`)
+    console.log(`🔷 [OPENAI] Parameters:`, {
+      htmlLength: htmlContent.length,
+      websiteUrl,
+      targetCountry,
+      objective
+    })
     const countryMapping: Record<string, string> = {
       CA: "Canada",
       US: "États-Unis",
@@ -115,15 +122,19 @@ export class OpenAIClient {
     }
 
     // Check cache first
+    console.log(`🔷 [OPENAI] Checking cache for keywords...`)
     const cached = await this.cache.getCachedResponse(
       inputData,
       "openai",
       "targeted_keywords"
     )
     if (cached) {
+      console.log(`✅ [OPENAI] Cache hit! Returning cached keywords:`, cached)
       return cached
     }
+    console.log(`⚠️ [OPENAI] Cache miss for keywords, making API call...`)
 
+    console.log(`🔷 [OPENAI] Building keyword extraction prompt...`)
     const prompt = `Tu es un expert Google Ads. Analyse ce contenu de site web et donne EXACTEMENT 3 mots-clés Google Ads ultra-pertinents.
 
 CONTEXTE OBLIGATOIRE:
@@ -147,24 +158,34 @@ FORMAT: Retourne UNIQUEMENT un JSON avec:
 }
 
 IMPORTANT: Aucun autre texte, juste le JSON.`
+    console.log(`🔷 [OPENAI] Prompt built, length: ${prompt.length} chars`)
 
+    console.log(`🔷 [OPENAI] Calling generateJSON() for keyword extraction...`)
     const result = await this.generateJSON(prompt, "gpt-4o-mini")
+    console.log(`🔷 [OPENAI] generateJSON() returned:`, result)
+    
     const keywords = result.keywords || []
+    console.log(`🔷 [OPENAI] Extracted ${keywords.length} keywords:`, keywords)
 
     if (keywords.length !== 3) {
+      console.error(`❌ [OPENAI] Wrong number of keywords: ${keywords.length} instead of 3`)
       throw new Error(
         `AI returned ${keywords.length} keywords instead of exactly 3`
       )
     }
+    console.log(`✅ [OPENAI] Validation passed: exactly 3 keywords`)
 
     // Cache the result
+    console.log(`🔷 [OPENAI] Caching keywords...`)
     await this.cache.setCachedResponse(
       inputData,
       "openai",
       "targeted_keywords",
       keywords
     )
+    console.log(`✅ [OPENAI] Keywords cached successfully`)
 
+    console.log(`✅ [OPENAI] extractTargetedKeywords() completed successfully`)
     return keywords
   }
 
