@@ -79,50 +79,142 @@ export class ProfitabilityPredictor {
 
       // STEP 1: DataForSEO fetches HTML content (0-25%)
       console.log(`🌐 [${analysisId}] STEP 1: Fetching website HTML...`)
+      console.log(
+        `🔧 [${analysisId}] STEP 1: About to call this.dataForSEO.getWebsiteHTML(${input.websiteUrl})`
+      )
       await onProgress?.(10, "Récupération du contenu du site...")
-      
-      const htmlContent = await this.dataForSEO.getWebsiteHTML(input.websiteUrl)
-      console.log(`✅ [${analysisId}] STEP 1 completed: Got ${htmlContent.length} chars`)
-      await onProgress?.(25, "Contenu récupéré avec succès")
+
+      let htmlContent: string
+      try {
+        htmlContent = await this.dataForSEO.getWebsiteHTML(input.websiteUrl)
+        console.log(
+          `✅ [${analysisId}] STEP 1 completed: Got ${htmlContent.length} chars`
+        )
+        console.log(
+          `🔧 [${analysisId}] STEP 1: HTML preview: "${htmlContent.substring(0, 200)}..."`
+        )
+        await onProgress?.(25, "Contenu récupéré avec succès")
+      } catch (error) {
+        console.error(
+          `❌ [${analysisId}] STEP 1 failed: DataForSEO HTML fetch error:`,
+          error
+        )
+        throw new Error(
+          `STEP 1 failed: ${error instanceof Error ? error.message : "Unknown error"}`
+        )
+      }
 
       // STEP 2: OpenAI extracts exactly 3 targeted keywords (25-50%)
-      console.log(`🤖 [${analysisId}] STEP 2: AI extracting 3 targeted keywords...`)
-      await onProgress?.(35, `Analyse IA pour le marché ${input.targetCountry}...`)
-      
-      const targetedKeywords = await this.openAI.extractTargetedKeywords(
-        htmlContent,
-        input.websiteUrl,
-        input.targetCountry,
-        input.objective
+      console.log(
+        `🤖 [${analysisId}] STEP 2: AI extracting 3 targeted keywords...`
       )
-      console.log(`✅ [${analysisId}] STEP 2 completed: Got 3 keywords: ${targetedKeywords.join(", ")}`)
-      await onProgress?.(50, "3 mots-clés ultra-pertinents identifiés")
+      console.log(
+        `🔧 [${analysisId}] STEP 2: About to call this.openAI.extractTargetedKeywords`
+      )
+      console.log(
+        `🔧 [${analysisId}] STEP 2: Parameters: URL=${input.websiteUrl}, Country=${input.targetCountry}, Objective=${input.objective}`
+      )
+      await onProgress?.(
+        35,
+        `Analyse IA pour le marché ${input.targetCountry}...`
+      )
+
+      let targetedKeywords: string[]
+      try {
+        targetedKeywords = await this.openAI.extractTargetedKeywords(
+          htmlContent,
+          input.websiteUrl,
+          input.targetCountry,
+          input.objective
+        )
+        console.log(
+          `✅ [${analysisId}] STEP 2 completed: Got 3 keywords: ${targetedKeywords.join(", ")}`
+        )
+        console.log(
+          `🔧 [${analysisId}] STEP 2: Keywords validation: length=${targetedKeywords.length}`
+        )
+        await onProgress?.(50, "3 mots-clés ultra-pertinents identifiés")
+      } catch (error) {
+        console.error(
+          `❌ [${analysisId}] STEP 2 failed: OpenAI keyword extraction error:`,
+          error
+        )
+        throw new Error(
+          `STEP 2 failed: ${error instanceof Error ? error.message : "Unknown error"}`
+        )
+      }
 
       // STEP 3: DataForSEO gets comprehensive data for these 3 keywords (50-75%)
-      console.log(`🔢 [${analysisId}] STEP 3: Getting keyword data for targeted keywords...`)
-      await onProgress?.(60, "Récupération données de marché...")
-      
-      const keywordData = await this.dataForSEO.getKeywordData(
-        targetedKeywords,
-        input.targetCountry,
-        "fr" // Default to French for now, can be improved later
+      console.log(
+        `🔢 [${analysisId}] STEP 3: Getting keyword data for targeted keywords...`
       )
-      console.log(`✅ [${analysisId}] STEP 3 completed: Got market data for ${keywordData.length} keywords`)
-      await onProgress?.(75, "Données de marché récupérées")
+      console.log(
+        `🔧 [${analysisId}] STEP 3: About to call this.dataForSEO.getKeywordData`
+      )
+      console.log(
+        `🔧 [${analysisId}] STEP 3: Parameters: keywords=${JSON.stringify(targetedKeywords)}, country=${input.targetCountry}, lang=fr`
+      )
+      await onProgress?.(60, "Récupération données de marché...")
+
+      let keywordData: any[]
+      try {
+        keywordData = await this.dataForSEO.getKeywordData(
+          targetedKeywords,
+          input.targetCountry,
+          "fr" // Default to French for now, can be improved later
+        )
+        console.log(
+          `✅ [${analysisId}] STEP 3 completed: Got market data for ${keywordData.length} keywords`
+        )
+        console.log(
+          `🔧 [${analysisId}] STEP 3: Keyword data sample:`,
+          keywordData.length > 0
+            ? {
+                firstKeyword: keywordData[0].keyword,
+                hasVolume: !!keywordData[0].search_volume,
+                hasCpc: !!keywordData[0].cpc,
+                volumes: keywordData.map((k) => k.search_volume),
+                cpcs: keywordData.map((k) => k.cpc),
+              }
+            : "No data"
+        )
+        await onProgress?.(75, "Données de marché récupérées")
+      } catch (error) {
+        console.error(
+          `❌ [${analysisId}] STEP 3 failed: DataForSEO keyword data error:`,
+          error
+        )
+        throw new Error(
+          `STEP 3 failed: ${error instanceof Error ? error.message : "Unknown error"}`
+        )
+      }
 
       // STEP 4: Generate final analysis and recommendations (75-100%)
       console.log(`💡 [${analysisId}] STEP 4: Generating final analysis...`)
+      console.log(
+        `🔧 [${analysisId}] STEP 4: Creating website analysis object...`
+      )
       await onProgress?.(85, "Génération analyse finale...")
 
       // Create basic website analysis from HTML
       const url = new URL(input.websiteUrl)
       const domain = url.hostname.replace("www.", "")
+      console.log(`🔧 [${analysisId}] STEP 4: Extracted domain: ${domain}`)
+      console.log(
+        `🔧 [${analysisId}] STEP 4: Target country: ${input.targetCountry}`
+      )
+
       const websiteAnalysis: WebsiteInsights = {
         domain,
-        detectedLanguage: input.targetCountry === "US" || input.targetCountry === "GB" ? "en" : "fr",
+        detectedLanguage:
+          input.targetCountry === "US" || input.targetCountry === "GB"
+            ? "en"
+            : "fr",
         targetCountry: input.targetCountry,
         currency: this.websiteAnalyzer.getCurrency(input.targetCountry),
-        currencySymbol: this.websiteAnalyzer.getCurrencySymbol(input.targetCountry),
+        currencySymbol: this.websiteAnalyzer.getCurrencySymbol(
+          input.targetCountry
+        ),
         industry: "business", // Simplified for now
         businessType: "b2c", // Default
         suggestedKeywords: targetedKeywords,
@@ -131,14 +223,37 @@ export class ProfitabilityPredictor {
         businessModel: "service",
         targetAudience: "clients potentiels",
       }
+      console.log(`🔧 [${analysisId}] STEP 4: Website analysis created:`, {
+        domain: websiteAnalysis.domain,
+        currency: websiteAnalysis.currency,
+        currencySymbol: websiteAnalysis.currencySymbol,
+        keywordCount: websiteAnalysis.suggestedKeywords.length,
+      })
 
       // Generate basic ROI prediction
-      const avgCpc = keywordData.reduce((sum, kw) => sum + (kw.cpc || 1), 0) / keywordData.length
-      const totalVolume = keywordData.reduce((sum, kw) => sum + (kw.search_volume || 0), 0)
+      console.log(`🔧 [${analysisId}] STEP 4: Calculating ROI predictions...`)
+      const avgCpc =
+        keywordData.reduce((sum, kw) => sum + (kw.cpc || 1), 0) /
+        keywordData.length
+      const totalVolume = keywordData.reduce(
+        (sum, kw) => sum + (kw.search_volume || 0),
+        0
+      )
       const estimatedClicks = Math.floor(input.budget / avgCpc)
       const estimatedLeads = Math.floor(estimatedClicks * 0.02) // 2% conversion rate
       const estimatedConversions = Math.floor(estimatedLeads * 0.15) // 15% close rate
-      const roiPercentage = Math.floor((estimatedConversions * 500 - input.budget) / input.budget * 100)
+      const roiPercentage = Math.floor(
+        ((estimatedConversions * 500 - input.budget) / input.budget) * 100
+      )
+
+      console.log(`🔧 [${analysisId}] STEP 4: ROI calculations:`, {
+        avgCpc,
+        totalVolume,
+        estimatedClicks,
+        estimatedLeads,
+        estimatedConversions,
+        roiPercentage,
+      })
 
       const roiPrediction = {
         estimatedClicks,
@@ -146,7 +261,8 @@ export class ProfitabilityPredictor {
         estimatedLeads,
         estimatedConversions,
         roiPercentage: Math.max(50, roiPercentage), // Minimum 50% ROI
-        breakEvenDays: Math.floor(input.budget / (estimatedConversions * 10) * 30) || 90,
+        breakEvenDays:
+          Math.floor((input.budget / (estimatedConversions * 10)) * 30) || 90,
         confidence: "medium" as const,
       }
 
@@ -179,9 +295,21 @@ export class ProfitabilityPredictor {
           reserve: 0,
         },
         monthlyProjection: {
-          month1: { clicks: Math.floor(estimatedClicks * 0.7), cost: input.budget, leads: Math.floor(estimatedLeads * 0.6) },
-          month2: { clicks: Math.floor(estimatedClicks * 0.9), cost: input.budget, leads: Math.floor(estimatedLeads * 0.8) },
-          month3: { clicks: estimatedClicks, cost: input.budget, leads: estimatedLeads },
+          month1: {
+            clicks: Math.floor(estimatedClicks * 0.7),
+            cost: input.budget,
+            leads: Math.floor(estimatedLeads * 0.6),
+          },
+          month2: {
+            clicks: Math.floor(estimatedClicks * 0.9),
+            cost: input.budget,
+            leads: Math.floor(estimatedLeads * 0.8),
+          },
+          month3: {
+            clicks: estimatedClicks,
+            cost: input.budget,
+            leads: estimatedLeads,
+          },
         },
         recommendations,
       }
@@ -191,7 +319,7 @@ export class ProfitabilityPredictor {
       // Save to database
       await onProgress?.(95, "Sauvegarde en cours...")
       await this.savePrediction(analysisId, prediction)
-      
+
       await onProgress?.(100, "Analyse terminée!")
       console.log(`🎉 [${analysisId}] NEW WORKFLOW COMPLETE!`)
 

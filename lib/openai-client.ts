@@ -89,7 +89,7 @@ export class OpenAIClient {
   ): Promise<string[]> {
     const countryMapping: Record<string, string> = {
       CA: "Canada",
-      US: "États-Unis", 
+      US: "États-Unis",
       FR: "France",
       BE: "Belgique",
       CH: "Suisse",
@@ -97,21 +97,21 @@ export class OpenAIClient {
       DE: "Allemagne",
       ES: "Espagne",
       IT: "Italie",
-      NL: "Pays-Bas"
+      NL: "Pays-Bas",
     }
 
     const objectiveMapping: Record<string, string> = {
       leads: "générer des prospects qualifiés",
       sales: "augmenter les ventes directes",
       traffic: "augmenter le trafic du site",
-      awareness: "améliorer la notoriété de la marque"
+      awareness: "améliorer la notoriété de la marque",
     }
 
     const inputData = {
       htmlContent: htmlContent.substring(0, 3000),
       websiteUrl,
       targetCountry,
-      objective
+      objective,
     }
 
     // Check cache first
@@ -152,13 +152,15 @@ IMPORTANT: Aucun autre texte, juste le JSON.`
     const keywords = result.keywords || []
 
     if (keywords.length !== 3) {
-      throw new Error(`AI returned ${keywords.length} keywords instead of exactly 3`)
+      throw new Error(
+        `AI returned ${keywords.length} keywords instead of exactly 3`
+      )
     }
 
     // Cache the result
     await this.cache.setCachedResponse(
       inputData,
-      "openai", 
+      "openai",
       "targeted_keywords",
       keywords
     )

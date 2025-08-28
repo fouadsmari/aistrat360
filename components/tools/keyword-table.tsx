@@ -46,7 +46,11 @@ interface KeywordTableProps {
 type SortField = "keyword" | "searchVolume" | "cpc" | "difficulty" | "roiScore"
 type SortDirection = "asc" | "desc" | null
 
-export function KeywordTable({ keywords, currencySymbol, targetCountry }: KeywordTableProps) {
+export function KeywordTable({
+  keywords,
+  currencySymbol,
+  targetCountry,
+}: KeywordTableProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [difficultyFilter, setDifficultyFilter] = useState<string>("all")
   const [volumeFilter, setVolumeFilter] = useState<string>("all")
@@ -55,33 +59,57 @@ export function KeywordTable({ keywords, currencySymbol, targetCountry }: Keywor
 
   // Calculate enhanced keyword data
   const enhancedKeywords = useMemo(() => {
-    return keywords.map(kw => ({
+    return keywords.map((kw) => ({
       ...kw,
-      roiScore: kw.searchVolume && kw.cpc ? Math.round(kw.searchVolume / kw.cpc / 10) : 0,
-      difficultyLevel: kw.difficulty < 0.3 ? "Faible" : kw.difficulty < 0.7 ? "Moyen" : "Élevé",
-      difficultyColor: kw.difficulty < 0.3 ? "text-green-600" : kw.difficulty < 0.7 ? "text-orange-600" : "text-red-600",
+      roiScore:
+        kw.searchVolume && kw.cpc
+          ? Math.round(kw.searchVolume / kw.cpc / 10)
+          : 0,
+      difficultyLevel:
+        kw.difficulty < 0.3
+          ? "Faible"
+          : kw.difficulty < 0.7
+            ? "Moyen"
+            : "Élevé",
+      difficultyColor:
+        kw.difficulty < 0.3
+          ? "text-green-600"
+          : kw.difficulty < 0.7
+            ? "text-orange-600"
+            : "text-red-600",
     }))
   }, [keywords])
 
   // Filter and sort data
   const filteredAndSortedKeywords = useMemo(() => {
-    let filtered = enhancedKeywords.filter(kw => {
+    let filtered = enhancedKeywords.filter((kw) => {
       // Search filter
-      if (searchTerm && !kw.keyword.toLowerCase().includes(searchTerm.toLowerCase())) {
+      if (
+        searchTerm &&
+        !kw.keyword.toLowerCase().includes(searchTerm.toLowerCase())
+      ) {
         return false
       }
 
       // Difficulty filter
       if (difficultyFilter !== "all") {
         if (difficultyFilter === "low" && kw.difficulty >= 0.3) return false
-        if (difficultyFilter === "medium" && (kw.difficulty < 0.3 || kw.difficulty >= 0.7)) return false
+        if (
+          difficultyFilter === "medium" &&
+          (kw.difficulty < 0.3 || kw.difficulty >= 0.7)
+        )
+          return false
         if (difficultyFilter === "high" && kw.difficulty < 0.7) return false
       }
 
       // Volume filter
       if (volumeFilter !== "all") {
         if (volumeFilter === "low" && kw.searchVolume >= 1000) return false
-        if (volumeFilter === "medium" && (kw.searchVolume < 1000 || kw.searchVolume >= 10000)) return false
+        if (
+          volumeFilter === "medium" &&
+          (kw.searchVolume < 1000 || kw.searchVolume >= 10000)
+        )
+          return false
         if (volumeFilter === "high" && kw.searchVolume < 10000) return false
       }
 
@@ -108,11 +136,18 @@ export function KeywordTable({ keywords, currencySymbol, targetCountry }: Keywor
     }
 
     return filtered
-  }, [enhancedKeywords, searchTerm, difficultyFilter, volumeFilter, sortField, sortDirection])
+  }, [
+    enhancedKeywords,
+    searchTerm,
+    difficultyFilter,
+    volumeFilter,
+    sortField,
+    sortDirection,
+  ])
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortDirection(prev => 
+      setSortDirection((prev) =>
         prev === "asc" ? "desc" : prev === "desc" ? null : "asc"
       )
       if (sortDirection === "desc") {
@@ -125,9 +160,12 @@ export function KeywordTable({ keywords, currencySymbol, targetCountry }: Keywor
   }
 
   const getSortIcon = (field: SortField) => {
-    if (sortField !== field) return <ArrowUpDown className="h-4 w-4 opacity-30" />
-    if (sortDirection === "asc") return <ArrowUp className="h-4 w-4 text-violet-600" />
-    if (sortDirection === "desc") return <ArrowDown className="h-4 w-4 text-violet-600" />
+    if (sortField !== field)
+      return <ArrowUpDown className="h-4 w-4 opacity-30" />
+    if (sortDirection === "asc")
+      return <ArrowUp className="h-4 w-4 text-violet-600" />
+    if (sortDirection === "desc")
+      return <ArrowDown className="h-4 w-4 text-violet-600" />
     return <ArrowUpDown className="h-4 w-4 opacity-30" />
   }
 
@@ -171,9 +209,11 @@ export function KeywordTable({ keywords, currencySymbol, targetCountry }: Keywor
           </SelectContent>
         </Select>
 
-        {(searchTerm || difficultyFilter !== "all" || volumeFilter !== "all") && (
-          <Button 
-            variant="outline" 
+        {(searchTerm ||
+          difficultyFilter !== "all" ||
+          volumeFilter !== "all") && (
+          <Button
+            variant="outline"
             size="sm"
             onClick={() => {
               setSearchTerm("")
@@ -189,13 +229,14 @@ export function KeywordTable({ keywords, currencySymbol, targetCountry }: Keywor
       <div className="rounded-md border">
         <Table>
           <TableCaption>
-            {filteredAndSortedKeywords.length} mots-clés affichés sur {keywords.length} total pour le marché {targetCountry}
+            {filteredAndSortedKeywords.length} mots-clés affichés sur{" "}
+            {keywords.length} total pour le marché {targetCountry}
           </TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead className="font-semibold">
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   className="h-auto p-0 font-semibold hover:bg-transparent"
                   onClick={() => handleSort("keyword")}
                 >
@@ -204,8 +245,8 @@ export function KeywordTable({ keywords, currencySymbol, targetCountry }: Keywor
                 </Button>
               </TableHead>
               <TableHead className="text-right font-semibold">
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   className="h-auto p-0 font-semibold hover:bg-transparent"
                   onClick={() => handleSort("searchVolume")}
                 >
@@ -217,8 +258,8 @@ export function KeywordTable({ keywords, currencySymbol, targetCountry }: Keywor
                 </Button>
               </TableHead>
               <TableHead className="text-right font-semibold">
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   className="h-auto p-0 font-semibold hover:bg-transparent"
                   onClick={() => handleSort("cpc")}
                 >
@@ -230,8 +271,8 @@ export function KeywordTable({ keywords, currencySymbol, targetCountry }: Keywor
                 </Button>
               </TableHead>
               <TableHead className="text-right font-semibold">
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   className="h-auto p-0 font-semibold hover:bg-transparent"
                   onClick={() => handleSort("difficulty")}
                 >
@@ -240,8 +281,8 @@ export function KeywordTable({ keywords, currencySymbol, targetCountry }: Keywor
                 </Button>
               </TableHead>
               <TableHead className="text-right font-semibold">
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   className="h-auto p-0 font-semibold hover:bg-transparent"
                   onClick={() => handleSort("roiScore")}
                 >
@@ -254,7 +295,10 @@ export function KeywordTable({ keywords, currencySymbol, targetCountry }: Keywor
           <TableBody>
             {filteredAndSortedKeywords.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                <TableCell
+                  colSpan={5}
+                  className="text-muted-foreground py-8 text-center"
+                >
                   Aucun mot-clé ne correspond aux filtres sélectionnés
                 </TableCell>
               </TableRow>
@@ -293,9 +337,7 @@ export function KeywordTable({ keywords, currencySymbol, targetCountry }: Keywor
                           }}
                         />
                       </div>
-                      <span className="text-sm font-medium">
-                        {kw.roiScore}
-                      </span>
+                      <span className="text-sm font-medium">{kw.roiScore}</span>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -310,10 +352,7 @@ export function KeywordTable({ keywords, currencySymbol, targetCountry }: Keywor
         <div className="rounded-lg bg-violet-50 p-4 text-center dark:bg-violet-900/10">
           <div className="text-2xl font-bold text-violet-600">
             {filteredAndSortedKeywords
-              .reduce(
-                (sum, kw) => sum + (kw.searchVolume || 0),
-                0
-              )
+              .reduce((sum, kw) => sum + (kw.searchVolume || 0), 0)
               .toLocaleString()}
           </div>
           <div className="text-sm text-gray-600 dark:text-gray-400">
@@ -323,12 +362,14 @@ export function KeywordTable({ keywords, currencySymbol, targetCountry }: Keywor
         <div className="rounded-lg bg-green-50 p-4 text-center dark:bg-green-900/10">
           <div className="text-2xl font-bold text-green-600">
             {currencySymbol}
-            {filteredAndSortedKeywords.length > 0 ? (
-              filteredAndSortedKeywords.reduce(
-                (sum, kw) => sum + (kw.cpc || 0),
-                0
-              ) / filteredAndSortedKeywords.length
-            ).toFixed(2) : "0.00"}
+            {filteredAndSortedKeywords.length > 0
+              ? (
+                  filteredAndSortedKeywords.reduce(
+                    (sum, kw) => sum + (kw.cpc || 0),
+                    0
+                  ) / filteredAndSortedKeywords.length
+                ).toFixed(2)
+              : "0.00"}
           </div>
           <div className="text-sm text-gray-600 dark:text-gray-400">
             CPC moyen
@@ -336,13 +377,14 @@ export function KeywordTable({ keywords, currencySymbol, targetCountry }: Keywor
         </div>
         <div className="rounded-lg bg-orange-50 p-4 text-center dark:bg-orange-900/10">
           <div className="text-2xl font-bold text-orange-600">
-            {filteredAndSortedKeywords.length > 0 ? Math.round(
-              (filteredAndSortedKeywords.filter(
-                (kw) => kw.difficulty < 0.5
-              ).length /
-                filteredAndSortedKeywords.length) *
-                100
-            ) : 0}
+            {filteredAndSortedKeywords.length > 0
+              ? Math.round(
+                  (filteredAndSortedKeywords.filter((kw) => kw.difficulty < 0.5)
+                    .length /
+                    filteredAndSortedKeywords.length) *
+                    100
+                )
+              : 0}
             %
           </div>
           <div className="text-sm text-gray-600 dark:text-gray-400">

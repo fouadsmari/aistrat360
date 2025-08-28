@@ -204,7 +204,7 @@ export class DataForSEOClient {
 
       if (data.tasks?.[0]?.result?.[0]) {
         const htmlContent = data.tasks[0].result[0].content?.plain_text || ""
-        
+
         // Cache the result for 7 days (HTML content changes less frequently)
         await this.cache.setCachedResponse(
           inputData,
