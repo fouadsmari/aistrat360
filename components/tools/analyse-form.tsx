@@ -93,8 +93,8 @@ export function AnalyseForm({ userQuota }: AnalyseFormProps) {
       }, 500)
 
       // TODO: Make API call to start analysis
-      const response = await fetch("/api/tools/analyse", {
-        method: "POST",
+      const response = await fetch("/api/tools/analyse/test", {
+        method: "POST", 
         headers: {
           "Content-Type": "application/json",
         },

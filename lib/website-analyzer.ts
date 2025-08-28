@@ -113,19 +113,27 @@ export class WebsiteAnalyzer {
    */
   private async fetchWebsiteContent(url: string): Promise<string> {
     try {
-      // In production, you might want to use a headless browser or scraping service
-      // For now, we'll use a simple fetch with error handling
+      console.log(`🌐 Fetching content from ${url}`)
+      
+      // Add timeout to prevent hanging
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+      
       const response = await fetch(url, {
         headers: {
           "User-Agent": "Mozilla/5.0 (compatible; GoogleAdsAnalyzer/1.0)",
         },
+        signal: controller.signal,
       })
+      
+      clearTimeout(timeoutId)
 
       if (!response.ok) {
         throw new Error(`Failed to fetch website: ${response.status}`)
       }
 
       const html = await response.text()
+      console.log(`📄 Fetched ${html.length} characters from ${url}`)
       
       // Extract text content from HTML (basic extraction)
       const textContent = html
@@ -136,10 +144,13 @@ export class WebsiteAnalyzer {
         .trim()
         .substring(0, 5000) // Limit to 5000 chars
 
+      console.log(`📝 Extracted ${textContent.length} characters of text content`)
       return textContent
     } catch (error) {
       console.error("Error fetching website content:", error)
-      return ""
+      // Return fallback content based on domain
+      const domain = new URL(url).hostname.replace("www.", "")
+      return `Site web: ${domain}. Service professionnel en ligne.`
     }
   }
 

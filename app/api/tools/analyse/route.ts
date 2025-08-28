@@ -186,8 +186,11 @@ async function processAnalysis(
   const predictor = new ProfitabilityPredictor()
 
   try {
+    console.log(`🚀 Starting analysis ${analysisId} for ${input.websiteUrl}`)
+    
     // Update progress callback
     const updateProgress = async (progress: number, status: string) => {
+      console.log(`📊 Analysis ${analysisId}: ${progress}% - ${status}`)
       await supabase
         .from("profitability_analyses")
         .update({
@@ -200,30 +203,36 @@ async function processAnalysis(
     // Start processing
     await updateProgress(5, "Initialisation de l'analyse...")
 
-    // Run prediction
-    const prediction = await predictor.predictProfitability(
-      {
-        websiteUrl: input.websiteUrl,
-        budget: input.budget,
-        objective: input.objective,
-        keywords: input.keywords,
-      },
-      analysisId,
-      updateProgress
-    )
+    // Run prediction with timeout
+    const prediction = await Promise.race([
+      predictor.predictProfitability(
+        {
+          websiteUrl: input.websiteUrl,
+          budget: input.budget,
+          objective: input.objective,
+          keywords: input.keywords,
+        },
+        analysisId,
+        updateProgress
+      ),
+      // 5 minute timeout
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Analysis timeout after 5 minutes')), 5 * 60 * 1000)
+      )
+    ])
 
-    // Analysis completed successfully
     console.log(`✅ Analysis ${analysisId} completed successfully`)
   } catch (error) {
     console.error(`❌ Analysis ${analysisId} failed:`, error)
     
-    // Update status to failed
+    // Update status to failed with error details
     await supabase
       .from("profitability_analyses")
       .update({
         status: "failed",
         progress: 0,
         completed_at: new Date().toISOString(),
+        result_data: { error: error instanceof Error ? error.message : 'Unknown error' }
       })
       .eq("id", analysisId)
   }

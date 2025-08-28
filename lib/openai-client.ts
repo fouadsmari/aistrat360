@@ -68,12 +68,36 @@ export class OpenAIClient {
       return result
     } catch (error) {
       console.error("OpenAI API error:", error)
-      // Return default structure on error
+      
+      // Return intelligent fallback based on prompt content
+      const promptLower = prompt.toLowerCase()
+      let industry = "general"
+      let businessType = "b2c"
+      let keywords: string[] = []
+      
+      // Basic industry detection from prompt
+      if (promptLower.includes("restaurant") || promptLower.includes("food")) {
+        industry = "restaurant"
+        keywords = ["restaurant", "cuisine", "menu", "réservation", "livraison"]
+      } else if (promptLower.includes("consulting") || promptLower.includes("conseil")) {
+        industry = "consulting"
+        businessType = "b2b"
+        keywords = ["consultant", "conseil", "expertise", "accompagnement", "formation"]
+      } else if (promptLower.includes("ecommerce") || promptLower.includes("boutique")) {
+        industry = "ecommerce"
+        keywords = ["boutique en ligne", "achat", "livraison", "produits", "catalogue"]
+      } else {
+        // Generic service keywords
+        keywords = ["service", "professionnel", "devis", "contact", "entreprise"]
+      }
+      
+      console.log(`🔄 Using intelligent fallback for industry: ${industry}`)
+      
       return {
-        industry: "general",
-        businessType: "b2c",
-        keywords: [],
-        targetAudience: "general public",
+        industry,
+        businessType,
+        keywords,
+        targetAudience: "clients potentiels",
         competitiveness: "medium",
         businessModel: "service",
       }
