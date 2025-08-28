@@ -53,19 +53,25 @@ export default async function AnalysePage({ params }: AnalysePageProps) {
   }
 
   if (user) {
-    // Get user's subscription pack
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select(
-        `
-        subscription_pack_id,
-        subscription_packs (
-          analyses_per_month
-        )
-      `
-      )
-      .eq("id", user.id)
+    // Get user's subscription and pack - Fixed to use correct tables
+    const { data: subscription } = await supabase
+      .from("subscriptions")
+      .select("plan")
+      .eq("user_id", user.id)
       .single()
+
+    let monthlyLimit = 3 // Default for free plan
+
+    if (subscription) {
+      // Get the subscription pack details
+      const { data: pack } = await supabase
+        .from("subscription_packs")
+        .select("analyses_per_month")
+        .eq("name", subscription.plan)
+        .single()
+
+      monthlyLimit = pack?.analyses_per_month || 3
+    }
 
     // Get current month usage
     const startOfMonth = new Date()
@@ -78,8 +84,6 @@ export default async function AnalysePage({ params }: AnalysePageProps) {
       .eq("user_id", user.id)
       .gte("created_at", startOfMonth.toISOString())
 
-    const monthlyLimit =
-      (profile?.subscription_packs as any)?.analyses_per_month || 3
     const isUnlimited = monthlyLimit === -1
     const remaining = isUnlimited
       ? 999
