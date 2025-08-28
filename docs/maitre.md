@@ -140,6 +140,7 @@ Mon nouveau processus OBLIGATOIRE :
 
 - ❌ **INTERDIT** : de créer un nouveau projet dans vercel
 - ❌ **INTERDIT ABSOLU** : Utiliser la méthode HTTP PUT (Vercel incompatible - utiliser POST)
+- ❌ **INTERDIT ABSOLU** : JAMAIS faire un déploiement Vercel directement
 
 0. **Obligatoire** Ne jamais déployer sur vercel directement
 1. **VÉRIFIER** pose toi cette question et vérifie si les modifications ne viole pas les instructions maître ou tes corrections viole la sécurité ou le VRAIS fonctionnement de l'app.
