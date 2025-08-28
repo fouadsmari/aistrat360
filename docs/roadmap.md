@@ -2,9 +2,38 @@
 
 ## 🚀 En Cours
 
-### **[Phase 2.4] - Extension et améliorations interface**
+### **[PRIORITÉ MAXIMALE] - Refonte Workflow Analyse Profitabilité**
 
-**Prochaine étape : Améliorations Phase 2 ou démarrage Phase 2.3 - Generateur mots-clés négatifs**
+**🎯 OBJECTIF** : Simplifier drastiquement l'analyse pour obtenir des résultats ultra-pertinents
+
+**📋 TÂCHES PRIORITAIRES :**
+
+1. **✅ Ajouter sélecteur pays dans le formulaire**
+   - Menu déroulant : 🇨🇦 Canada, 🇫🇷 France, 🇺🇸 États-Unis, etc.
+   - Éliminer détection automatique défaillante
+   - User contrôle explicitement le marché cible
+
+2. **⚡ Workflow 4 étapes révolutionnaire** :
+   - **Étape 1** : DataForSEO récupère HTML du site directement
+   - **Étape 2** : OpenAI analyse HTML + extrait 3 mots-clés ultra-ciblés selon pays
+   - **Étape 3** : DataForSEO récupère données complètes (volumes + CPC) pour les 3 mots-clés
+   - **Étape 4** : Affichage résultats avec tableau professionnel
+
+3. **🔧 Simplifications techniques** :
+   - Remplacer analyse complexe actuelle (8 étapes) par workflow simplifié (4 étapes)
+   - 1 requête DataForSEO HTML + 1 OpenAI + 1 DataForSEO données = 3 appels vs 4-5 actuels
+   - Économie 50% coûts API + vitesse x2 + qualité mots-clés x10
+
+4. **📊 Interface tableau avec filtres** :
+   - Colonnes : Mot-clé, Volume, CPC, Difficulté, Score ROI
+   - Filtres : Volume min/max, CPC max, Difficulté
+   - Tri par colonnes + pagination
+   - Statistiques résumées en bas
+
+5. **🧹 Nettoyage code** :
+   - Supprimer ancienne méthode d'analyse complexe
+   - Nettoyer website-analyzer.ts (méthodes obsolètes)
+   - Maintenir app clean selon maitre.md
 
 ## 📝 À Faire
 

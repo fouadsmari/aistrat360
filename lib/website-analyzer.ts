@@ -31,7 +31,10 @@ export class WebsiteAnalyzer {
   /**
    * Analyze a website and extract business insights
    */
-  async analyzeWebsite(websiteUrl: string): Promise<WebsiteInsights> {
+  async analyzeWebsite(
+    websiteUrl: string,
+    explicitTargetCountry?: string
+  ): Promise<WebsiteInsights> {
     try {
       console.log(`🔍 WebsiteAnalyzer: Starting analysis for ${websiteUrl}`)
 
@@ -85,10 +88,11 @@ export class WebsiteAnalyzer {
 
       // Step 4: Combine all insights
       console.log(`📊 WebsiteAnalyzer: Step 4 - Combining insights...`)
-      const targetCountry = this.detectCountry(domain, websiteContent)
+      const targetCountry =
+        explicitTargetCountry || this.detectCountry(domain, websiteContent)
       const detectedLanguage = this.detectLanguage(websiteContent, domain)
       console.log(
-        `🌍 WebsiteAnalyzer: Detected country: ${targetCountry}, language: ${detectedLanguage}`
+        `🌍 WebsiteAnalyzer: Using country: ${targetCountry} ${explicitTargetCountry ? "(explicit)" : "(detected)"}, language: ${detectedLanguage}`
       )
 
       const insights: WebsiteInsights = {

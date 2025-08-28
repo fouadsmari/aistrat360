@@ -7,6 +7,17 @@ export interface ProfitabilityInput {
   websiteUrl: string
   budget: number
   objective: "leads" | "sales" | "traffic" | "awareness"
+  targetCountry:
+    | "CA"
+    | "US"
+    | "FR"
+    | "BE"
+    | "CH"
+    | "GB"
+    | "DE"
+    | "ES"
+    | "IT"
+    | "NL"
   keywords?: string
 }
 
@@ -71,7 +82,8 @@ export class ProfitabilityPredictor {
       await onProgress?.(10, "Analyse de votre site web en cours...")
 
       const websiteAnalysis = await this.websiteAnalyzer.analyzeWebsite(
-        input.websiteUrl
+        input.websiteUrl,
+        input.targetCountry
       )
       console.log(
         `✅ [${analysisId}] Step 1 completed: Website analysis done for ${websiteAnalysis.domain}`
@@ -103,13 +115,13 @@ export class ProfitabilityPredictor {
         )
       }
 
-      // Get keyword volumes and CPC data with proper geo-targeting
+      // Get keyword volumes and CPC data with explicit geo-targeting from user selection
       console.log(
-        `🔢 [${analysisId}] Fetching keyword data for ${Math.min(30, allKeywords.length)} keywords in ${websiteAnalysis.targetCountry}...`
+        `🔢 [${analysisId}] Fetching keyword data for ${Math.min(30, allKeywords.length)} keywords in ${input.targetCountry}...`
       )
       const keywordData = await this.dataForSEO.getKeywordData(
         allKeywords.slice(0, 30), // Limit to 30 keywords
-        websiteAnalysis.targetCountry,
+        input.targetCountry,
         websiteAnalysis.detectedLanguage
       )
       console.log(
@@ -136,7 +148,7 @@ export class ProfitabilityPredictor {
       const trafficEstimates = await this.dataForSEO.getTrafficEstimates(
         allKeywords.slice(0, 20),
         input.budget / 500, // Estimate bid based on budget
-        websiteAnalysis.targetCountry,
+        input.targetCountry,
         websiteAnalysis.detectedLanguage
       )
       console.log(`✅ [${analysisId}] Step 4 completed: Traffic estimates done`)

@@ -43,6 +43,18 @@ const formSchema = z.object({
     .min(100, "Budget must be at least €100")
     .max(100000, "Budget cannot exceed €100,000"),
   objective: z.enum(["leads", "sales", "traffic", "awareness"]),
+  targetCountry: z.enum([
+    "CA",
+    "US",
+    "FR",
+    "BE",
+    "CH",
+    "GB",
+    "DE",
+    "ES",
+    "IT",
+    "NL",
+  ]),
   keywords: z.string().optional(),
 })
 
@@ -67,6 +79,7 @@ export function AnalyseForm({ userQuota }: AnalyseFormProps) {
       websiteUrl: "",
       budget: 1000,
       objective: "leads",
+      targetCountry: "FR",
       keywords: "",
     },
   })
@@ -297,6 +310,48 @@ export function AnalyseForm({ userQuota }: AnalyseFormProps) {
                       </Select>
                       <FormDescription>
                         {t("form.objective_description")}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Target Country */}
+                <FormField
+                  control={form.control}
+                  name="targetCountry"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <Globe className="h-4 w-4" />
+                        Marché cible
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        disabled={isSubmitting}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sélectionnez un pays" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="CA">🇨🇦 Canada</SelectItem>
+                          <SelectItem value="US">🇺🇸 États-Unis</SelectItem>
+                          <SelectItem value="FR">🇫🇷 France</SelectItem>
+                          <SelectItem value="BE">🇧🇪 Belgique</SelectItem>
+                          <SelectItem value="CH">🇨🇭 Suisse</SelectItem>
+                          <SelectItem value="GB">🇬🇧 Royaume-Uni</SelectItem>
+                          <SelectItem value="DE">🇩🇪 Allemagne</SelectItem>
+                          <SelectItem value="ES">🇪🇸 Espagne</SelectItem>
+                          <SelectItem value="IT">🇮🇹 Italie</SelectItem>
+                          <SelectItem value="NL">🇳🇱 Pays-Bas</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        Sélectionnez le marché où vous souhaitez faire de la
+                        publicité
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
