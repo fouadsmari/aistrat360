@@ -187,7 +187,7 @@ async function processAnalysis(
 
   try {
     console.log(`🚀 Starting analysis ${analysisId} for ${input.websiteUrl}`)
-    
+
     // Update progress callback
     const updateProgress = async (progress: number, status: string) => {
       console.log(`📊 Analysis ${analysisId}: ${progress}% - ${status}`)
@@ -216,15 +216,18 @@ async function processAnalysis(
         updateProgress
       ),
       // 5 minute timeout
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Analysis timeout after 5 minutes')), 5 * 60 * 1000)
-      )
+      new Promise((_, reject) =>
+        setTimeout(
+          () => reject(new Error("Analysis timeout after 5 minutes")),
+          5 * 60 * 1000
+        )
+      ),
     ])
 
     console.log(`✅ Analysis ${analysisId} completed successfully`)
   } catch (error) {
     console.error(`❌ Analysis ${analysisId} failed:`, error)
-    
+
     // Update status to failed with error details
     await supabase
       .from("profitability_analyses")
@@ -232,7 +235,9 @@ async function processAnalysis(
         status: "failed",
         progress: 0,
         completed_at: new Date().toISOString(),
-        result_data: { error: error instanceof Error ? error.message : 'Unknown error' }
+        result_data: {
+          error: error instanceof Error ? error.message : "Unknown error",
+        },
       })
       .eq("id", analysisId)
   }

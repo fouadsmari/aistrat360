@@ -39,7 +39,7 @@ export class DataForSEOClient {
     // Create Basic Auth header
     const credentials = `${this.config.login}:${this.config.password}`
     this.authHeader = `Basic ${Buffer.from(credentials).toString("base64")}`
-    
+
     this.cache = new CacheManager()
   }
 
@@ -63,13 +63,10 @@ export class DataForSEOClient {
       "search_volume"
     )
     if (cached) {
-      console.log("🎯 Cache HIT: DataForSEO search volume")
       return cached
     }
 
     try {
-      console.log(`🔍 DataForSEO: Getting search volume for ${keywords.length} keywords`)
-      
       const response = await fetch(
         `${this.config.baseUrl}/v3/keywords_data/google_ads/search_volume/live`,
         {
@@ -89,12 +86,13 @@ export class DataForSEOClient {
       )
 
       if (!response.ok) {
-        throw new Error(`DataForSEO API error: ${response.status} ${response.statusText}`)
+        throw new Error(
+          `DataForSEO API error: ${response.status} ${response.statusText}`
+        )
       }
 
       const data = await response.json()
-      console.log(`📊 DataForSEO response:`, data?.tasks?.length ? 'Success' : 'Empty')
-      
+
       if (data.tasks?.[0]?.result) {
         const results = data.tasks[0].result.map((item: any) => ({
           keyword: item.keyword,
@@ -117,18 +115,15 @@ export class DataForSEOClient {
 
       return []
     } catch (error) {
-      console.error("DataForSEO API error:", error)
-      
       // Return fallback data
-      const fallbackData = keywords.map(keyword => ({
+      const fallbackData = keywords.map((keyword) => ({
         keyword,
         search_volume: Math.floor(Math.random() * 1000) + 100, // Random between 100-1100
         cpc: Math.random() * 3 + 0.5, // Random between 0.5-3.5
         competition: Math.random(), // Random between 0-1
         monthly_searches: [],
       }))
-      
-      console.log(`🔄 Using fallback data for ${keywords.length} keywords`)
+
       return fallbackData
     }
   }
@@ -153,7 +148,6 @@ export class DataForSEOClient {
       "keywords_for_site"
     )
     if (cached) {
-      console.log("🎯 Cache HIT: DataForSEO keywords for site")
       return cached
     }
 
@@ -184,7 +178,7 @@ export class DataForSEOClient {
       }
 
       const data = await response.json()
-      
+
       if (data.tasks?.[0]?.result) {
         const keywords = data.tasks[0].result
           .map((item: any) => item.keyword)
@@ -204,24 +198,21 @@ export class DataForSEOClient {
 
       return []
     } catch (error) {
-      console.error("DataForSEO keywords for site error:", error)
-      
       // Return fallback keywords based on domain analysis
-      const domain = target.replace(/^https?:\/\//, '').replace(/^www\./, '')
+      const domain = target.replace(/^https?:\/\//, "").replace(/^www\./, "")
       const fallbackKeywords = [
-        domain.split('.')[0], // Domain name
-        `${domain.split('.')[0]} service`,
-        `${domain.split('.')[0]} professionnel`,
-        `${domain.split('.')[0]} en ligne`,
-        `${domain.split('.')[0]} france`,
-        'service client',
-        'devis gratuit',
-        'consultant',
-        'entreprise',
-        'solution',
+        domain.split(".")[0], // Domain name
+        `${domain.split(".")[0]} service`,
+        `${domain.split(".")[0]} professionnel`,
+        `${domain.split(".")[0]} en ligne`,
+        `${domain.split(".")[0]} france`,
+        "service client",
+        "devis gratuit",
+        "consultant",
+        "entreprise",
+        "solution",
       ]
-      
-      console.log(`🔄 Using fallback keywords for ${target}`)
+
       return fallbackKeywords
     }
   }
@@ -248,7 +239,6 @@ export class DataForSEOClient {
       "traffic_estimates"
     )
     if (cached) {
-      console.log("🎯 Cache HIT: DataForSEO traffic estimates")
       return cached
     }
 
@@ -278,7 +268,7 @@ export class DataForSEOClient {
       }
 
       const data = await response.json()
-      
+
       if (data.tasks?.[0]?.result) {
         const estimates = {
           impressions: data.tasks[0].result.impressions || 0,
@@ -301,7 +291,6 @@ export class DataForSEOClient {
 
       return null
     } catch (error) {
-      console.error("DataForSEO traffic estimates error:", error)
       throw error
     }
   }
@@ -319,7 +308,6 @@ export class DataForSEOClient {
       "website_analysis"
     )
     if (cached) {
-      console.log("🎯 Cache HIT: DataForSEO website analysis")
       return cached
     }
 
@@ -347,11 +335,12 @@ export class DataForSEOClient {
       }
 
       const data = await response.json()
-      
+
       if (data.tasks?.[0]?.result?.items) {
-        const techs = data.tasks[0].result.items
-          .flatMap((item: any) => item.technologies?.map((t: any) => t.name) || [])
-        
+        const techs = data.tasks[0].result.items.flatMap(
+          (item: any) => item.technologies?.map((t: any) => t.name) || []
+        )
+
         const analysis: WebsiteAnalysisData = {
           domain,
           technologies: techs,
@@ -372,7 +361,6 @@ export class DataForSEOClient {
 
       return { domain }
     } catch (error) {
-      console.error("DataForSEO website analysis error:", error)
       // Return basic data on error
       return { domain }
     }

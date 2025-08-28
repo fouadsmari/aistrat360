@@ -71,14 +71,17 @@ export class ProfitabilityPredictor {
 
       // Step 2: Get keyword data (30-50%)
       await onProgress?.(35, "Recherche des mots-clés pertinents...")
-      
+
       // Combine suggested keywords with user keywords
       let allKeywords = [...websiteAnalysis.suggestedKeywords]
       if (input.keywords) {
-        const userKeywords = input.keywords.split(",").map(k => k.trim()).filter(Boolean)
+        const userKeywords = input.keywords
+          .split(",")
+          .map((k) => k.trim())
+          .filter(Boolean)
         allKeywords = [...new Set([...allKeywords, ...userKeywords])]
       }
-      
+
       // Get keyword volumes and CPC data
       const keywordData = await this.dataForSEO.getKeywordData(
         allKeywords.slice(0, 30) // Limit to 30 keywords
@@ -136,7 +139,10 @@ export class ProfitabilityPredictor {
 
       // Format recommended keywords
       const recommendedKeywords = keywordData
-        .filter(kw => (kw.search_volume || 0) > 10 && (kw.cpc || 0) < input.budget * 0.05)
+        .filter(
+          (kw) =>
+            (kw.search_volume || 0) > 10 && (kw.cpc || 0) < input.budget * 0.05
+        )
         .sort((a, b) => {
           // Sort by value score (volume / cpc)
           const scoreA = (a.search_volume || 0) / (a.cpc || 1)
@@ -144,7 +150,7 @@ export class ProfitabilityPredictor {
           return scoreB - scoreA
         })
         .slice(0, 20)
-        .map(kw => ({
+        .map((kw) => ({
           keyword: kw.keyword,
           searchVolume: kw.search_volume || 0,
           cpc: kw.cpc || 0,
@@ -170,7 +176,6 @@ export class ProfitabilityPredictor {
 
       return prediction
     } catch (error) {
-      console.error("Profitability prediction error:", error)
       throw error
     }
   }
@@ -323,7 +328,7 @@ export class ProfitabilityPredictor {
   ): Promise<void> {
     try {
       const supabase = await createSupabaseServerClient()
-      
+
       await supabase
         .from("profitability_analyses")
         .update({
@@ -334,7 +339,7 @@ export class ProfitabilityPredictor {
         })
         .eq("id", analysisId)
     } catch (error) {
-      console.error("Error saving prediction:", error)
+      // Error saving prediction - continue silently
     }
   }
 }

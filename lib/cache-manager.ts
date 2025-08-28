@@ -12,7 +12,7 @@ export class CacheManager {
     // Sort object keys for consistent hashing
     const sortedInput = JSON.stringify(inputData, Object.keys(inputData).sort())
     const keyString = `${service}:${endpoint}:${sortedInput}`
-    
+
     // Create a simple hash
     let hash = 0
     for (let i = 0; i < keyString.length; i++) {
@@ -20,7 +20,7 @@ export class CacheManager {
       hash = (hash << 5) - hash + char
       hash = hash & hash // Convert to 32bit integer
     }
-    
+
     return `${service}_${endpoint}_${Math.abs(hash)}`
   }
 
@@ -34,7 +34,11 @@ export class CacheManager {
   ): Promise<any | null> {
     try {
       const supabase = await createSupabaseServerClient()
-      const cacheKey = this.generateCacheKey(inputData, serviceType, endpointType)
+      const cacheKey = this.generateCacheKey(
+        inputData,
+        serviceType,
+        endpointType
+      )
 
       const { data: cached, error } = await supabase
         .from("api_cache")
@@ -56,10 +60,8 @@ export class CacheManager {
         })
         .eq("cache_key", cacheKey)
 
-      console.log(`🎯 Cache HIT: ${serviceType}/${endpointType} (saved API call)`)
       return cached.api_response
     } catch (error) {
-      console.error("Cache retrieval error:", error)
       return null
     }
   }
@@ -75,8 +77,12 @@ export class CacheManager {
   ): Promise<void> {
     try {
       const supabase = await createSupabaseServerClient()
-      const cacheKey = this.generateCacheKey(inputData, serviceType, endpointType)
-      
+      const cacheKey = this.generateCacheKey(
+        inputData,
+        serviceType,
+        endpointType
+      )
+
       // Set expiration to 90 days from now
       const expiresAt = new Date()
       expiresAt.setDate(expiresAt.getDate() + 90)
@@ -94,12 +100,10 @@ export class CacheManager {
       })
 
       if (error) {
-        console.error("Cache storage error:", error)
-      } else {
-        console.log(`💾 Cache STORED: ${serviceType}/${endpointType}`)
+        // Cache storage error - continue silently
       }
     } catch (error) {
-      console.error("Cache storage error:", error)
+      // Cache storage error - continue silently
     }
   }
 
@@ -109,19 +113,17 @@ export class CacheManager {
   async cleanupExpiredCache(): Promise<void> {
     try {
       const supabase = await createSupabaseServerClient()
-      
+
       const { error } = await supabase
         .from("api_cache")
         .delete()
         .lt("expires_at", new Date().toISOString())
 
       if (error) {
-        console.error("Cache cleanup error:", error)
-      } else {
-        console.log("🧹 Expired cache entries cleaned")
+        // Cache cleanup error - continue silently
       }
     } catch (error) {
-      console.error("Cache cleanup error:", error)
+      // Cache cleanup error - continue silently
     }
   }
 
@@ -136,7 +138,7 @@ export class CacheManager {
   } | null> {
     try {
       const supabase = await createSupabaseServerClient()
-      
+
       const { data, error } = await supabase
         .from("api_cache")
         .select("hit_count")
@@ -146,7 +148,10 @@ export class CacheManager {
       }
 
       const totalEntries = data.length
-      const totalHits = data.reduce((sum, item) => sum + (item.hit_count || 0), 0)
+      const totalHits = data.reduce(
+        (sum, item) => sum + (item.hit_count || 0),
+        0
+      )
       const avgHitRate = totalEntries > 0 ? totalHits / totalEntries : 0
 
       return {
@@ -156,7 +161,6 @@ export class CacheManager {
         sizeEstimate: `${Math.round(totalEntries * 5)}KB`, // Rough estimate
       }
     } catch (error) {
-      console.error("Cache stats error:", error)
       return null
     }
   }

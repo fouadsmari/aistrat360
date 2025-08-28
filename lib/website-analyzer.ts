@@ -6,6 +6,8 @@ export interface WebsiteInsights {
   domain: string
   detectedLanguage: string
   targetCountry: string
+  currency: string // CAD, USD, EUR, etc.
+  currencySymbol: string // $, €, £, etc.
   industry: string
   businessType: "b2b" | "b2c" | "local" | "mixed"
   suggestedKeywords: string[]
@@ -42,7 +44,6 @@ export class WebsiteAnalyzer {
         "full_analysis"
       )
       if (cached) {
-        console.log("🎯 Cache HIT: Website analysis")
         return cached
       }
 
@@ -61,16 +62,21 @@ export class WebsiteAnalyzer {
       })
 
       // Step 4: Combine all insights
+      const targetCountry = this.detectCountry(domain, websiteContent)
       const insights: WebsiteInsights = {
         domain,
         detectedLanguage: this.detectLanguage(websiteContent, domain),
-        targetCountry: this.detectCountry(domain, websiteContent),
+        targetCountry,
+        currency: this.getCurrency(targetCountry),
+        currencySymbol: this.getCurrencySymbol(targetCountry),
         industry: aiAnalysis.industry,
         businessType: aiAnalysis.businessType,
-        suggestedKeywords: [...new Set([
-          ...suggestedKeywords.slice(0, 15),
-          ...(aiAnalysis.keywords || []).slice(0, 15),
-        ])].slice(0, 30),
+        suggestedKeywords: [
+          ...new Set([
+            ...suggestedKeywords.slice(0, 15),
+            ...(aiAnalysis.keywords || []).slice(0, 15),
+          ]),
+        ].slice(0, 30),
         websiteQuality: this.calculateQualityScore(websiteContent),
         competitiveness: aiAnalysis.competitiveness,
         businessModel: aiAnalysis.businessModel,
@@ -87,16 +93,17 @@ export class WebsiteAnalyzer {
 
       return insights
     } catch (error) {
-      console.error("Website analysis error:", error)
-      
       // Return basic insights on error
       const url = new URL(websiteUrl)
       const domain = url.hostname.replace("www.", "")
-      
+      const fallbackCountry = this.detectCountry(domain, "")
+
       return {
         domain,
-        detectedLanguage: "fr",
-        targetCountry: "FR",
+        detectedLanguage: this.detectLanguage("", domain),
+        targetCountry: fallbackCountry,
+        currency: this.getCurrency(fallbackCountry),
+        currencySymbol: this.getCurrencySymbol(fallbackCountry),
         industry: "general",
         businessType: "b2c",
         suggestedKeywords: [],
@@ -113,19 +120,17 @@ export class WebsiteAnalyzer {
    */
   private async fetchWebsiteContent(url: string): Promise<string> {
     try {
-      console.log(`🌐 Fetching content from ${url}`)
-      
       // Add timeout to prevent hanging
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
-      
+
       const response = await fetch(url, {
         headers: {
           "User-Agent": "Mozilla/5.0 (compatible; GoogleAdsAnalyzer/1.0)",
         },
         signal: controller.signal,
       })
-      
+
       clearTimeout(timeoutId)
 
       if (!response.ok) {
@@ -133,8 +138,7 @@ export class WebsiteAnalyzer {
       }
 
       const html = await response.text()
-      console.log(`📄 Fetched ${html.length} characters from ${url}`)
-      
+
       // Extract text content from HTML (basic extraction)
       const textContent = html
         .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
@@ -144,10 +148,8 @@ export class WebsiteAnalyzer {
         .trim()
         .substring(0, 5000) // Limit to 5000 chars
 
-      console.log(`📝 Extracted ${textContent.length} characters of text content`)
       return textContent
     } catch (error) {
-      console.error("Error fetching website content:", error)
       // Return fallback content based on domain
       const domain = new URL(url).hostname.replace("www.", "")
       return `Site web: ${domain}. Service professionnel en ligne.`
@@ -202,22 +204,35 @@ export class WebsiteAnalyzer {
     if (domain.endsWith(".de")) return "de"
     if (domain.endsWith(".es")) return "es"
     if (domain.endsWith(".it")) return "it"
-    
+
     // Check content for French indicators
     const frenchIndicators = [
-      "nous", "vous", "avec", "pour", "dans", "sur", "est", "sont",
-      "être", "avoir", "faire", "dire", "aller", "voir", "savoir",
+      "nous",
+      "vous",
+      "avec",
+      "pour",
+      "dans",
+      "sur",
+      "est",
+      "sont",
+      "être",
+      "avoir",
+      "faire",
+      "dire",
+      "aller",
+      "voir",
+      "savoir",
     ]
-    
+
     const contentLower = content.toLowerCase()
     let frenchCount = 0
-    
+
     for (const word of frenchIndicators) {
       if (contentLower.includes(` ${word} `)) {
         frenchCount++
       }
     }
-    
+
     return frenchCount > 5 ? "fr" : "en"
   }
 
@@ -237,6 +252,7 @@ export class WebsiteAnalyzer {
       ".it": "IT",
       ".nl": "NL",
       ".com": "US",
+      ".us": "US",
     }
 
     for (const [tld, country] of Object.entries(tldMapping)) {
@@ -246,12 +262,62 @@ export class WebsiteAnalyzer {
     }
 
     // Check for country mentions in content
+    if (content.includes("Canada") || content.includes("canadien")) return "CA"
     if (content.includes("France") || content.includes("français")) return "FR"
     if (content.includes("Belgium") || content.includes("Belgique")) return "BE"
-    if (content.includes("Canada")) return "CA"
-    
+    if (content.includes("United States") || content.includes("USA"))
+      return "US"
+
+    // Default based on language detection
+    const contentLower = content.toLowerCase()
+    if (contentLower.includes("dollar") && contentLower.includes("cad"))
+      return "CA"
+    if (contentLower.includes("dollar") && contentLower.includes("usd"))
+      return "US"
+    if (contentLower.includes("euro") || contentLower.includes("€")) return "FR"
+
     // Default to France for French market
     return "FR"
+  }
+
+  /**
+   * Get currency symbol based on country
+   */
+  getCurrency(country: string): string {
+    const currencyMapping: Record<string, string> = {
+      CA: "CAD",
+      US: "USD",
+      FR: "EUR",
+      BE: "EUR",
+      CH: "CHF",
+      GB: "GBP",
+      DE: "EUR",
+      ES: "EUR",
+      IT: "EUR",
+      NL: "EUR",
+    }
+
+    return currencyMapping[country] || "EUR"
+  }
+
+  /**
+   * Get currency symbol for display
+   */
+  getCurrencySymbol(country: string): string {
+    const symbolMapping: Record<string, string> = {
+      CA: "$",
+      US: "$",
+      FR: "€",
+      BE: "€",
+      CH: "CHF",
+      GB: "£",
+      DE: "€",
+      ES: "€",
+      IT: "€",
+      NL: "€",
+    }
+
+    return symbolMapping[country] || "€"
   }
 
   /**
@@ -263,21 +329,29 @@ export class WebsiteAnalyzer {
     // Check content length
     if (content.length > 1000) score += 10
     if (content.length > 2000) score += 10
-    
+
     // Check for business indicators
     const businessIndicators = [
-      "contact", "service", "produit", "product",
-      "prix", "price", "devis", "quote",
-      "client", "customer", "solution",
+      "contact",
+      "service",
+      "produit",
+      "product",
+      "prix",
+      "price",
+      "devis",
+      "quote",
+      "client",
+      "customer",
+      "solution",
     ]
-    
+
     const contentLower = content.toLowerCase()
     for (const indicator of businessIndicators) {
       if (contentLower.includes(indicator)) {
         score += 3
       }
     }
-    
+
     // Cap at 100
     return Math.min(score, 100)
   }

@@ -92,9 +92,9 @@ export function AnalyseForm({ userQuota }: AnalyseFormProps) {
         })
       }, 500)
 
-      // TODO: Make API call to start analysis
-      const response = await fetch("/api/tools/analyse/test", {
-        method: "POST", 
+      // Make API call to start analysis
+      const response = await fetch("/api/tools/analyse", {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
@@ -286,7 +286,7 @@ export function AnalyseForm({ userQuota }: AnalyseFormProps) {
               <Button
                 type="submit"
                 size="lg"
-                className="w-full bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white"
+                className="w-full bg-gradient-to-r from-violet-600 to-purple-600 text-white hover:from-violet-700 hover:to-purple-700"
                 disabled={!canSubmit || isSubmitting}
               >
                 {isSubmitting ? (

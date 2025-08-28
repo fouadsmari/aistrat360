@@ -114,7 +114,7 @@ export default async function AnalysePage({ params }: AnalysePageProps) {
 
       {/* Key Features */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <Card className="border-gray-200 hover:border-violet-200 transition-colors dark:border-gray-800 dark:hover:border-violet-700">
+        <Card className="border-gray-200 transition-colors hover:border-violet-200 dark:border-gray-800 dark:hover:border-violet-700">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5 text-violet-600 dark:text-violet-400" />
@@ -130,7 +130,7 @@ export default async function AnalysePage({ params }: AnalysePageProps) {
           </CardContent>
         </Card>
 
-        <Card className="border-gray-200 hover:border-violet-200 transition-colors dark:border-gray-800 dark:hover:border-violet-700">
+        <Card className="border-gray-200 transition-colors hover:border-violet-200 dark:border-gray-800 dark:hover:border-violet-700">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2">
               <BarChart3 className="h-5 w-5 text-violet-600 dark:text-violet-400" />
@@ -145,7 +145,7 @@ export default async function AnalysePage({ params }: AnalysePageProps) {
           </CardContent>
         </Card>
 
-        <Card className="border-gray-200 hover:border-violet-200 transition-colors dark:border-gray-800 dark:hover:border-violet-700">
+        <Card className="border-gray-200 transition-colors hover:border-violet-200 dark:border-gray-800 dark:hover:border-violet-700">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2">
               <DollarSign className="h-5 w-5 text-violet-600 dark:text-violet-400" />

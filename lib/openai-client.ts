@@ -12,7 +12,10 @@ export class OpenAIClient {
   /**
    * Generate JSON response from OpenAI
    */
-  async generateJSON(prompt: string, model: string = "gpt-4o-mini"): Promise<any> {
+  async generateJSON(
+    prompt: string,
+    model: string = "gpt-4o-mini"
+  ): Promise<any> {
     // Check cache first
     const cacheKey = { prompt, model }
     const cached = await this.cache.getCachedResponse(
@@ -21,34 +24,37 @@ export class OpenAIClient {
       "json_generation"
     )
     if (cached) {
-      console.log("🎯 Cache HIT: OpenAI generation")
       return cached
     }
 
     try {
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${this.apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model,
-          messages: [
-            {
-              role: "system",
-              content: "You are a helpful assistant that responds ONLY with valid JSON. Never include any text outside the JSON structure.",
-            },
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-          temperature: 0.3, // More deterministic
-          max_tokens: 1000,
-          response_format: { type: "json_object" },
-        }),
-      })
+      const response = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              {
+                role: "system",
+                content:
+                  "You are a helpful assistant that responds ONLY with valid JSON. Never include any text outside the JSON structure.",
+              },
+              {
+                role: "user",
+                content: prompt,
+              },
+            ],
+            temperature: 0.3, // More deterministic
+            max_tokens: 1000,
+            response_format: { type: "json_object" },
+          }),
+        }
+      )
 
       if (!response.ok) {
         throw new Error(`OpenAI API error: ${response.statusText}`)
@@ -67,32 +73,52 @@ export class OpenAIClient {
 
       return result
     } catch (error) {
-      console.error("OpenAI API error:", error)
-      
       // Return intelligent fallback based on prompt content
       const promptLower = prompt.toLowerCase()
       let industry = "general"
       let businessType = "b2c"
       let keywords: string[] = []
-      
+
       // Basic industry detection from prompt
       if (promptLower.includes("restaurant") || promptLower.includes("food")) {
         industry = "restaurant"
         keywords = ["restaurant", "cuisine", "menu", "réservation", "livraison"]
-      } else if (promptLower.includes("consulting") || promptLower.includes("conseil")) {
+      } else if (
+        promptLower.includes("consulting") ||
+        promptLower.includes("conseil")
+      ) {
         industry = "consulting"
         businessType = "b2b"
-        keywords = ["consultant", "conseil", "expertise", "accompagnement", "formation"]
-      } else if (promptLower.includes("ecommerce") || promptLower.includes("boutique")) {
+        keywords = [
+          "consultant",
+          "conseil",
+          "expertise",
+          "accompagnement",
+          "formation",
+        ]
+      } else if (
+        promptLower.includes("ecommerce") ||
+        promptLower.includes("boutique")
+      ) {
         industry = "ecommerce"
-        keywords = ["boutique en ligne", "achat", "livraison", "produits", "catalogue"]
+        keywords = [
+          "boutique en ligne",
+          "achat",
+          "livraison",
+          "produits",
+          "catalogue",
+        ]
       } else {
         // Generic service keywords
-        keywords = ["service", "professionnel", "devis", "contact", "entreprise"]
+        keywords = [
+          "service",
+          "professionnel",
+          "devis",
+          "contact",
+          "entreprise",
+        ]
       }
-      
-      console.log(`🔄 Using intelligent fallback for industry: ${industry}`)
-      
+
       return {
         industry,
         businessType,
@@ -125,7 +151,6 @@ export class OpenAIClient {
       "negative_keywords"
     )
     if (cached) {
-      console.log("🎯 Cache HIT: Negative keywords")
       return cached
     }
 
@@ -190,8 +215,13 @@ export class OpenAIClient {
       objective: data.objective,
       competitiveness: data.competitiveness,
       keywordCount: data.keywords.length,
-      avgCpc: data.keywords.reduce((sum, kw) => sum + (kw.cpc || 2), 0) / data.keywords.length,
-      totalVolume: data.keywords.reduce((sum, kw) => sum + (kw.search_volume || 0), 0),
+      avgCpc:
+        data.keywords.reduce((sum, kw) => sum + (kw.cpc || 2), 0) /
+        data.keywords.length,
+      totalVolume: data.keywords.reduce(
+        (sum, kw) => sum + (kw.search_volume || 0),
+        0
+      ),
     }
 
     // Check cache first
@@ -201,7 +231,6 @@ export class OpenAIClient {
       "roi_prediction"
     )
     if (cached) {
-      console.log("🎯 Cache HIT: ROI prediction")
       return cached
     }
 
@@ -241,12 +270,15 @@ export class OpenAIClient {
     `
 
     const result = await this.generateJSON(prompt, "gpt-4o-mini")
-    
+
     const prediction = {
-      estimatedClicks: result.estimatedClicks || Math.floor(data.budget / inputData.avgCpc),
+      estimatedClicks:
+        result.estimatedClicks || Math.floor(data.budget / inputData.avgCpc),
       estimatedCost: result.estimatedCost || data.budget * 0.9,
-      estimatedLeads: result.estimatedLeads || Math.floor(result.estimatedClicks * 0.02),
-      estimatedConversions: result.estimatedConversions || Math.floor(result.estimatedLeads * 0.2),
+      estimatedLeads:
+        result.estimatedLeads || Math.floor(result.estimatedClicks * 0.02),
+      estimatedConversions:
+        result.estimatedConversions || Math.floor(result.estimatedLeads * 0.2),
       roiPercentage: result.roiPercentage || 150,
       breakEvenDays: result.breakEvenDays || 90,
       confidence: result.confidence || "medium",
