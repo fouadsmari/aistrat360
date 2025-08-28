@@ -103,12 +103,14 @@ export class ProfitabilityPredictor {
         )
       }
 
-      // Get keyword volumes and CPC data
+      // Get keyword volumes and CPC data with proper geo-targeting
       console.log(
-        `🔢 [${analysisId}] Fetching keyword data for ${Math.min(30, allKeywords.length)} keywords...`
+        `🔢 [${analysisId}] Fetching keyword data for ${Math.min(30, allKeywords.length)} keywords in ${websiteAnalysis.targetCountry}...`
       )
       const keywordData = await this.dataForSEO.getKeywordData(
-        allKeywords.slice(0, 30) // Limit to 30 keywords
+        allKeywords.slice(0, 30), // Limit to 30 keywords
+        websiteAnalysis.targetCountry,
+        websiteAnalysis.detectedLanguage
       )
       console.log(
         `✅ [${analysisId}] Step 2 completed: Got data for ${keywordData.length} keywords`
@@ -133,7 +135,9 @@ export class ProfitabilityPredictor {
       await onProgress?.(65, "Estimation du trafic potentiel...")
       const trafficEstimates = await this.dataForSEO.getTrafficEstimates(
         allKeywords.slice(0, 20),
-        input.budget / 500 // Estimate bid based on budget
+        input.budget / 500, // Estimate bid based on budget
+        websiteAnalysis.targetCountry,
+        websiteAnalysis.detectedLanguage
       )
       console.log(`✅ [${analysisId}] Step 4 completed: Traffic estimates done`)
       await onProgress?.(70, "Estimations de trafic calculées")

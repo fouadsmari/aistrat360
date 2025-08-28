@@ -44,16 +44,52 @@ export class DataForSEOClient {
   }
 
   /**
-   * Get keyword search volume and CPC data
+   * Get keyword search volume and CPC data with proper geo-targeting
    */
   async getKeywordData(
     keywords: string[],
-    location_code: number = 2250 // France by default
+    country: string = "FR",
+    language: string = "fr"
   ): Promise<KeywordData[]> {
+    // Map country codes to DataForSEO location codes
+    const locationMapping: Record<string, number> = {
+      CA: 2124, // Canada
+      US: 2840, // United States
+      FR: 2250, // France
+      BE: 2056, // Belgium
+      CH: 2756, // Switzerland
+      GB: 2826, // United Kingdom
+      DE: 2276, // Germany
+      ES: 2724, // Spain
+      IT: 2380, // Italy
+      NL: 2528, // Netherlands
+    }
+
+    // Map countries to language codes
+    const languageMapping: Record<string, string> = {
+      CA: language === "fr" ? "fr" : "en", // Canada can be French or English
+      US: "en",
+      FR: "fr",
+      BE: language === "fr" ? "fr" : "nl",
+      CH: language === "fr" ? "fr" : "de",
+      GB: "en",
+      DE: "de",
+      ES: "es",
+      IT: "it",
+      NL: "nl",
+    }
+
+    const location_code = locationMapping[country] || 2250 // Default to France
+    const language_code = languageMapping[country] || "fr"
+
+    console.log(
+      `🌍 DataForSEO: Using location ${location_code} (${country}) with language ${language_code}`
+    )
+
     const inputData = {
       keywords: keywords.sort(),
       location_code,
-      language_code: "fr",
+      language_code,
     }
 
     // Check cache first
@@ -79,7 +115,7 @@ export class DataForSEOClient {
             {
               keywords,
               location_code,
-              language_code: "fr",
+              language_code,
             },
           ]),
         }
@@ -218,18 +254,49 @@ export class DataForSEOClient {
   }
 
   /**
-   * Get traffic estimates for keywords
+   * Get traffic estimates for keywords with proper geo-targeting
    */
   async getTrafficEstimates(
     keywords: string[],
     bid: number = 2.0,
-    location_code: number = 2250
+    country: string = "FR",
+    language: string = "fr"
   ) {
+    // Use same location mapping as getKeywordData
+    const locationMapping: Record<string, number> = {
+      CA: 2124, // Canada
+      US: 2840, // United States
+      FR: 2250, // France
+      BE: 2056, // Belgium
+      CH: 2756, // Switzerland
+      GB: 2826, // United Kingdom
+      DE: 2276, // Germany
+      ES: 2724, // Spain
+      IT: 2380, // Italy
+      NL: 2528, // Netherlands
+    }
+
+    const languageMapping: Record<string, string> = {
+      CA: language === "fr" ? "fr" : "en",
+      US: "en",
+      FR: "fr",
+      BE: language === "fr" ? "fr" : "nl",
+      CH: language === "fr" ? "fr" : "de",
+      GB: "en",
+      DE: "de",
+      ES: "es",
+      IT: "it",
+      NL: "nl",
+    }
+
+    const location_code = locationMapping[country] || 2250
+    const language_code = languageMapping[country] || "fr"
+
     const inputData = {
       keywords: keywords.sort(),
       bid,
       location_code,
-      language_code: "fr",
+      language_code,
     }
 
     // Check cache first
@@ -257,7 +324,7 @@ export class DataForSEOClient {
               bid,
               match: "broad",
               location_code,
-              language_code: "fr",
+              language_code,
             },
           ]),
         }
