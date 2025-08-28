@@ -512,5 +512,54 @@
     "cancelMessage": "Are you sure you want to cancel?",
     "unsavedChanges": "You have unsaved changes. Do you want to continue?",
     "logoutMessage": "Are you sure you want to logout?"
+  },
+  "tools": {
+    "title": "Google Ads Tools",
+    "description": "Analysis and optimization of your Google Ads campaigns",
+    "analyse": {
+      "title": "Google Ads Profitability Analysis",
+      "description": "Predict your ROI BEFORE spending - Avoid losing your money",
+      "form": {
+        "website_url": "Your website URL",
+        "website_url_placeholder": "https://mysite.com",
+        "website_url_description": "Our AI will automatically analyze your industry and products",
+        "budget": "Monthly budget ($)",
+        "budget_placeholder": "1000",
+        "budget_description": "Budget you want to allocate to Google Ads",
+        "objective": "Main objective",
+        "objective_description": "What do you want to accomplish with your campaigns?",
+        "keywords": "Additional keywords (optional)",
+        "keywords_placeholder": "digital marketing, consultant...",
+        "keywords_description": "Add specific keywords if you have any",
+        "submit": "🚀 Analyze my profitability",
+        "submitting": "Analysis in progress..."
+      },
+      "objectives": {
+        "leads": "Lead generation",
+        "sales": "Online sales",
+        "traffic": "Qualified traffic",
+        "awareness": "Brand awareness"
+      },
+      "results": {
+        "roi_prediction": "Predicted ROI",
+        "recommended_keywords": "Recommended keywords",
+        "keywords_to_avoid": "Keywords to avoid",
+        "monthly_stats": "Predicted monthly stats",
+        "clicks": "Estimated clicks",
+        "impressions": "Estimated impressions",
+        "cost_per_click": "Estimated avg CPC"
+      },
+      "quota": {
+        "remaining": "Analyses remaining this month",
+        "unlimited": "Unlimited",
+        "upgrade": "Upgrade"
+      },
+      "status": {
+        "pending": "Pending",
+        "processing": "Analysis in progress...",
+        "completed": "Completed",
+        "failed": "Failed"
+      }
+    }
   }
 }

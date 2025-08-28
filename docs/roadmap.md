@@ -4,6 +4,813 @@
 
 ## 📝 À Faire
 
+### **[Phase 2] - Outils Google Ads Intelligence**
+
+## 📋 **ÉTAPE 2.1 : GOOGLE ADS PROFITABILITY PREDICTOR MVP**
+
+**Durée : 6-8 semaines | Priorité 1 - RÉVOLUTIONNAIRE**
+
+### **A. STRUCTURE DE BASE (Semaine 1)**
+
+#### 1. **Setup Routes & Navigation**
+
+```typescript
+// Routes à créer
+app/[locale]/tools/layout.tsx       // Layout commun pour tous les outils
+app/[locale]/tools/analyse/page.tsx // Page principale "Analyse"
+app/api/tools/profitability-predictor/route.ts // API endpoint
+
+// Sidebar modification
+components/layout/sidebar.tsx
+- Ajouter dropdown "Google Ads" avec icône Target
+- Sous-menu : "Analyse" (outil principal)
+```
+
+#### 2. **Traductions de base**
+
+```json
+// messages/fr.json
+"tools": {
+  "title": "Outils Google Ads",
+  "description": "Analyse et optimisation de vos campagnes Google Ads",
+  "analyse": {
+    "title": "Analyse de Rentabilité Google Ads",
+    "description": "Prédisez votre ROI AVANT de dépenser - Évitez de perdre votre argent",
+    "input_budget": "Budget mensuel (€)",
+    "input_keywords": "Vos mots-clés cibles",
+    "select_industry": "Secteur d'activité",
+    "select_objective": "Objectif principal",
+    "predict_button": "Analyser ma rentabilité",
+    "roi_prediction": "ROI prédit",
+    "recommended_keywords": "Mots-clés recommandés",
+    "keywords_to_avoid": "Mots-clés à éviter"
+  }
+}
+
+// messages/en.json
+"tools": {
+  "title": "Google Ads Tools",
+  "description": "Analysis and optimization of your Google Ads campaigns",
+  "analyse": {
+    "title": "Google Ads Profitability Analysis",
+    "description": "Predict your ROI BEFORE spending - Avoid losing your money",
+    "input_budget": "Monthly budget ($)",
+    "input_keywords": "Your target keywords",
+    "select_industry": "Industry sector",
+    "select_objective": "Main objective",
+    "predict_button": "Analyze my profitability",
+    "roi_prediction": "Predicted ROI",
+    "recommended_keywords": "Recommended keywords",
+    "keywords_to_avoid": "Keywords to avoid"
+  }
+}
+```
+
+#### 3. **Database Schema**
+
+```sql
+-- Table pour sauvegarder les analyses de profitabilité
+CREATE TABLE profitability_analyses (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id),
+  analysis_type VARCHAR(50) DEFAULT 'profitability_prediction',
+  input_data JSONB,          -- {keywords: [], industry: '', budget: 1000, objective: 'leads'}
+  result_data JSONB,         -- {roi_predictions: [], recommended_keywords: [], avoid_keywords: []}
+  status VARCHAR(20),        -- 'pending', 'processing', 'completed', 'failed'
+  progress INTEGER DEFAULT 0,
+  created_at TIMESTAMP DEFAULT NOW(),
+  completed_at TIMESTAMP,
+  credits_used INTEGER DEFAULT 2  -- Plus complexe = 2 crédits
+);
+
+-- Extension table quotas existante
+ALTER TABLE subscription_packs
+ADD COLUMN analyses_per_month INTEGER DEFAULT 3;
+
+-- Table cache partagée DataForSEO + IA (ajoutée en Phase 2.1)
+-- Voir section C.1 pour schéma complet et logique cache 3 mois
+```
+
+### **B. INTERFACE UTILISATEUR (Semaines 2-3)**
+
+#### 1. **Inputs Utilisateur - MODE RÉVOLUTIONNAIRE SIMPLIFIÉ**
+
+```typescript
+interface ProfitabilityPredictorInput {
+  // OBLIGATOIRE - ULTRA SIMPLE pour petits entrepreneurs
+  websiteUrl: string // "https://monsite.fr" (validation URL + accessibilité)
+  monthlyBudget: number // 200-5000€ (slider visuel avec paliers)
+  objective: "leads" | "sales" | "clients" | "visibilite" // Langage simple
+
+  // AUTO-DÉTECTÉ par l'analyse de site (DataForSEO + IA)
+  detectedLanguage?: string // Analysé depuis charset + contenu
+  targetCountry?: string // Détecté via domaine (.fr/.be) + contenu géolocalisé
+  industry?: string // Déterminé par analyse sémantique IA du contenu
+  businessType?: "b2b" | "b2c" | "local" // Analysé via type de contenu/services
+  suggestedKeywords?: string[] // Extraits du contenu + suggestions IA (20-30 keywords)
+
+  // OPTIONNEL - Pour utilisateurs avancés (onglet "Mode Expert")
+  manualKeywords?: string[] // Override suggestions IA
+  averageOrderValue?: number // Pour calcul ROI précis (sales only)
+  conversionRate?: number // Estimation taux conversion actuel
+  competitorUrls?: string[] // URLs concurrents pour benchmark
+}
+
+// Workflow utilisateur simplifié
+interface SimplifiedWorkflow {
+  step1: "Collez votre site web" // Input URL
+  step2: "Choisissez votre budget" // Slider budget
+  step3: "Quel est votre objectif ?" // Radio buttons simples
+  step4: "🚀 Analyser ma rentabilité" // Bouton CTA
+}
+```
+
+#### 2. **Industries Prédéfinies avec Templates**
+
+```typescript
+const INDUSTRIES = {
+  marketing: {
+    fr: "Marketing & Publicité",
+    en: "Marketing & Advertising",
+    baseNegatives: [
+      "gratuit",
+      "free",
+      "formation",
+      "emploi",
+      "stage",
+      "junior",
+    ],
+  },
+  ecommerce: {
+    fr: "E-commerce & Retail",
+    en: "E-commerce & Retail",
+    baseNegatives: ["occasion", "seconde main", "location", "réparation"],
+  },
+  b2b_services: {
+    fr: "Services B2B",
+    en: "B2B Services",
+    baseNegatives: ["particulier", "personnel", "maison", "domestique"],
+  },
+  healthcare: {
+    fr: "Santé & Bien-être",
+    en: "Healthcare & Wellness",
+    baseNegatives: ["gratuit", "remboursement", "sécurité sociale", "mutuelle"],
+  },
+}
+```
+
+#### 3. **Progress Bar Interactive Temps Réel**
+
+```jsx
+const AnalysisProgress = ({ progress, status }) => {
+  const steps = [
+    { percent: 0, status: "Initialisation de l'analyse...", duration: 500 },
+    { percent: 20, status: "Connexion à DataForSEO...", duration: 1000 },
+    {
+      percent: 40,
+      status: "Récupération volumes de recherche...",
+      duration: 2000,
+    },
+    { percent: 60, status: "Génération IA des exclusions...", duration: 1500 },
+    {
+      percent: 80,
+      status: "Calcul des économies potentielles...",
+      duration: 1000,
+    },
+    { percent: 100, status: "Analyse terminée !", duration: 500 },
+  ]
+
+  return (
+    <Card>
+      <CardContent className="space-y-4">
+        <div className="flex items-center gap-3">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          <span className="font-medium">{status}</span>
+        </div>
+        <Progress value={progress} className="h-3" />
+        <div className="flex justify-between text-sm text-gray-500">
+          <span>{progress}% terminé</span>
+          <span>~ {Math.round((100 - progress) / 20)} min restantes</span>
+        </div>
+
+        {/* Sauvegarde automatique */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => saveAnalysis()} // Sauvegarder pour reprendre plus tard
+        >
+          💾 Sauvegarder et continuer plus tard
+        </Button>
+      </CardContent>
+    </Card>
+  )
+}
+```
+
+### **C. LOGIQUE DE PRÉDICTION RENTABILITÉ (Semaines 4-6)**
+
+#### 1. **Analyse de Site Web Automatique**
+
+```typescript
+// lib/website-analyzer.ts
+class WebsiteAnalyzer {
+  private cache = new CacheManager()
+
+  async analyzeWebsite(websiteUrl: string): Promise<WebsiteInsights> {
+    // 1. Vérifier cache d'abord (économie API)
+    const cacheKey = `website_analysis:${websiteUrl}`
+    const cached = await this.cache.getCachedResponse(
+      { url: websiteUrl },
+      "dataforseo",
+      "website_analysis"
+    )
+    if (cached) return cached
+
+    // 2. Analyse DataForSEO On-Page API
+    const contentData = await fetch("/api/dataforseo/analyze-page", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        url: websiteUrl,
+        enable_content_parsing: true,
+        enable_javascript: true,
+      }),
+    })
+
+    const pageAnalysis = await contentData.json()
+
+    // 3. Extraction intelligente via IA
+    const aiInsights = await this.analyzeContentWithAI({
+      title: pageAnalysis.title,
+      metaDescription: pageAnalysis.meta_description,
+      headings: pageAnalysis.headings,
+      content: pageAnalysis.plain_text_content,
+      domain: new URL(websiteUrl).hostname,
+    })
+
+    // 4. Combinaison données + cache 3 mois
+    const insights = {
+      detectedLanguage: this.detectLanguage(pageAnalysis, aiInsights),
+      targetCountry: this.detectCountry(websiteUrl, pageAnalysis, aiInsights),
+      industry: aiInsights.industry,
+      businessType: aiInsights.businessType,
+      suggestedKeywords: aiInsights.keywords,
+      websiteQuality: this.calculateSEOScore(pageAnalysis),
+      competitiveness: aiInsights.competitiveness,
+    }
+
+    // 5. Cache pour 3 mois (contenu site stable)
+    await this.cache.setCachedResponse(
+      { url: websiteUrl },
+      "dataforseo",
+      "website_analysis",
+      insights
+    )
+
+    return insights
+  }
+
+  private async analyzeContentWithAI(pageData: any): Promise<any> {
+    const prompt = `
+    Analyse ce site web et détermine précisément :
+    
+    CONTENU À ANALYSER :
+    - Titre: ${pageData.title}
+    - Description: ${pageData.metaDescription}
+    - Titres: ${pageData.headings?.join(", ")}
+    - Domaine: ${pageData.domain}
+    - Contenu: ${pageData.content?.substring(0, 2000)}...
+    
+    RETOURNER JSON STRUCTURÉ :
+    {
+      "industry": "secteur précis (ex: coaching-business, restaurant, ecommerce-mode)",
+      "businessType": "b2b|b2c|local",
+      "keywords": ["20 mots-clés commerciaux pertinents"],
+      "targetAudience": "description cible",
+      "competitiveness": "low|medium|high",
+      "businessModel": "service|product|marketplace|saas"
+    }
+    
+    RÈGLES :
+    - Mots-clés COMMERCIAUX (pas techniques)
+    - Focus intentions d'achat
+    - Éviter mots-clés trop génériques
+    `
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini", // Plus économique pour cette tâche
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.3, // Plus déterministe
+    })
+
+    return JSON.parse(response.choices[0].message.content)
+  }
+
+  private detectLanguage(pageData: any, aiInsights: any): string {
+    // Priorité : 1) HTML lang, 2) Charset, 3) Analyse IA du contenu
+    return (
+      pageData.language ||
+      (pageData.charset?.includes("utf-8") ? "fr" : "en") ||
+      this.detectLanguageFromContent(pageData.content)
+    )
+  }
+
+  private detectCountry(url: string, pageData: any, aiInsights: any): string {
+    const domain = new URL(url).hostname
+    const tldMapping = {
+      ".fr": "FR",
+      ".be": "BE",
+      ".ch": "CH",
+      ".ca": "CA",
+      ".co.uk": "GB",
+      ".com": "US",
+      ".de": "DE",
+    }
+
+    // Détection par TLD ou contenu géolocalisé
+    for (const [tld, country] of Object.entries(tldMapping)) {
+      if (domain.endsWith(tld)) return country
+    }
+
+    return "FR" // Default pour notre marché
+  }
+}
+```
+
+#### 2. **DataForSEO Integration avec Cache 3 Mois**
+
+```sql
+-- Table cache unifiée pour réduire coûts API + IA de 90%
+CREATE TABLE api_cache (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  cache_key VARCHAR(255) UNIQUE NOT NULL,  -- hash(input + service + endpoint)
+  service_type VARCHAR(50) NOT NULL,       -- 'dataforseo', 'openai', 'claude'
+  endpoint_type VARCHAR(50) NOT NULL,      -- 'search_volume', 'negative_keywords_generation'
+  input_data JSONB NOT NULL,               -- paramètres d'entrée (keywords, industry, etc)
+  api_response JSONB NOT NULL,             -- réponse complète service
+  expires_at TIMESTAMP DEFAULT (NOW() + INTERVAL '90 days'),  -- TTL 3 mois
+  hit_count INTEGER DEFAULT 0,             -- nombre de réutilisations
+  created_at TIMESTAMP DEFAULT NOW(),
+  last_accessed_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Index pour performance cache lookup
+CREATE INDEX idx_api_cache_key ON api_cache(cache_key);
+CREATE INDEX idx_api_cache_expires ON api_cache(expires_at);
+CREATE INDEX idx_api_cache_service ON api_cache(service_type, endpoint_type);
+
+-- Cleanup automatique hebdomadaire
+CREATE OR REPLACE FUNCTION cleanup_expired_cache()
+RETURNS void AS $$
+BEGIN
+  DELETE FROM api_cache WHERE expires_at < NOW();
+END;
+$$ LANGUAGE plpgsql;
+```
+
+````typescript
+// lib/cache-manager.ts - Service cache unifié
+class CacheManager {
+  private generateCacheKey(inputData: any, service: string, endpoint: string): string {
+    // Hash déterministe pour clé unique partagée entre users
+    const input = JSON.stringify(inputData, Object.keys(inputData).sort())
+    return btoa(`${service}:${endpoint}:${input}`).substring(0, 200)
+  }
+
+  async getCachedResponse(
+    inputData: any,
+    serviceType: string,
+    endpointType: string
+  ): Promise<any | null> {
+    const cacheKey = this.generateCacheKey(inputData, serviceType, endpointType)
+
+    const { data: cached } = await supabase
+      .from('api_cache')
+      .select('api_response, hit_count')
+      .eq('cache_key', cacheKey)
+      .gt('expires_at', new Date().toISOString())
+      .single()
+
+    if (cached) {
+      // HIT: Incrémenter compteur usage
+      await supabase
+        .from('api_cache')
+        .update({
+          hit_count: cached.hit_count + 1,
+          last_accessed_at: new Date().toISOString()
+        })
+        .eq('cache_key', cacheKey)
+
+      console.log(`🎯 Cache HIT: ${serviceType}/${endpointType} (économie)`)
+      return cached.api_response
+    }
+
+    return null
+  }
+
+  async setCachedResponse(
+    inputData: any,
+    serviceType: string,
+    endpointType: string,
+    apiResponse: any
+  ): Promise<void> {
+    const cacheKey = this.generateCacheKey(inputData, serviceType, endpointType)
+
+    await supabase
+      .from('api_cache')
+      .upsert({
+        cache_key: cacheKey,
+        service_type: serviceType,
+        endpoint_type: endpointType,
+        input_data: inputData,
+        api_response: apiResponse,
+        expires_at: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString()
+      })
+
+    console.log(`💾 Cache STORED: ${serviceType}/${endpointType}`)
+  }
+}
+
+// lib/dataforseo-client.ts
+class DataForSEOClient {
+  private cache = new CacheManager()
+
+  async getKeywordVolumes(keywords: string[], location = 'FR'): Promise<any> {
+    const inputData = { keywords: keywords.sort(), location }
+
+    // 1. Check cache AVANT requête API
+    const cached = await this.cache.getCachedResponse(
+      inputData, 'dataforseo', 'search_volume'
+    )
+    if (cached) return cached
+
+    // 2. MISS: Requête DataForSEO API
+    const response = await fetch('/api/dataforseo/search-volume', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(inputData)
+    })
+
+    const apiData = await response.json()
+
+    // 3. STORE: Sauver en cache 3 mois
+    await this.cache.setCachedResponse(
+      inputData, 'dataforseo', 'search_volume', apiData
+    )
+
+    return apiData
+  }
+}
+
+// lib/ai-client.ts
+class AIClient {
+  private cache = new CacheManager()
+
+  async generateNegativeKeywords(
+    mainKeywords: string[],
+    industry: string,
+    businessType: string = 'b2b'
+  ): Promise<string[]> {
+    const inputData = {
+      keywords: mainKeywords.sort(),
+      industry,
+      businessType
+    }
+
+    // 1. Check cache AVANT requête IA
+    const cached = await this.cache.getCachedResponse(
+      inputData, 'openai', 'negative_keywords_generation'
+    )
+    if (cached) return cached.negativeKeywords
+
+    // 2. MISS: Requête OpenAI/Claude
+    const prompt = `Generate 50 negative keywords for: ${mainKeywords.join(', ')}, Industry: ${industry}, Type: ${businessType}`
+
+    const aiResponse = await openai.chat.completions.create({
+      model: 'gpt-4',
+      messages: [{ role: 'user', content: prompt }]
+    })
+
+    const negativeKeywords = JSON.parse(aiResponse.choices[0].message.content)
+    const result = { negativeKeywords, prompt, model: 'gpt-4' }
+
+    // 3. STORE: Sauver en cache 3 mois
+    await this.cache.setCachedResponse(
+      inputData, 'openai', 'negative_keywords_generation', result
+    )
+
+    return negativeKeywords
+  }
+}
+
+// Projection économies TOTALES avec analyse de site
+/*
+COÛTS PAR ANALYSE COMPLÈTE SANS CACHE:
+- DataForSEO On-Page API: 0.02€ (analyse contenu site)
+- OpenAI GPT-4o-mini: 0.01€ (analyse IA du contenu)
+- DataForSEO Keywords API: 0.02€ (volumes de recherche)
+- OpenAI GPT-4: 0.03€ (prédiction ROI avancée)
+- TOTAL: 0.08€ par analyse complète
+
+PROJECTION AVEC CACHE 3 MOIS:
+MOIS 1: 100% API calls (0% cache) - 0.08€/analyse
+MOIS 2: 40% API calls (60% cache) - 0.032€/analyse
+MOIS 3+: 10% API calls (90% cache) - 0.008€/analyse
+
+ÉCONOMIE FINALE: 90% après stabilisation cache
+Pour 5,000 analyses/mois: 400€ → 40€ = 360€ économisés/mois
+
+RÉVOLUTION UX:
+- Input: 1 URL + budget + objectif (3 champs vs 10+)
+- Public: Petits entrepreneurs (marché x10 plus large)
+- Différenciation: Personne ne fait ça actuellement
+*/
+
+#### 3. **Workflow Complet Prédiction ROI**
+```typescript
+async function predictProfitability({
+  websiteUrl,
+  monthlyBudget,
+  objective
+}: ProfitabilityPredictorInput) {
+
+  // ÉTAPE 1: Analyse de site (2-3 secondes)
+  updateProgress(10, "Analyse de votre site web...")
+  const websiteInsights = await websiteAnalyzer.analyzeWebsite(websiteUrl)
+
+  // ÉTAPE 2: Récupération données keywords (3-4 secondes)
+  updateProgress(40, "Analyse du marché et concurrence...")
+  const keywordData = await dataforSEO.getKeywordVolumes(
+    websiteInsights.suggestedKeywords,
+    websiteInsights.targetCountry
+  )
+
+  // ÉTAPE 3: Calculs prédictions IA (2-3 secondes)
+  updateProgress(70, "Calcul de vos prédictions ROI...")
+  const roiPredictions = await aiClient.predictROI({
+    keywords: keywordData,
+    budget: monthlyBudget,
+    industry: websiteInsights.industry,
+    businessType: websiteInsights.businessType,
+    objective,
+    competitiveness: websiteInsights.competitiveness
+  })
+
+  // ÉTAPE 4: Génération recommandations (1-2 secondes)
+  updateProgress(90, "Génération de vos recommandations...")
+  const recommendations = await generateRecommendations({
+    roiPredictions,
+    websiteInsights,
+    monthlyBudget
+  })
+
+  updateProgress(100, "Analyse terminée !")
+
+  return {
+    websiteAnalysis: websiteInsights,
+    roiPredictions: roiPredictions,
+    recommendedKeywords: recommendations.topKeywords,
+    keywordsToAvoid: recommendations.avoidKeywords,
+    budgetAllocation: recommendations.budgetSplit,
+    expectedResults: {
+      monthlyClicks: roiPredictions.estimatedClicks,
+      monthlyCost: roiPredictions.estimatedCost,
+      monthlyLeads: roiPredictions.estimatedLeads,
+      predictedROI: roiPredictions.roiPercentage,
+      breakEvenTime: roiPredictions.breakEvenDays
+    }
+  }
+}
+````
+
+````
+
+#### 2. **Génération IA Intelligente**
+```typescript
+async function generateNegativeKeywords({
+  mainKeywords,
+  industry,
+  businessType = 'b2b'
+}: NegativeKeywordsInput) {
+
+  // 1. Templates de base par industrie
+  const industryNegatives = INDUSTRIES[industry].baseNegatives
+
+  // 2. Génération contextuelle par IA
+  const prompt = `
+  Tu es un expert Google Ads. Génère 50 mots-clés négatifs pertinents.
+
+  CONTEXTE:
+  - Mots-clés principaux: ${mainKeywords.join(', ')}
+  - Secteur: ${INDUSTRIES[industry].fr}
+  - Type: ${businessType}
+
+  RÈGLES:
+  - Éviter trafic non-qualifié
+  - Exclure intentions gratuites si B2B
+  - Exclure emploi/formation si service
+  - Exclure géolocalisation non pertinente
+
+  FORMAT: Array JSON de strings uniquement
+  `
+
+  const aiNegatives = await generateWithAI(prompt)
+
+  // 3. Fusion et déduplication
+  const allNegatives = [...new Set([...industryNegatives, ...aiNegatives])]
+
+  // 4. Scoring par pertinence
+  return await scoreNegativeKeywords(allNegatives, mainKeywords)
+}
+````
+
+#### 3. **Calcul Économies avec DataForSEO**
+
+```typescript
+async function calculateSavings(
+  negativeKeywords: string[],
+  mainKeywords: string[],
+  estimatedBudget = 1000
+) {
+  // Récupérer données de volume et CPC
+  const negativeData = await dataForSEO.getKeywordVolumes(negativeKeywords)
+
+  let totalWastedClicks = 0
+  let totalWastedSpend = 0
+
+  negativeData.results.forEach((kw) => {
+    // Estimation: 5% des recherches = clics non-qualifiés
+    const wastedClicks = (kw.search_volume || 0) * 0.05
+    const wastedCost = wastedClicks * (kw.cpc || 2)
+
+    totalWastedClicks += wastedClicks
+    totalWastedSpend += wastedCost
+  })
+
+  return {
+    clicksSaved: Math.round(totalWastedClicks),
+    moneySaved: Math.round(totalWastedSpend),
+    percentageSaved: Math.round((totalWastedSpend / estimatedBudget) * 100),
+    monthlySavings: Math.round(totalWastedSpend * 12),
+  }
+}
+```
+
+### **D. INTERFACE RÉSULTATS & EXPORT (Semaines 7-8)**
+
+#### 1. **Écran Résultats Révolutionnaire**
+
+```jsx
+const ProfitabilityResults = ({ results }) => (
+  <div className="space-y-6">
+    {/* Header Impact */}
+    <Card className="bg-gradient-to-r from-green-500 to-blue-500 text-white">
+      <CardContent className="p-8 text-center">
+        <h2 className="mb-2 text-3xl font-bold">
+          ROI Prédit: +{results.expectedResults.predictedROI}%
+        </h2>
+        <p className="text-lg opacity-90">
+          Avec {results.websiteAnalysis.industry} et {monthlyBudget}€/mois
+        </p>
+      </CardContent>
+    </Card>
+
+    {/* Métriques Clés */}
+    <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <MetricCard
+        title="Clics/mois"
+        value={results.expectedResults.monthlyClicks}
+        icon={<MousePointer />}
+      />
+      <MetricCard
+        title="Leads/mois"
+        value={results.expectedResults.monthlyLeads}
+        icon={<Users />}
+        highlight="green"
+      />
+      <MetricCard
+        title="Coût réel"
+        value={`${results.expectedResults.monthlyCost}€`}
+        icon={<Euro />}
+      />
+      <MetricCard
+        title="Break-even"
+        value={`${results.expectedResults.breakEvenTime} jours`}
+        icon={<Calendar />}
+      />
+    </div>
+
+    {/* Mots-clés Recommandés */}
+    <KeywordsRecommendations
+      recommended={results.recommendedKeywords}
+      toAvoid={results.keywordsToAvoid}
+      budgetAllocation={results.budgetAllocation}
+    />
+
+    {/* Actions Utilisateur */}
+    <div className="flex gap-4">
+      <Button
+        size="lg"
+        onClick={() => exportToGoogleAds(results)}
+        className="bg-blue-600 hover:bg-blue-700"
+      >
+        📤 Exporter vers Google Ads
+      </Button>
+      <Button variant="outline" onClick={() => downloadPDF(results)}>
+        📄 Télécharger Rapport PDF
+      </Button>
+      <Button variant="ghost" onClick={() => shareResults(results)}>
+        🔗 Partager avec équipe
+      </Button>
+    </div>
+  </div>
+)
+```
+
+#### 1. **Système de Quotas Adapté**
+
+```typescript
+// Extension du hook useSubscription existant
+export function useAnalysisQuota() {
+  const { pack } = useSubscription()
+
+  const quotaLimits = {
+    free: 3,
+    starter: 20,
+    pro: 100,
+    advanced: -1, // Illimité
+  }
+
+  const checkQuota = async () => {
+    const { data } = await supabase
+      .from("keyword_analyses")
+      .select("id")
+      .eq("user_id", user.id)
+      .gte("created_at", startOfMonth)
+
+    const used = data?.length || 0
+    const limit = quotaLimits[pack.name]
+    const remaining = limit === -1 ? Infinity : limit - used
+
+    return { used, limit, remaining, canUse: remaining > 0 }
+  }
+
+  return { checkQuota }
+}
+```
+
+#### 2. **Export Multi-Format**
+
+```typescript
+// Export optimisé pour Google Ads
+function exportForGoogleAds(negativeKeywords: string[]) {
+  const formats = {
+    // CSV pour Google Ads Editor
+    csv: negativeKeywords.map(kw => `"${kw}","Broad"`).join('\n'),
+
+    // Format Google Ads interface
+    list: negativeKeywords.map(kw => `${kw} (broad match)`).join('\n'),
+
+    // JSON pour développeurs
+    json: JSON.stringify(negativeKeywords, null, 2)
+  }
+
+  return formats
+}
+
+// Widget d'export dans l'interface
+const ExportWidget = ({ negativeKeywords }) => (
+  <Card>
+    <CardHeader>
+      <CardTitle>📤 Exporter vos mots-clés négatifs</CardTitle>
+    </CardHeader>
+    <CardContent className="space-y-3">
+      <Button onClick={() => downloadCSV(negativeKeywords)}>
+        ⬇️ Télécharger CSV (Google Ads)
+      </Button>
+      <Button variant="outline" onClick={() => copyToClipboard(negativeKeywords)}>
+        📋 Copier dans le presse-papier
+      </Button>
+      <p className="text-xs text-gray-500">
+        💡 Importez directement dans Google Ads Editor ou collez dans l'interface
+      </p>
+    </CardContent>
+  </Card>
+)
+```
+
+---
+
+## 📋 **ÉTAPE 2.2 : NEGATIVE KEYWORDS GENERATOR**
+
+**Durée : 3-4 semaines | Priorité 2**
+_(Outil simple pour économiser 40% budget Google Ads - Architecture détaillée après validation MVP Profitability Predictor)_
+
+## 📋 **ÉTAPE 2.3 : SMART BUDGET ALLOCATOR**
+
+**Durée : 8-10 semaines | Priorité 3**
+_(Architecture détaillée après validation outils précédents)_
+
 ## ✅ Terminé
 
 - **[2025-08-27]** Analyse complète et nettoyage de la codebase - Version irréprochable

@@ -512,5 +512,54 @@
     "cancelMessage": "Êtes-vous sûr de vouloir annuler ?",
     "unsavedChanges": "Vous avez des modifications non enregistrées. Voulez-vous continuer ?",
     "logoutMessage": "Êtes-vous sûr de vouloir vous déconnecter ?"
+  },
+  "tools": {
+    "title": "Outils Google Ads",
+    "description": "Analyse et optimisation de vos campagnes Google Ads",
+    "analyse": {
+      "title": "Analyse de Rentabilité Google Ads",
+      "description": "Prédisez votre ROI AVANT de dépenser - Évitez de perdre votre argent",
+      "form": {
+        "website_url": "URL de votre site web",
+        "website_url_placeholder": "https://monsite.com",
+        "website_url_description": "Notre IA analysera automatiquement votre secteur et produits",
+        "budget": "Budget mensuel (€)",
+        "budget_placeholder": "1000",
+        "budget_description": "Budget que vous souhaitez allouer à Google Ads",
+        "objective": "Objectif principal",
+        "objective_description": "Que voulez-vous accomplir avec vos campagnes ?",
+        "keywords": "Mots-clés additionnels (optionnel)",
+        "keywords_placeholder": "marketing digital, consultant...",
+        "keywords_description": "Ajoutez des mots-clés spécifiques si vous en avez",
+        "submit": "🚀 Analyser ma rentabilité",
+        "submitting": "Analyse en cours..."
+      },
+      "objectives": {
+        "leads": "Génération de leads",
+        "sales": "Ventes en ligne",
+        "traffic": "Trafic qualifié",
+        "awareness": "Notoriété de marque"
+      },
+      "results": {
+        "roi_prediction": "ROI prédit",
+        "recommended_keywords": "Mots-clés recommandés",
+        "keywords_to_avoid": "Mots-clés à éviter",
+        "monthly_stats": "Statistiques mensuelles prédites",
+        "clicks": "Clics estimés",
+        "impressions": "Impressions estimées",
+        "cost_per_click": "CPC moyen estimé"
+      },
+      "quota": {
+        "remaining": "Analyses restantes ce mois",
+        "unlimited": "Illimité",
+        "upgrade": "Mettre à niveau"
+      },
+      "status": {
+        "pending": "En attente",
+        "processing": "Analyse en cours...",
+        "completed": "Terminé",
+        "failed": "Échec"
+      }
+    }
   }
 }
