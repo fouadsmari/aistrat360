@@ -72,27 +72,28 @@ export function AnalyseForm({ userQuota }: AnalyseFormProps) {
   })
 
   const onSubmit = async (data: FormData) => {
+    console.log("🚀 CLIENT: Form submission started", data)
+
     if (!userQuota.isUnlimited && userQuota.remaining <= 0) {
+      console.log("❌ CLIENT: Quota exceeded", {
+        remaining: userQuota.remaining,
+        isUnlimited: userQuota.isUnlimited,
+      })
       // TODO: Show upgrade modal
       return
     }
 
+    console.log("✅ CLIENT: Quota OK, starting analysis", {
+      remaining: userQuota.remaining,
+      isUnlimited: userQuota.isUnlimited,
+    })
     setIsSubmitting(true)
     setProgress(0)
 
     try {
-      // Simulate progress
-      const progressInterval = setInterval(() => {
-        setProgress((prev) => {
-          if (prev >= 90) {
-            clearInterval(progressInterval)
-            return 90
-          }
-          return prev + Math.random() * 15
-        })
-      }, 500)
+      console.log("📡 CLIENT: Making API call to /api/tools/analyse...")
 
-      // Make API call to start analysis
+      // Make API call to start analysis FIRST
       const response = await fetch("/api/tools/analyse", {
         method: "POST",
         headers: {
@@ -101,24 +102,68 @@ export function AnalyseForm({ userQuota }: AnalyseFormProps) {
         body: JSON.stringify(data),
       })
 
-      clearInterval(progressInterval)
-      setProgress(100)
+      console.log("📥 CLIENT: API response received", {
+        status: response.status,
+        ok: response.ok,
+        statusText: response.statusText,
+      })
 
       if (response.ok) {
         const result = await response.json()
-        // Redirect to results page
-        router.push(`/tools/analyse/${result.analysisId}`)
+        console.log("✅ CLIENT: API success, got result", result)
+
+        // Start polling for progress
+        const analysisId = result.analysisId
+        console.log(
+          "🔄 CLIENT: Starting progress polling for analysis",
+          analysisId
+        )
+
+        const pollProgress = async () => {
+          try {
+            const statusResponse = await fetch(
+              `/api/tools/analyse?id=${analysisId}`
+            )
+            if (statusResponse.ok) {
+              const status = await statusResponse.json()
+              console.log("📊 CLIENT: Progress update", status)
+
+              setProgress(status.progress || 0)
+
+              if (status.status === "completed") {
+                console.log("🎉 CLIENT: Analysis completed, redirecting...")
+                router.push(`/tools/analyse/${analysisId}`)
+                return
+              } else if (status.status === "failed") {
+                console.error("❌ CLIENT: Analysis failed", status)
+                throw new Error("Analysis failed")
+              }
+
+              // Continue polling if still processing
+              if (
+                status.status === "processing" ||
+                status.status === "pending"
+              ) {
+                setTimeout(pollProgress, 2000) // Poll every 2 seconds
+              }
+            }
+          } catch (error) {
+            console.error("❌ CLIENT: Polling error", error)
+          }
+        }
+
+        // Start polling
+        setTimeout(pollProgress, 1000)
       } else {
-        throw new Error("Failed to start analysis")
+        const errorText = await response.text()
+        console.error("❌ CLIENT: API error response", errorText)
+        throw new Error(`API Error: ${response.status} - ${errorText}`)
       }
     } catch (error) {
-      console.error("Analysis error:", error)
+      console.error("❌ CLIENT: Analysis error:", error)
+      setIsSubmitting(false)
+      setProgress(0)
       // TODO: Show error toast
-    } finally {
-      setTimeout(() => {
-        setIsSubmitting(false)
-        setProgress(0)
-      }, 1000)
     }
   }
 

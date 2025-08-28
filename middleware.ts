@@ -42,10 +42,10 @@ export async function middleware(req: NextRequest) {
     }
   )
 
-  // Check authentication
+  // Check authentication - use getUser() for security
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    data: { user },
+  } = await supabase.auth.getUser()
 
   const pathname = req.nextUrl.pathname
 
@@ -66,20 +66,20 @@ export async function middleware(req: NextRequest) {
   const isAuthRoute =
     pathname.includes("/login") || pathname.includes("/signup")
 
-  // Redirect to login if accessing protected route without session
-  if (isProtectedRoute && !session) {
+  // Redirect to login if accessing protected route without user
+  if (isProtectedRoute && !user) {
     const url = req.nextUrl.clone()
     url.pathname = `/${locale}/login`
     return NextResponse.redirect(url)
   }
 
   // Check admin access for authenticated users
-  if (isAdminRoute && session) {
+  if (isAdminRoute && user) {
     // Get user profile to check role
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
-      .eq("id", session.user.id)
+      .eq("id", user.id)
       .single()
 
     // If user is not admin or super_admin, redirect to regular dashboard
@@ -90,15 +90,15 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  // Redirect to dashboard if accessing auth routes with active session
-  if (isAuthRoute && session) {
+  // Redirect to dashboard if accessing auth routes with active user
+  if (isAuthRoute && user) {
     const url = req.nextUrl.clone()
 
     // Get user profile to check role
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
-      .eq("id", session.user.id)
+      .eq("id", user.id)
       .single()
 
     // Redirect based on user role
