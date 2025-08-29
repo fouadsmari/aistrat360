@@ -247,30 +247,47 @@ export class DataForSEOClient {
       }
       console.log(`✅ [DATAFORSEO] Valid status code 20000`)
 
-      // Check for HTML content in the response - the HTML is in page_content field
-      const htmlContent = data.tasks?.[0]?.result?.[0]?.items?.[0]?.page_content?.main_topic?.[0]?.text || 
-                          data.tasks?.[0]?.result?.[0]?.items?.[0]?.html || 
-                          data.tasks?.[0]?.result?.[0]?.items?.[0]?.meta?.content || ""
+      // Check for HTML content in the response
+      // First log what we have to understand the structure
+      const item = data.tasks?.[0]?.result?.[0]?.items?.[0]
+      if (item) {
+        console.log(`🔷 [DATAFORSEO] Item keys available:`, Object.keys(item))
+      }
       
-      console.log(`🔷 [DATAFORSEO] HTML content length: ${htmlContent.length} chars`)
+      // Try multiple locations where HTML content might be
+      let htmlContent = ""
       
-      // If no HTML in expected places, try to get any text content
-      if (!htmlContent) {
-        // Log the full structure to understand where the content is
-        console.log(`🔷 [DATAFORSEO] Checking alternative content locations...`)
-        const item = data.tasks?.[0]?.result?.[0]?.items?.[0]
-        if (item) {
-          console.log(`🔷 [DATAFORSEO] Item keys:`, Object.keys(item))
-          // Try to extract any available content
-          const possibleContent = item.page_content || item.content || item.text || ""
-          if (possibleContent) {
-            console.log(`🔷 [DATAFORSEO] Found content in alternative location, using it`)
-            return JSON.stringify(possibleContent) // Convert to string if it's an object
-          }
+      // Check for page_content which might contain the HTML
+      if (item?.page_content) {
+        console.log(`🔷 [DATAFORSEO] Found page_content, type:`, typeof item.page_content)
+        if (typeof item.page_content === 'string') {
+          htmlContent = item.page_content
+        } else if (typeof item.page_content === 'object') {
+          // If it's an object, try to extract text from it
+          htmlContent = item.page_content.main_topic?.[0]?.text || 
+                       item.page_content.text || 
+                       item.page_content.content ||
+                       JSON.stringify(item.page_content)
         }
-        
+      }
+      
+      // Fallback to other possible locations
+      if (!htmlContent) {
+        htmlContent = item?.html || item?.meta?.content || item?.text || item?.content || ""
+      }
+      
+      // Ensure htmlContent is a string
+      if (typeof htmlContent !== 'string') {
+        console.log(`🔷 [DATAFORSEO] Converting non-string content to string, type was: ${typeof htmlContent}`)
+        htmlContent = JSON.stringify(htmlContent)
+      }
+      
+      console.log(`🔷 [DATAFORSEO] HTML content length: ${htmlContent?.length || 0} chars`)
+      console.log(`🔷 [DATAFORSEO] HTML content preview: ${htmlContent?.substring(0, 200)}...`)
+      
+      if (!htmlContent || htmlContent.length === 0) {
         console.error(`❌ [DATAFORSEO] No HTML content in response`)
-        console.error(`❌ [DATAFORSEO] Full response structure:`, JSON.stringify(data, null, 2).substring(0, 2000))
+        console.error(`❌ [DATAFORSEO] Full item structure:`, JSON.stringify(item, null, 2).substring(0, 2000))
         throw new Error("No HTML content received from DataForSEO")
       }
 
