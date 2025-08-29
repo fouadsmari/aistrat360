@@ -247,13 +247,30 @@ export class DataForSEOClient {
       }
       console.log(`✅ [DATAFORSEO] Valid status code 20000`)
 
-      // Check for HTML content in the response
-      const htmlContent = data.tasks?.[0]?.result?.[0]?.items?.[0]?.html || ""
+      // Check for HTML content in the response - the HTML is in page_content field
+      const htmlContent = data.tasks?.[0]?.result?.[0]?.items?.[0]?.page_content?.main_topic?.[0]?.text || 
+                          data.tasks?.[0]?.result?.[0]?.items?.[0]?.html || 
+                          data.tasks?.[0]?.result?.[0]?.items?.[0]?.meta?.content || ""
+      
       console.log(`🔷 [DATAFORSEO] HTML content length: ${htmlContent.length} chars`)
       
+      // If no HTML in expected places, try to get any text content
       if (!htmlContent) {
+        // Log the full structure to understand where the content is
+        console.log(`🔷 [DATAFORSEO] Checking alternative content locations...`)
+        const item = data.tasks?.[0]?.result?.[0]?.items?.[0]
+        if (item) {
+          console.log(`🔷 [DATAFORSEO] Item keys:`, Object.keys(item))
+          // Try to extract any available content
+          const possibleContent = item.page_content || item.content || item.text || ""
+          if (possibleContent) {
+            console.log(`🔷 [DATAFORSEO] Found content in alternative location, using it`)
+            return JSON.stringify(possibleContent) // Convert to string if it's an object
+          }
+        }
+        
         console.error(`❌ [DATAFORSEO] No HTML content in response`)
-        console.error(`❌ [DATAFORSEO] Full response structure:`, JSON.stringify(data, null, 2).substring(0, 1000))
+        console.error(`❌ [DATAFORSEO] Full response structure:`, JSON.stringify(data, null, 2).substring(0, 2000))
         throw new Error("No HTML content received from DataForSEO")
       }
 
