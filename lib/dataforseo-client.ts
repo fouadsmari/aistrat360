@@ -206,7 +206,6 @@ export class DataForSEOClient {
           enable_javascript: true,
           enable_browser_rendering: true,
           load_resources: true,
-          custom_js: "return document.documentElement.outerHTML;",
         },
       ]
       console.log(`🔷 [DATAFORSEO] Request body:`, JSON.stringify(requestBody, null, 2))
