@@ -30,17 +30,27 @@ export class DataForSEOClient {
   private authHeader: string
 
   constructor() {
+    console.log(`🔷 [DATAFORSEO] Constructor called at ${new Date().toISOString()}`)
+    console.log(`🔷 [DATAFORSEO] Environment check:`)
+    console.log(`  - DATAFORSEO_LOGIN: ${process.env.DATAFORSEO_LOGIN ? 'SET ✅' : 'NOT SET ❌'}`)
+    console.log(`  - DATAFORSEO_PASSWORD: ${process.env.DATAFORSEO_PASSWORD ? 'SET ✅' : 'NOT SET ❌'}`)
+    console.log(`  - DATAFORSEO_CREDENTIALS: ${process.env.DATAFORSEO_CREDENTIALS ? 'SET ✅' : 'NOT SET ❌'}`)
+    
     this.config = {
       login: process.env.DATAFORSEO_LOGIN!,
       password: process.env.DATAFORSEO_PASSWORD!,
       baseUrl: "https://api.dataforseo.com",
     }
+    
+    console.log(`🔷 [DATAFORSEO] Config created with login: ${this.config.login?.substring(0, 5)}***`)
 
     // Create Basic Auth header
     const credentials = `${this.config.login}:${this.config.password}`
     this.authHeader = `Basic ${Buffer.from(credentials).toString("base64")}`
+    console.log(`🔷 [DATAFORSEO] Auth header created, length: ${this.authHeader.length}`)
 
     this.cache = new CacheManager()
+    console.log(`✅ [DATAFORSEO] Constructor completed`)
   }
 
   /**
@@ -162,65 +172,111 @@ export class DataForSEOClient {
    * Get HTML content from website using DataForSEO
    */
   async getWebsiteHTML(websiteUrl: string): Promise<string> {
+    console.log(`\n🔷 [DATAFORSEO] getWebsiteHTML() called at ${new Date().toISOString()}`)
+    console.log(`🔷 [DATAFORSEO] URL to fetch: ${websiteUrl}`)
+    
     const inputData = {
       url: websiteUrl,
-      enable_content_parsing: true,
       enable_javascript: true,
+      enable_browser_rendering: true,
+      load_resources: true,
     }
 
     // Check cache first
+    console.log(`🔷 [DATAFORSEO] Checking cache for HTML...`)
     const cached = await this.cache.getCachedResponse(
       inputData,
       "dataforseo",
       "website_html"
     )
     if (cached) {
+      console.log(`✅ [DATAFORSEO] Cache hit! Returning cached HTML`)
       return cached
     }
+    console.log(`⚠️ [DATAFORSEO] Cache miss, making API call...`)
 
     try {
-      const response = await fetch(
-        `${this.config.baseUrl}/v3/on_page/page_screenshot/live`,
+      // Use the instant_pages endpoint which is correct for HTML fetching
+      const apiUrl = `${this.config.baseUrl}/v3/on_page/instant_pages`
+      console.log(`🔷 [DATAFORSEO] API URL: ${apiUrl}`)
+      
+      const requestBody = [
         {
-          method: "POST",
-          headers: {
-            Authorization: this.authHeader,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify([
-            {
-              url: websiteUrl,
-              enable_content_parsing: true,
-              enable_javascript: true,
-              custom_user_agent: "Mozilla/5.0 (compatible; DataForSEO/1.0)",
-            },
-          ]),
-        }
-      )
+          url: websiteUrl,
+          enable_javascript: true,
+          enable_browser_rendering: true,
+          load_resources: true,
+          custom_js: "return document.documentElement.outerHTML;",
+        },
+      ]
+      console.log(`🔷 [DATAFORSEO] Request body:`, JSON.stringify(requestBody, null, 2))
+      
+      console.log(`🔷 [DATAFORSEO] Making POST request for HTML...`)
+      console.log(`🔷 [DATAFORSEO] Auth header present: ${!!this.authHeader}`)
+      console.log(`🔷 [DATAFORSEO] Auth header length: ${this.authHeader?.length || 0}`)
+      
+      const startTime = Date.now()
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          Authorization: this.authHeader,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      })
+      const duration = Date.now() - startTime
+      console.log(`🔷 [DATAFORSEO] HTML response received in ${duration}ms, status: ${response.status}`)
 
       if (!response.ok) {
-        throw new Error(`DataForSEO API error: ${response.statusText}`)
+        const errorText = await response.text()
+        console.error(`❌ [DATAFORSEO] HTML fetch error (${response.status}):`, errorText)
+        console.error(`❌ [DATAFORSEO] Response headers:`, Object.fromEntries(response.headers.entries()))
+        throw new Error(`DataForSEO API error: ${response.status} ${response.statusText}`)
       }
+      console.log(`✅ [DATAFORSEO] HTML response OK`)
 
+      console.log(`🔷 [DATAFORSEO] Parsing HTML response JSON...`)
       const data = await response.json()
-
-      if (data.tasks?.[0]?.result?.[0]) {
-        const htmlContent = data.tasks[0].result[0].content?.plain_text || ""
-
-        // Cache the result for 7 days (HTML content changes less frequently)
-        await this.cache.setCachedResponse(
-          inputData,
-          "dataforseo",
-          "website_html",
-          htmlContent
+      console.log(`🔷 [DATAFORSEO] Response status code: ${data.status_code}`)
+      console.log(`🔷 [DATAFORSEO] Response status message: ${data.status_message}`)
+      
+      if (data.status_code !== 20000) {
+        console.error(`❌ [DATAFORSEO] API returned error:`, data)
+        throw new Error(
+          data.status_message || "Failed to fetch HTML from DataForSEO"
         )
+      }
+      console.log(`✅ [DATAFORSEO] Valid status code 20000`)
 
-        return htmlContent
+      // Check for HTML content in the response
+      const htmlContent = data.tasks?.[0]?.result?.[0]?.items?.[0]?.html || ""
+      console.log(`🔷 [DATAFORSEO] HTML content length: ${htmlContent.length} chars`)
+      
+      if (!htmlContent) {
+        console.error(`❌ [DATAFORSEO] No HTML content in response`)
+        console.error(`❌ [DATAFORSEO] Full response structure:`, JSON.stringify(data, null, 2).substring(0, 1000))
+        throw new Error("No HTML content received from DataForSEO")
       }
 
-      throw new Error("No HTML content received from DataForSEO")
+      // Cache the result for 7 days (HTML content changes less frequently)
+      console.log(`🔷 [DATAFORSEO] Caching HTML content...`)
+      await this.cache.setCachedResponse(
+        inputData,
+        "dataforseo",
+        "website_html",
+        htmlContent
+      )
+      console.log(`✅ [DATAFORSEO] HTML cached successfully`)
+
+      console.log(`✅ [DATAFORSEO] getWebsiteHTML() completed successfully`)
+      return htmlContent
     } catch (error) {
-      console.error("❌ DataForSEO HTML fetch error:", error)
+      console.error(`❌ [DATAFORSEO] Error fetching website HTML:`, error)
+      console.error(`❌ [DATAFORSEO] Error details:`, {
+        name: error?.constructor?.name,
+        message: error instanceof Error ? error.message : 'Unknown',
+        stack: error instanceof Error ? error.stack?.split('\n').slice(0, 5) : 'No stack'
+      })
       throw new Error("Failed to fetch website HTML from DataForSEO API")
     }
   }
