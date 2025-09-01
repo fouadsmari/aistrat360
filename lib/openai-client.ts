@@ -87,12 +87,14 @@ export class OpenAIClient {
     targetCountry: string,
     objective: string
   ): Promise<string[]> {
-    console.log(`\n🔷 [OPENAI] extractTargetedKeywords() called at ${new Date().toISOString()}`)
+    console.log(
+      `\n🔷 [OPENAI] extractTargetedKeywords() called at ${new Date().toISOString()}`
+    )
     console.log(`🔷 [OPENAI] Parameters:`, {
       htmlLength: htmlContent.length,
       websiteUrl,
       targetCountry,
-      objective
+      objective,
     })
     const countryMapping: Record<string, string> = {
       CA: "Canada",
@@ -163,12 +165,14 @@ IMPORTANT: Aucun autre texte, juste le JSON.`
     console.log(`🔷 [OPENAI] Calling generateJSON() for keyword extraction...`)
     const result = await this.generateJSON(prompt, "gpt-4o-mini")
     console.log(`🔷 [OPENAI] generateJSON() returned:`, result)
-    
+
     const keywords = result.keywords || []
     console.log(`🔷 [OPENAI] Extracted ${keywords.length} keywords:`, keywords)
 
     if (keywords.length !== 3) {
-      console.error(`❌ [OPENAI] Wrong number of keywords: ${keywords.length} instead of 3`)
+      console.error(
+        `❌ [OPENAI] Wrong number of keywords: ${keywords.length} instead of 3`
+      )
       throw new Error(
         `AI returned ${keywords.length} keywords instead of exactly 3`
       )

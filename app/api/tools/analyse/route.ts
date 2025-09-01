@@ -23,8 +23,10 @@ const analyseRequestSchema = z.object({
 })
 
 export async function POST(request: NextRequest) {
-  console.log(`🔵 [API] POST /api/tools/analyse - Request received at ${new Date().toISOString()}`)
-  
+  console.log(
+    `🔵 [API] POST /api/tools/analyse - Request received at ${new Date().toISOString()}`
+  )
+
   try {
     console.log(`🔵 [API] Creating Supabase client...`)
     const supabase = await createSupabaseServerClient()
@@ -47,10 +49,13 @@ export async function POST(request: NextRequest) {
     console.log(`🔵 [API] Parsing request body...`)
     const body = await request.json()
     console.log(`📝 [API] Raw body received:`, JSON.stringify(body, null, 2))
-    
+
     console.log(`🔵 [API] Validating input data...`)
     const validatedData = analyseRequestSchema.parse(body)
-    console.log(`✅ [API] Input validated:`, JSON.stringify(validatedData, null, 2))
+    console.log(
+      `✅ [API] Input validated:`,
+      JSON.stringify(validatedData, null, 2)
+    )
 
     // Check user quota - Fixed to use subscriptions table correctly
     console.log(`🔵 [API] Checking user subscription...`)
@@ -59,9 +64,12 @@ export async function POST(request: NextRequest) {
       .select("plan")
       .eq("user_id", user.id)
       .single()
-    
+
     if (subError) {
-      console.log(`⚠️ [API] No subscription found for user (might be free plan):`, subError)
+      console.log(
+        `⚠️ [API] No subscription found for user (might be free plan):`,
+        subError
+      )
     } else {
       console.log(`📝 [API] Subscription found:`, subscription)
     }
@@ -71,13 +79,15 @@ export async function POST(request: NextRequest) {
 
     if (subscription) {
       // Get the subscription pack details based on plan name
-      console.log(`🔵 [API] Fetching pack details for plan: ${subscription.plan}`)
+      console.log(
+        `🔵 [API] Fetching pack details for plan: ${subscription.plan}`
+      )
       const { data: pack, error: packError } = await supabase
         .from("subscription_packs")
         .select("analyses_per_month")
         .eq("name", subscription.plan)
         .single()
-      
+
       if (packError) {
         console.error(`❌ [API] Pack fetch error:`, packError)
       } else {
@@ -89,7 +99,9 @@ export async function POST(request: NextRequest) {
         `📊 [API] User ${user.email} has plan: ${subscription.plan}, limit: ${monthlyLimit}`
       )
     } else {
-      console.log(`📊 [API] User ${user.email} on free plan, limit: ${monthlyLimit}`)
+      console.log(
+        `📊 [API] User ${user.email} on free plan, limit: ${monthlyLimit}`
+      )
     }
 
     // Get current month usage
@@ -104,23 +116,23 @@ export async function POST(request: NextRequest) {
       .select("*", { count: "exact", head: true })
       .eq("user_id", user.id)
       .gte("created_at", startOfMonth.toISOString())
-    
+
     if (countError) {
       console.error(`❌ [API] Count error:`, countError)
     }
-    
+
     console.log(`📊 [API] Analyses used this month: ${usedAnalyses || 0}`)
-    
+
     const isUnlimited = monthlyLimit === -1
     const remaining = isUnlimited
       ? 999
       : Math.max(0, monthlyLimit - (usedAnalyses || 0))
-    
+
     console.log(`📊 [API] Quota status:`, {
       monthlyLimit,
       used: usedAnalyses || 0,
       remaining,
-      isUnlimited
+      isUnlimited,
     })
 
     if (!isUnlimited && remaining <= 0) {
@@ -147,8 +159,11 @@ export async function POST(request: NextRequest) {
       progress: 0,
       credits_used: 2,
     }
-    console.log(`📝 [API] Analysis data to insert:`, JSON.stringify(analysisData, null, 2))
-    
+    console.log(
+      `📝 [API] Analysis data to insert:`,
+      JSON.stringify(analysisData, null, 2)
+    )
+
     const { data: analysis, error: insertError } = await supabase
       .from("profitability_analyses")
       .insert(analysisData)
@@ -167,23 +182,35 @@ export async function POST(request: NextRequest) {
     // Process analysis synchronously instead of background for Vercel compatibility
     console.log(`🚀 [API] Starting synchronous analysis for ${analysis.id}`)
     console.log(`🔧 [API] Environment check:`)
-    console.log(`  - DataForSEO Login: ${process.env.DATAFORSEO_LOGIN ? 'SET ✅' : 'NOT SET ❌'}`)
-    console.log(`  - DataForSEO Password: ${process.env.DATAFORSEO_PASSWORD ? 'SET ✅' : 'NOT SET ❌'}`)
-    console.log(`  - OpenAI API Key: ${process.env.OPENAI_API_KEY ? 'SET ✅' : 'NOT SET ❌'}`)
-    console.log(`  - NEXT_PUBLIC_SUPABASE_URL: ${process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET ✅' : 'NOT SET ❌'}`)
-    console.log(`  - DATAFORSEO_CREDENTIALS: ${process.env.DATAFORSEO_CREDENTIALS ? 'SET ✅' : 'NOT SET ❌'}`)
+    console.log(
+      `  - DataForSEO Login: ${process.env.DATAFORSEO_LOGIN ? "SET ✅" : "NOT SET ❌"}`
+    )
+    console.log(
+      `  - DataForSEO Password: ${process.env.DATAFORSEO_PASSWORD ? "SET ✅" : "NOT SET ❌"}`
+    )
+    console.log(
+      `  - OpenAI API Key: ${process.env.OPENAI_API_KEY ? "SET ✅" : "NOT SET ❌"}`
+    )
+    console.log(
+      `  - NEXT_PUBLIC_SUPABASE_URL: ${process.env.NEXT_PUBLIC_SUPABASE_URL ? "SET ✅" : "NOT SET ❌"}`
+    )
+    console.log(
+      `  - DATAFORSEO_CREDENTIALS: ${process.env.DATAFORSEO_CREDENTIALS ? "SET ✅" : "NOT SET ❌"}`
+    )
 
     try {
       // Process the analysis directly in this request
       console.log(`🔵 [API] Calling processAnalysis function...`)
       console.log(`📝 [API] processAnalysis params:`, {
         analysisId: analysis.id,
-        input: validatedData
+        input: validatedData,
       })
-      
+
       await processAnalysis(analysis.id, validatedData)
-      
-      console.log(`✅ [API] processAnalysis returned successfully for ${analysis.id}`)
+
+      console.log(
+        `✅ [API] processAnalysis returned successfully for ${analysis.id}`
+      )
 
       console.log(`🔵 [API] Preparing successful response...`)
       const successResponse = {
@@ -193,11 +220,14 @@ export async function POST(request: NextRequest) {
         status: "completed",
       }
       console.log(`📝 [API] Success response:`, successResponse)
-      
+
       return NextResponse.json(successResponse)
     } catch (error) {
       console.error(`❌ [API] Analysis failed for ${analysis.id}:`, error)
-      console.error(`❌ [API] Error stack trace:`, error instanceof Error ? error.stack : 'No stack trace')
+      console.error(
+        `❌ [API] Error stack trace:`,
+        error instanceof Error ? error.stack : "No stack trace"
+      )
 
       // Update analysis to failed status
       await supabase
@@ -301,38 +331,42 @@ async function processAnalysis(
   input: z.infer<typeof analyseRequestSchema>
 ) {
   console.log(`
-${'='.repeat(80)}`)
-  console.log(`🔷 [PROCESS] processAnalysis() called at ${new Date().toISOString()}`)
+${"=".repeat(80)}`)
+  console.log(
+    `🔷 [PROCESS] processAnalysis() called at ${new Date().toISOString()}`
+  )
   console.log(`🔷 [PROCESS] Analysis ID: ${analysisId}`)
   console.log(`🔷 [PROCESS] Input:`, JSON.stringify(input, null, 2))
-  console.log(`${'='.repeat(80)}\n`)
-  
+  console.log(`${"=".repeat(80)}\n`)
+
   console.log(`🔷 [PROCESS] Creating Supabase client...`)
   const supabase = await createSupabaseServerClient()
   console.log(`✅ [PROCESS] Supabase client created`)
-  
+
   console.log(`🔷 [PROCESS] Creating ProfitabilityPredictor instance...`)
   const predictor = new ProfitabilityPredictor()
   console.log(`✅ [PROCESS] ProfitabilityPredictor created`)
 
   try {
-    console.log(`🔷 [PROCESS] Starting analysis ${analysisId} for ${input.websiteUrl}`)
+    console.log(
+      `🔷 [PROCESS] Starting analysis ${analysisId} for ${input.websiteUrl}`
+    )
 
     // Update progress callback
     const updateProgress = async (progress: number, status: string) => {
       console.log(`📊 [PROGRESS] ${analysisId}: ${progress}% - ${status}`)
-      
+
       const updateData = {
         progress,
         status: progress === 100 ? "completed" : "processing",
       }
       console.log(`🔷 [PROCESS] Updating DB with:`, updateData)
-      
+
       const { error } = await supabase
         .from("profitability_analyses")
         .update(updateData)
         .eq("id", analysisId)
-      
+
       if (error) {
         console.error(`❌ [PROCESS] Failed to update progress:`, error)
       } else {
@@ -341,11 +375,15 @@ ${'='.repeat(80)}`)
     }
 
     // Start processing
-    console.log(`🔷 [PROCESS] Calling updateProgress(5, "Initialisation de l'analyse...")...`)
+    console.log(
+      `🔷 [PROCESS] Calling updateProgress(5, "Initialisation de l'analyse...")...`
+    )
     await updateProgress(5, "Initialisation de l'analyse...")
     console.log(`✅ [PROCESS] Initial progress update complete`)
 
-    console.log(`🔷 [PROCESS] About to call predictor.predictProfitability()...`)
+    console.log(
+      `🔷 [PROCESS] About to call predictor.predictProfitability()...`
+    )
     console.log(`📝 [PROCESS] predictProfitability params:`, {
       websiteUrl: input.websiteUrl,
       budget: input.budget,
@@ -353,7 +391,7 @@ ${'='.repeat(80)}`)
       targetCountry: input.targetCountry,
       keywords: input.keywords,
       analysisId: analysisId,
-      hasUpdateCallback: true
+      hasUpdateCallback: true,
     })
 
     // Run prediction with timeout
@@ -388,7 +426,7 @@ ${'='.repeat(80)}`)
       estimatedClicks: prediction.roiPrediction?.estimatedClicks,
     })
     console.log(`✅ [PROCESS] Analysis ${analysisId} completed successfully`)
-    console.log(`${'='.repeat(80)}\n`)
+    console.log(`${"=".repeat(80)}\n`)
   } catch (error) {
     console.error(`❌ [PROCESS] Analysis ${analysisId} failed:`, error)
     console.error(`❌ [PROCESS] Error type:`, error?.constructor?.name)

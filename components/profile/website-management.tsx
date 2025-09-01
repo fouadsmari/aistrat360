@@ -202,7 +202,10 @@ export function WebsiteManagement() {
     try {
       // Parse and validate budget
       let budget = null
-      if (formData.monthly_ads_budget && formData.monthly_ads_budget.trim() !== "") {
+      if (
+        formData.monthly_ads_budget &&
+        formData.monthly_ads_budget.trim() !== ""
+      ) {
         const parsedBudget = parseFloat(formData.monthly_ads_budget)
         if (isNaN(parsedBudget) || parsedBudget < 0) {
           showToast({
@@ -244,13 +247,15 @@ export function WebsiteManagement() {
       if (!response.ok) {
         const errorData = await response.json()
         console.error("API Error Details:", errorData)
-        
+
         // Handle validation errors specifically
         if (response.status === 400 && errorData.details) {
-          const validationErrors = errorData.details.map((detail: any) => detail.message).join(", ")
+          const validationErrors = errorData.details
+            .map((detail: any) => detail.message)
+            .join(", ")
           throw new Error(`Validation failed: ${validationErrors}`)
         }
-        
+
         throw new Error(errorData.error || "Failed to save website")
       }
 

@@ -611,6 +611,55 @@
         "completed": "Terminé",
         "failed": "Échec"
       }
+    },
+    "dataforseo": {
+      "title": "Analyse de Mots-clés DataForSEO",
+      "description": "Analysez les performances SEO de vos sites web",
+      "selectWebsite": "Sélectionner un site web",
+      "noWebsites": "Aucun site web configuré",
+      "addWebsiteFirst": "Ajoutez d'abord un site web dans votre profil",
+      "startAnalysis": "Démarrer l'analyse",
+      "analysisRunning": "Analyse en cours",
+      "progress": {
+        "step1": "Récupération du contenu du site...",
+        "step2": "Analyse des mots-clés positionnés...",
+        "step3": "Recherche d'opportunités de mots-clés...",
+        "step4": "Traitement des données...",
+        "step5": "Finalisation de l'analyse..."
+      },
+      "results": {
+        "title": "Résultats de l'analyse",
+        "totalKeywords": "Total mots-clés",
+        "rankedKeywords": "Mots-clés positionnés",
+        "opportunities": "Opportunités",
+        "avgPosition": "Position moyenne",
+        "searchVolume": "Volume de recherche",
+        "difficulty": "Difficulté",
+        "cpc": "CPC",
+        "position": "Position",
+        "keyword": "Mot-clé",
+        "type": "Type",
+        "exportCsv": "Exporter CSV",
+        "viewDetails": "Voir détails",
+        "noResults": "Aucun résultat trouvé",
+        "cost": "Coût de l'analyse"
+      },
+      "filters": {
+        "searchVolume": "Volume de recherche",
+        "minVolume": "Volume minimum",
+        "maxVolume": "Volume maximum",
+        "difficulty": "Difficulté",
+        "keywordType": "Type de mot-clé",
+        "allTypes": "Tous les types",
+        "ranked": "Positionnés",
+        "suggestions": "Suggestions"
+      },
+      "errors": {
+        "noWebsiteSelected": "Veuillez sélectionner un site web",
+        "analysisError": "Erreur lors de l'analyse",
+        "quotaExceeded": "Quota d'analyses dépassé",
+        "networkError": "Erreur de connexion"
+      }
     }
   }
 }

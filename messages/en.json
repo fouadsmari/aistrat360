@@ -611,6 +611,55 @@
         "completed": "Completed",
         "failed": "Failed"
       }
+    },
+    "dataforseo": {
+      "title": "DataForSEO Keywords Analysis",
+      "description": "Analyze SEO performance of your websites",
+      "selectWebsite": "Select a website",
+      "noWebsites": "No websites configured",
+      "addWebsiteFirst": "Add a website first in your profile",
+      "startAnalysis": "Start analysis",
+      "analysisRunning": "Analysis running",
+      "progress": {
+        "step1": "Fetching website content...",
+        "step2": "Analyzing ranked keywords...",
+        "step3": "Finding keyword opportunities...",
+        "step4": "Processing data...",
+        "step5": "Finalizing analysis..."
+      },
+      "results": {
+        "title": "Analysis results",
+        "totalKeywords": "Total keywords",
+        "rankedKeywords": "Ranked keywords",
+        "opportunities": "Opportunities",
+        "avgPosition": "Average position",
+        "searchVolume": "Search volume",
+        "difficulty": "Difficulty",
+        "cpc": "CPC",
+        "position": "Position",
+        "keyword": "Keyword",
+        "type": "Type",
+        "exportCsv": "Export CSV",
+        "viewDetails": "View details",
+        "noResults": "No results found",
+        "cost": "Analysis cost"
+      },
+      "filters": {
+        "searchVolume": "Search volume",
+        "minVolume": "Minimum volume",
+        "maxVolume": "Maximum volume",
+        "difficulty": "Difficulty",
+        "keywordType": "Keyword type",
+        "allTypes": "All types",
+        "ranked": "Ranked",
+        "suggestions": "Suggestions"
+      },
+      "errors": {
+        "noWebsiteSelected": "Please select a website",
+        "analysisError": "Error during analysis",
+        "quotaExceeded": "Analysis quota exceeded",
+        "networkError": "Connection error"
+      }
     }
   }
 }

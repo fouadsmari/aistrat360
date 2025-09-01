@@ -25,6 +25,7 @@ import {
   CreditCard,
   Target,
   Zap,
+  Search,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -297,6 +298,35 @@ export function Sidebar({
                             )}
                           />
                           <span className="text-sm">Analyse</span>
+                        </Button>
+                      </Link>
+                    </TooltipTrigger>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Link href={`/${locale}/tools/dataforseo`}>
+                        <Button
+                          variant={
+                            pathname === `/${locale}/tools/dataforseo`
+                              ? "secondary"
+                              : "ghost"
+                          }
+                          className={cn(
+                            "w-full justify-start",
+                            pathname === `/${locale}/tools/dataforseo` &&
+                              "bg-violet-50 text-violet-600 dark:bg-violet-950/30 dark:text-violet-400"
+                          )}
+                        >
+                          <Search
+                            className={cn(
+                              "mr-3 h-4 w-4",
+                              pathname === `/${locale}/tools/dataforseo`
+                                ? "text-violet-600 dark:text-violet-400"
+                                : "text-gray-600 dark:text-gray-400"
+                            )}
+                          />
+                          <span className="text-sm">Mots-clés</span>
                         </Button>
                       </Link>
                     </TooltipTrigger>

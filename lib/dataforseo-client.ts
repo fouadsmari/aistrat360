@@ -30,24 +30,36 @@ export class DataForSEOClient {
   private authHeader: string
 
   constructor() {
-    console.log(`🔷 [DATAFORSEO] Constructor called at ${new Date().toISOString()}`)
+    console.log(
+      `🔷 [DATAFORSEO] Constructor called at ${new Date().toISOString()}`
+    )
     console.log(`🔷 [DATAFORSEO] Environment check:`)
-    console.log(`  - DATAFORSEO_LOGIN: ${process.env.DATAFORSEO_LOGIN ? 'SET ✅' : 'NOT SET ❌'}`)
-    console.log(`  - DATAFORSEO_PASSWORD: ${process.env.DATAFORSEO_PASSWORD ? 'SET ✅' : 'NOT SET ❌'}`)
-    console.log(`  - DATAFORSEO_CREDENTIALS: ${process.env.DATAFORSEO_CREDENTIALS ? 'SET ✅' : 'NOT SET ❌'}`)
-    
+    console.log(
+      `  - DATAFORSEO_LOGIN: ${process.env.DATAFORSEO_LOGIN ? "SET ✅" : "NOT SET ❌"}`
+    )
+    console.log(
+      `  - DATAFORSEO_PASSWORD: ${process.env.DATAFORSEO_PASSWORD ? "SET ✅" : "NOT SET ❌"}`
+    )
+    console.log(
+      `  - DATAFORSEO_CREDENTIALS: ${process.env.DATAFORSEO_CREDENTIALS ? "SET ✅" : "NOT SET ❌"}`
+    )
+
     this.config = {
       login: process.env.DATAFORSEO_LOGIN!,
       password: process.env.DATAFORSEO_PASSWORD!,
       baseUrl: "https://api.dataforseo.com",
     }
-    
-    console.log(`🔷 [DATAFORSEO] Config created with login: ${this.config.login?.substring(0, 5)}***`)
+
+    console.log(
+      `🔷 [DATAFORSEO] Config created with login: ${this.config.login?.substring(0, 5)}***`
+    )
 
     // Create Basic Auth header
     const credentials = `${this.config.login}:${this.config.password}`
     this.authHeader = `Basic ${Buffer.from(credentials).toString("base64")}`
-    console.log(`🔷 [DATAFORSEO] Auth header created, length: ${this.authHeader.length}`)
+    console.log(
+      `🔷 [DATAFORSEO] Auth header created, length: ${this.authHeader.length}`
+    )
 
     this.cache = new CacheManager()
     console.log(`✅ [DATAFORSEO] Constructor completed`)
@@ -172,9 +184,11 @@ export class DataForSEOClient {
    * Get HTML content from website using DataForSEO
    */
   async getWebsiteHTML(websiteUrl: string): Promise<string> {
-    console.log(`\n🔷 [DATAFORSEO] getWebsiteHTML() called at ${new Date().toISOString()}`)
+    console.log(
+      `\n🔷 [DATAFORSEO] getWebsiteHTML() called at ${new Date().toISOString()}`
+    )
     console.log(`🔷 [DATAFORSEO] URL to fetch: ${websiteUrl}`)
-    
+
     const inputData = {
       url: websiteUrl,
       enable_javascript: true,
@@ -199,7 +213,7 @@ export class DataForSEOClient {
       // Use the instant_pages endpoint which is correct for HTML fetching
       const apiUrl = `${this.config.baseUrl}/v3/on_page/instant_pages`
       console.log(`🔷 [DATAFORSEO] API URL: ${apiUrl}`)
-      
+
       const requestBody = [
         {
           url: websiteUrl,
@@ -208,12 +222,17 @@ export class DataForSEOClient {
           load_resources: true,
         },
       ]
-      console.log(`🔷 [DATAFORSEO] Request body:`, JSON.stringify(requestBody, null, 2))
-      
+      console.log(
+        `🔷 [DATAFORSEO] Request body:`,
+        JSON.stringify(requestBody, null, 2)
+      )
+
       console.log(`🔷 [DATAFORSEO] Making POST request for HTML...`)
       console.log(`🔷 [DATAFORSEO] Auth header present: ${!!this.authHeader}`)
-      console.log(`🔷 [DATAFORSEO] Auth header length: ${this.authHeader?.length || 0}`)
-      
+      console.log(
+        `🔷 [DATAFORSEO] Auth header length: ${this.authHeader?.length || 0}`
+      )
+
       const startTime = Date.now()
       const response = await fetch(apiUrl, {
         method: "POST",
@@ -224,21 +243,33 @@ export class DataForSEOClient {
         body: JSON.stringify(requestBody),
       })
       const duration = Date.now() - startTime
-      console.log(`🔷 [DATAFORSEO] HTML response received in ${duration}ms, status: ${response.status}`)
+      console.log(
+        `🔷 [DATAFORSEO] HTML response received in ${duration}ms, status: ${response.status}`
+      )
 
       if (!response.ok) {
         const errorText = await response.text()
-        console.error(`❌ [DATAFORSEO] HTML fetch error (${response.status}):`, errorText)
-        console.error(`❌ [DATAFORSEO] Response headers:`, Object.fromEntries(response.headers.entries()))
-        throw new Error(`DataForSEO API error: ${response.status} ${response.statusText}`)
+        console.error(
+          `❌ [DATAFORSEO] HTML fetch error (${response.status}):`,
+          errorText
+        )
+        console.error(
+          `❌ [DATAFORSEO] Response headers:`,
+          Object.fromEntries(response.headers.entries())
+        )
+        throw new Error(
+          `DataForSEO API error: ${response.status} ${response.statusText}`
+        )
       }
       console.log(`✅ [DATAFORSEO] HTML response OK`)
 
       console.log(`🔷 [DATAFORSEO] Parsing HTML response JSON...`)
       const data = await response.json()
       console.log(`🔷 [DATAFORSEO] Response status code: ${data.status_code}`)
-      console.log(`🔷 [DATAFORSEO] Response status message: ${data.status_message}`)
-      
+      console.log(
+        `🔷 [DATAFORSEO] Response status message: ${data.status_message}`
+      )
+
       if (data.status_code !== 20000) {
         console.error(`❌ [DATAFORSEO] API returned error:`, data)
         throw new Error(
@@ -253,41 +284,55 @@ export class DataForSEOClient {
       if (item) {
         console.log(`🔷 [DATAFORSEO] Item keys available:`, Object.keys(item))
       }
-      
+
       // Try multiple locations where HTML content might be
       let htmlContent = ""
-      
+
       // Check for page_content which might contain the HTML
       if (item?.page_content) {
-        console.log(`🔷 [DATAFORSEO] Found page_content, type:`, typeof item.page_content)
-        if (typeof item.page_content === 'string') {
+        console.log(
+          `🔷 [DATAFORSEO] Found page_content, type:`,
+          typeof item.page_content
+        )
+        if (typeof item.page_content === "string") {
           htmlContent = item.page_content
-        } else if (typeof item.page_content === 'object') {
+        } else if (typeof item.page_content === "object") {
           // If it's an object, try to extract text from it
-          htmlContent = item.page_content.main_topic?.[0]?.text || 
-                       item.page_content.text || 
-                       item.page_content.content ||
-                       JSON.stringify(item.page_content)
+          htmlContent =
+            item.page_content.main_topic?.[0]?.text ||
+            item.page_content.text ||
+            item.page_content.content ||
+            JSON.stringify(item.page_content)
         }
       }
-      
+
       // Fallback to other possible locations
       if (!htmlContent) {
-        htmlContent = item?.html || item?.meta?.content || item?.text || item?.content || ""
+        htmlContent =
+          item?.html || item?.meta?.content || item?.text || item?.content || ""
       }
-      
+
       // Ensure htmlContent is a string
-      if (typeof htmlContent !== 'string') {
-        console.log(`🔷 [DATAFORSEO] Converting non-string content to string, type was: ${typeof htmlContent}`)
+      if (typeof htmlContent !== "string") {
+        console.log(
+          `🔷 [DATAFORSEO] Converting non-string content to string, type was: ${typeof htmlContent}`
+        )
         htmlContent = JSON.stringify(htmlContent)
       }
-      
-      console.log(`🔷 [DATAFORSEO] HTML content length: ${htmlContent?.length || 0} chars`)
-      console.log(`🔷 [DATAFORSEO] HTML content preview: ${htmlContent?.substring(0, 200)}...`)
-      
+
+      console.log(
+        `🔷 [DATAFORSEO] HTML content length: ${htmlContent?.length || 0} chars`
+      )
+      console.log(
+        `🔷 [DATAFORSEO] HTML content preview: ${htmlContent?.substring(0, 200)}...`
+      )
+
       if (!htmlContent || htmlContent.length === 0) {
         console.error(`❌ [DATAFORSEO] No HTML content in response`)
-        console.error(`❌ [DATAFORSEO] Full item structure:`, JSON.stringify(item, null, 2).substring(0, 2000))
+        console.error(
+          `❌ [DATAFORSEO] Full item structure:`,
+          JSON.stringify(item, null, 2).substring(0, 2000)
+        )
         throw new Error("No HTML content received from DataForSEO")
       }
 
@@ -307,8 +352,11 @@ export class DataForSEOClient {
       console.error(`❌ [DATAFORSEO] Error fetching website HTML:`, error)
       console.error(`❌ [DATAFORSEO] Error details:`, {
         name: error?.constructor?.name,
-        message: error instanceof Error ? error.message : 'Unknown',
-        stack: error instanceof Error ? error.stack?.split('\n').slice(0, 5) : 'No stack'
+        message: error instanceof Error ? error.message : "Unknown",
+        stack:
+          error instanceof Error
+            ? error.stack?.split("\n").slice(0, 5)
+            : "No stack",
       })
       throw new Error("Failed to fetch website HTML from DataForSEO API")
     }
@@ -566,6 +614,280 @@ export class DataForSEOClient {
     } catch (error) {
       // Return basic data on error
       return { domain }
+    }
+  }
+
+  /**
+   * Get ranked keywords for a domain (Phase 2 - DataForSEO Labs API)
+   * Limited to 900 keywords to stay under $0.10
+   */
+  async getRankedKeywords(
+    domain: string,
+    location: string = "FR",
+    limit: number = 900
+  ): Promise<any[]> {
+    const locationMap: Record<string, number> = {
+      FR: 2250, // France
+      CA: 2124, // Canada
+      US: 2840, // United States
+      BE: 2056, // Belgium
+      CH: 2756, // Switzerland
+      UK: 2826, // United Kingdom
+      DE: 2276, // Germany
+      ES: 2724, // Spain
+      IT: 2380, // Italy
+    }
+
+    const inputData = {
+      domain,
+      location_code: locationMap[location] || locationMap["FR"],
+      language_code: location === "CA" ? "en" : location === "US" ? "en" : "fr",
+      limit: Math.min(limit, 900), // Enforce 900 keyword limit
+    }
+
+    // Check cache first
+    const cached = await this.cache.getCachedResponse(
+      inputData,
+      "dataforseo",
+      "ranked_keywords"
+    )
+    if (cached) {
+      console.log(
+        `✅ [DATAFORSEO] Ranked keywords cache hit for domain: ${domain}`
+      )
+      return cached
+    }
+
+    try {
+      console.log(
+        `🔄 [DATAFORSEO] Fetching ranked keywords for domain: ${domain}`
+      )
+
+      const response = await fetch(
+        `${this.config.baseUrl}/v3/dataforseo_labs/google/ranked_keywords/live`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: this.authHeader,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify([
+            {
+              target: domain,
+              location_code: inputData.location_code,
+              language_code: inputData.language_code,
+              limit: inputData.limit,
+              offset: 0,
+              filters: [
+                ["keyword_data.keyword_info.search_volume", ">", 10], // Only keywords with volume > 10
+              ],
+              order_by: ["keyword_data.keyword_info.search_volume,desc"],
+            },
+          ]),
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error(
+          `DataForSEO API error: ${response.status} ${response.statusText}`
+        )
+      }
+
+      const data = await response.json()
+
+      if (data.status_code !== 20000) {
+        throw new Error(`DataForSEO error: ${data.status_message}`)
+      }
+
+      const keywords = data.tasks?.[0]?.result || []
+
+      console.log(
+        `✅ [DATAFORSEO] Retrieved ${keywords.length} ranked keywords`
+      )
+
+      // Cache the results for 90 days
+      await this.cache.setCachedResponse(
+        inputData,
+        "dataforseo",
+        "ranked_keywords",
+        keywords
+      )
+
+      return keywords
+    } catch (error) {
+      console.error("❌ [DATAFORSEO] Ranked keywords API error:", error)
+      throw error
+    }
+  }
+
+  /**
+   * Get keyword suggestions based on seed keywords (Phase 2 - DataForSEO Labs API)
+   */
+  async getKeywordSuggestions(
+    keywords: string[],
+    location: string = "FR",
+    limit: number = 100
+  ): Promise<any[]> {
+    const locationMap: Record<string, number> = {
+      FR: 2250,
+      CA: 2124,
+      US: 2840,
+      BE: 2056,
+      CH: 2756,
+      UK: 2826,
+      DE: 2276,
+      ES: 2724,
+      IT: 2380,
+    }
+
+    // Take up to 5 seed keywords to avoid too many suggestions
+    const seedKeywords = keywords.slice(0, 5)
+
+    const inputData = {
+      keywords: seedKeywords.sort(),
+      location_code: locationMap[location] || locationMap["FR"],
+      language_code: location === "CA" ? "en" : location === "US" ? "en" : "fr",
+      limit,
+    }
+
+    // Check cache first
+    const cached = await this.cache.getCachedResponse(
+      inputData,
+      "dataforseo",
+      "keyword_suggestions"
+    )
+    if (cached) {
+      console.log(`✅ [DATAFORSEO] Keyword suggestions cache hit`)
+      return cached
+    }
+
+    try {
+      console.log(
+        `🔄 [DATAFORSEO] Fetching keyword suggestions for: ${seedKeywords.join(", ")}`
+      )
+
+      const response = await fetch(
+        `${this.config.baseUrl}/v3/dataforseo_labs/google/keyword_suggestions/live`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: this.authHeader,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify([
+            {
+              keywords: seedKeywords,
+              location_code: inputData.location_code,
+              language_code: inputData.language_code,
+              limit: inputData.limit,
+              offset: 0,
+              filters: [
+                ["keyword_data.search_volume", ">", 50], // Only keywords with volume > 50
+                ["keyword_data.keyword_difficulty", "<", 80], // Exclude very difficult keywords
+              ],
+              order_by: ["keyword_data.search_volume,desc"],
+            },
+          ]),
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error(
+          `DataForSEO API error: ${response.status} ${response.statusText}`
+        )
+      }
+
+      const data = await response.json()
+
+      if (data.status_code !== 20000) {
+        throw new Error(`DataForSEO error: ${data.status_message}`)
+      }
+
+      const suggestions = data.tasks?.[0]?.result || []
+
+      console.log(
+        `✅ [DATAFORSEO] Retrieved ${suggestions.length} keyword suggestions`
+      )
+
+      // Cache the results for 90 days
+      await this.cache.setCachedResponse(
+        inputData,
+        "dataforseo",
+        "keyword_suggestions",
+        suggestions
+      )
+
+      return suggestions
+    } catch (error) {
+      console.error("❌ [DATAFORSEO] Keyword suggestions API error:", error)
+      throw error
+    }
+  }
+
+  /**
+   * Calculate estimated cost for DataForSEO Labs analysis
+   */
+  calculateLabsCost(
+    rankedKeywordsCount: number,
+    suggestionsCount: number
+  ): number {
+    // DataForSEO Labs pricing:
+    // - ranked_keywords: $0.11 per 1000 keywords (max 900 = ~$0.099)
+    // - keyword_suggestions: $0.0115 per request (not per keyword)
+
+    const rankedCost = (rankedKeywordsCount / 1000) * 0.11
+    const suggestionsCost = suggestionsCount > 0 ? 0.0115 : 0
+
+    return rankedCost + suggestionsCost
+  }
+
+  /**
+   * Extract main keywords from page HTML content for suggestions
+   */
+  extractMainKeywords(pageContent: any, limit: number = 10): string[] {
+    try {
+      const item = pageContent.tasks?.[0]?.result?.[0]?.items?.[0]
+      if (!item) return []
+
+      const keywords = new Set<string>()
+
+      // Extract from title
+      if (item.meta?.title) {
+        const titleWords = item.meta.title
+          .toLowerCase()
+          .replace(/[^\w\s]/g, " ")
+          .split(/\s+/)
+          .filter((word: string) => word.length > 3)
+        titleWords.forEach((word: string) => keywords.add(word))
+      }
+
+      // Extract from H1 tags
+      if (item.meta?.htags?.h1) {
+        item.meta.htags.h1.forEach((h1: string) => {
+          const h1Words = h1
+            .toLowerCase()
+            .replace(/[^\w\s]/g, " ")
+            .split(/\s+/)
+            .filter((word: string) => word.length > 3)
+          h1Words.forEach((word: string) => keywords.add(word))
+        })
+      }
+
+      // Extract from meta description
+      if (item.meta?.description) {
+        const descWords = item.meta.description
+          .toLowerCase()
+          .replace(/[^\w\s]/g, " ")
+          .split(/\s+/)
+          .filter((word: string) => word.length > 4)
+          .slice(0, 5) // Top 5 from description
+        descWords.forEach((word: string) => keywords.add(word))
+      }
+
+      return Array.from(keywords).slice(0, limit)
+    } catch (error) {
+      console.error("Error extracting keywords:", error)
+      return []
     }
   }
 }

@@ -15,7 +15,11 @@ const websiteSchema = z.object({
     .array(z.string())
     .min(1, "At least one language must be selected"),
   industry: z.string().nullable().optional(),
-  monthly_ads_budget: z.number().min(0, "Budget must be positive").nullable().optional(),
+  monthly_ads_budget: z
+    .number()
+    .min(0, "Budget must be positive")
+    .nullable()
+    .optional(),
   is_primary: z.boolean().optional().default(false),
 })
 

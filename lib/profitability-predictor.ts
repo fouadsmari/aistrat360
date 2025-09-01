@@ -59,19 +59,21 @@ export class ProfitabilityPredictor {
   private openAI: OpenAIClient
 
   constructor() {
-    console.log(`🔷 [PREDICTOR] Constructor called at ${new Date().toISOString()}`)
+    console.log(
+      `🔷 [PREDICTOR] Constructor called at ${new Date().toISOString()}`
+    )
     console.log(`🔷 [PREDICTOR] Creating WebsiteAnalyzer...`)
     this.websiteAnalyzer = new WebsiteAnalyzer()
     console.log(`✅ [PREDICTOR] WebsiteAnalyzer created`)
-    
+
     console.log(`🔷 [PREDICTOR] Creating DataForSEOClient...`)
     this.dataForSEO = new DataForSEOClient()
     console.log(`✅ [PREDICTOR] DataForSEOClient created`)
-    
+
     console.log(`🔷 [PREDICTOR] Creating OpenAIClient...`)
     this.openAI = new OpenAIClient()
     console.log(`✅ [PREDICTOR] OpenAIClient created`)
-    
+
     console.log(`✅ [PREDICTOR] Constructor completed`)
   }
 
@@ -83,22 +85,24 @@ export class ProfitabilityPredictor {
     analysisId: string,
     onProgress?: (progress: number, status: string) => Promise<void>
   ): Promise<ProfitabilityPrediction> {
-    console.log(`\n${'*'.repeat(80)}`)
-    console.log(`🔷 [PREDICTOR] predictProfitability() called at ${new Date().toISOString()}`)
+    console.log(`\n${"*".repeat(80)}`)
+    console.log(
+      `🔷 [PREDICTOR] predictProfitability() called at ${new Date().toISOString()}`
+    )
     console.log(`🔷 [PREDICTOR] Analysis ID: ${analysisId}`)
     console.log(`🔷 [PREDICTOR] Full input:`, JSON.stringify(input, null, 2))
     console.log(`🔷 [PREDICTOR] Has onProgress callback: ${!!onProgress}`)
-    console.log(`${'*'.repeat(80)}\n`)
-    
+    console.log(`${"*".repeat(80)}\n`)
+
     try {
       console.log(
         `🚀 [${analysisId}] Starting NEW simplified workflow for ${input.websiteUrl}`
       )
 
       // STEP 1: DataForSEO fetches HTML content (0-25%)
-      console.log(`\n${'='.repeat(60)}`)
+      console.log(`\n${"=".repeat(60)}`)
       console.log(`🌐 [${analysisId}] STEP 1: Fetching website HTML...`)
-      console.log(`${'='.repeat(60)}`)
+      console.log(`${"=".repeat(60)}`)
       console.log(
         `🔧 [${analysisId}] STEP 1: About to call this.dataForSEO.getWebsiteHTML(${input.websiteUrl})`
       )
@@ -108,11 +112,13 @@ export class ProfitabilityPredictor {
 
       let htmlContent: string
       try {
-        console.log(`🔧 [${analysisId}] STEP 1: Entering dataForSEO.getWebsiteHTML()...`)
+        console.log(
+          `🔧 [${analysisId}] STEP 1: Entering dataForSEO.getWebsiteHTML()...`
+        )
         const startTime = Date.now()
         htmlContent = await this.dataForSEO.getWebsiteHTML(input.websiteUrl)
         const duration = Date.now() - startTime
-        
+
         console.log(
           `✅ [${analysisId}] STEP 1 completed in ${duration}ms: Got ${htmlContent.length} chars`
         )
@@ -133,11 +139,11 @@ export class ProfitabilityPredictor {
       }
 
       // STEP 2: OpenAI extracts exactly 3 targeted keywords (25-50%)
-      console.log(`\n${'='.repeat(60)}`)
+      console.log(`\n${"=".repeat(60)}`)
       console.log(
         `🤖 [${analysisId}] STEP 2: AI extracting 3 targeted keywords...`
       )
-      console.log(`${'='.repeat(60)}`)
+      console.log(`${"=".repeat(60)}`)
       console.log(
         `🔧 [${analysisId}] STEP 2: About to call this.openAI.extractTargetedKeywords`
       )
@@ -153,7 +159,9 @@ export class ProfitabilityPredictor {
 
       let targetedKeywords: string[]
       try {
-        console.log(`🔧 [${analysisId}] STEP 2: Entering openAI.extractTargetedKeywords()...`)
+        console.log(
+          `🔧 [${analysisId}] STEP 2: Entering openAI.extractTargetedKeywords()...`
+        )
         const startTime = Date.now()
         targetedKeywords = await this.openAI.extractTargetedKeywords(
           htmlContent,
@@ -162,7 +170,7 @@ export class ProfitabilityPredictor {
           input.objective
         )
         const duration = Date.now() - startTime
-        
+
         console.log(
           `✅ [${analysisId}] STEP 2 completed in ${duration}ms: Got 3 keywords: ${targetedKeywords.join(", ")}`
         )
@@ -183,11 +191,11 @@ export class ProfitabilityPredictor {
       }
 
       // STEP 3: DataForSEO gets comprehensive data for these 3 keywords (50-75%)
-      console.log(`\n${'='.repeat(60)}`)
+      console.log(`\n${"=".repeat(60)}`)
       console.log(
         `🔢 [${analysisId}] STEP 3: Getting keyword data for targeted keywords...`
       )
-      console.log(`${'='.repeat(60)}`)
+      console.log(`${"=".repeat(60)}`)
       console.log(
         `🔧 [${analysisId}] STEP 3: About to call this.dataForSEO.getKeywordData`
       )
@@ -200,7 +208,9 @@ export class ProfitabilityPredictor {
 
       let keywordData: any[]
       try {
-        console.log(`🔧 [${analysisId}] STEP 3: Entering dataForSEO.getKeywordData()...`)
+        console.log(
+          `🔧 [${analysisId}] STEP 3: Entering dataForSEO.getKeywordData()...`
+        )
         const startTime = Date.now()
         keywordData = await this.dataForSEO.getKeywordData(
           targetedKeywords,
@@ -208,7 +218,7 @@ export class ProfitabilityPredictor {
           "fr" // Default to French for now, can be improved later
         )
         const duration = Date.now() - startTime
-        
+
         console.log(
           `✅ [${analysisId}] STEP 3 completed in ${duration}ms: Got market data for ${keywordData.length} keywords`
         )
@@ -238,9 +248,9 @@ export class ProfitabilityPredictor {
       }
 
       // STEP 4: Generate final analysis and recommendations (75-100%)
-      console.log(`\n${'='.repeat(60)}`)
+      console.log(`\n${"=".repeat(60)}`)
       console.log(`💡 [${analysisId}] STEP 4: Generating final analysis...`)
-      console.log(`${'='.repeat(60)}`)
+      console.log(`${"=".repeat(60)}`)
       console.log(
         `🔧 [${analysisId}] STEP 4: Creating website analysis object...`
       )
@@ -372,28 +382,33 @@ export class ProfitabilityPredictor {
       console.log(`🔧 [${analysisId}] Calling onProgress(95)...`)
       await onProgress?.(95, "Sauvegarde en cours...")
       console.log(`✅ [${analysisId}] onProgress(95) completed`)
-      
+
       console.log(`🔧 [${analysisId}] Calling savePrediction()...`)
       const saveStart = Date.now()
       await this.savePrediction(analysisId, prediction)
-      console.log(`✅ [${analysisId}] savePrediction() completed in ${Date.now() - saveStart}ms`)
+      console.log(
+        `✅ [${analysisId}] savePrediction() completed in ${Date.now() - saveStart}ms`
+      )
 
       console.log(`🔧 [${analysisId}] Calling onProgress(100)...`)
       await onProgress?.(100, "Analyse terminée!")
       console.log(`✅ [${analysisId}] onProgress(100) completed`)
-      
+
       console.log(`🎉 [${analysisId}] NEW WORKFLOW COMPLETE!`)
-      console.log(`${'*'.repeat(80)}\n`)
+      console.log(`${"*".repeat(80)}\n`)
 
       return prediction
     } catch (error) {
       console.error(`❌ [${analysisId}] NEW WORKFLOW FAILED:`, error)
       console.error(`❌ [${analysisId}] Error details:`, {
         name: error?.constructor?.name,
-        message: error instanceof Error ? error.message : 'Unknown',
-        stack: error instanceof Error ? error.stack?.split('\n').slice(0, 5) : 'No stack'
+        message: error instanceof Error ? error.message : "Unknown",
+        stack:
+          error instanceof Error
+            ? error.stack?.split("\n").slice(0, 5)
+            : "No stack",
       })
-      console.log(`${'*'.repeat(80)}\n`)
+      console.log(`${"*".repeat(80)}\n`)
       throw error
     }
   }
@@ -561,14 +576,14 @@ export class ProfitabilityPredictor {
         hasResultData: !!updateData.result_data,
         status: updateData.status,
         progress: updateData.progress,
-        completedAt: updateData.completed_at
+        completedAt: updateData.completed_at,
       })
-      
+
       const { error } = await supabase
         .from("profitability_analyses")
         .update(updateData)
         .eq("id", analysisId)
-      
+
       if (error) {
         console.error(`❌ [SAVE] Failed to save prediction:`, error)
       } else {
