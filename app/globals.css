@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Fix transparent Select dropdown backgrounds */
+@layer components {
+  [data-radix-select-content] {
+    @apply border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900 !important;
+  }
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

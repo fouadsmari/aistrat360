@@ -612,13 +612,13 @@
         "failed": "Échec"
       }
     },
-    "dataforseo": {
-      "title": "Analyse de Mots-clés DataForSEO",
+    "keywords": {
+      "title": "Analyse de Mots-clés",
       "description": "Analysez les performances SEO de vos sites web",
       "selectWebsite": "Sélectionner un site web",
       "noWebsites": "Aucun site web configuré",
       "addWebsiteFirst": "Ajoutez d'abord un site web dans votre profil",
-      "startAnalysis": "Démarrer l'analyse",
+      "startAnalysis": "Analyser les mots-clés",
       "analysisRunning": "Analyse en cours",
       "progress": {
         "step1": "Récupération du contenu du site...",
@@ -629,9 +629,11 @@
       },
       "results": {
         "title": "Résultats de l'analyse",
+        "websiteLabel": "Site web",
         "totalKeywords": "Total mots-clés",
         "rankedKeywords": "Mots-clés positionnés",
         "opportunities": "Opportunités",
+        "totalVolume": "Volume total",
         "avgPosition": "Position moyenne",
         "searchVolume": "Volume de recherche",
         "difficulty": "Difficulté",
@@ -642,17 +644,35 @@
         "exportCsv": "Exporter CSV",
         "viewDetails": "Voir détails",
         "noResults": "Aucun résultat trouvé",
-        "cost": "Coût de l'analyse"
+        "cost": "Coût de l'analyse",
+        "showingResults": "Affichage de {count} résultats sur {total}",
+        "keywordsList": "Liste des mots-clés",
+        "ranked": "Positionné",
+        "suggestion": "Suggestion",
+        "table": {
+          "keyword": "Mot-clé",
+          "type": "Type",
+          "volume": "Volume",
+          "difficulty": "Difficulté",
+          "cpc": "CPC",
+          "position": "Position",
+          "url": "URL"
+        }
       },
       "filters": {
+        "title": "Filtres",
         "searchVolume": "Volume de recherche",
         "minVolume": "Volume minimum",
         "maxVolume": "Volume maximum",
         "difficulty": "Difficulté",
         "keywordType": "Type de mot-clé",
-        "allTypes": "Tous les types",
+        "all": "Tous",
         "ranked": "Positionnés",
-        "suggestions": "Suggestions"
+        "suggestions": "Suggestions",
+        "searchKeywords": "Rechercher des mots-clés",
+        "searchPlaceholder": "Rechercher un mot-clé...",
+        "volumeRange": "Plage de volume",
+        "clearFilters": "Effacer les filtres"
       },
       "errors": {
         "noWebsiteSelected": "Veuillez sélectionner un site web",

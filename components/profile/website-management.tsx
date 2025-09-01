@@ -444,7 +444,7 @@ export function WebsiteManagement() {
                         <SelectTrigger>
                           <SelectValue placeholder="Sélectionnez le type" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
                           {businessTypes.map((type) => (
                             <SelectItem key={type.value} value={type.value}>
                               {type.label}

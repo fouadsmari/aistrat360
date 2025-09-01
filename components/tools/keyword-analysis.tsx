@@ -22,7 +22,7 @@ import {
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { DataForSEOResults } from "./dataforseo-results"
+import { KeywordResults } from "./keyword-results"
 import {
   Globe,
   Search,
@@ -68,8 +68,8 @@ interface AnalysisResults {
   }>
 }
 
-export function DataForSEOAnalysis() {
-  const t = useTranslations("tools.dataforseo")
+export function KeywordAnalysis() {
+  const t = useTranslations("tools.keywords")
   const tCommon = useTranslations("common")
   const params = useParams()
   const locale = params.locale as string
@@ -101,7 +101,6 @@ export function DataForSEOAnalysis() {
       const data = await response.json()
       setWebsites(data.websites || [])
     } catch (error) {
-      console.error("Error fetching websites:", error)
       showToast({
         message: t("errors.networkError"),
         type: "error",
@@ -112,7 +111,7 @@ export function DataForSEOAnalysis() {
     }
   }, [showToast, t])
 
-  // Start DataForSEO analysis
+  // Start keyword analysis
   const startAnalysis = async () => {
     if (!selectedWebsite) {
       showToast({
@@ -127,7 +126,7 @@ export function DataForSEOAnalysis() {
     if (!website) return
 
     try {
-      const response = await fetch("/api/tools/dataforseo/analyze", {
+      const response = await fetch("/api/tools/keywords/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -154,7 +153,6 @@ export function DataForSEOAnalysis() {
 
       pollAnalysisProgress(data.analysisId)
     } catch (error: any) {
-      console.error("Error starting analysis:", error)
       showToast({
         message: error.message || t("errors.analysisError"),
         type: "error",
@@ -167,9 +165,7 @@ export function DataForSEOAnalysis() {
   const pollAnalysisProgress = async (analysisId: string) => {
     const pollInterval = setInterval(async () => {
       try {
-        const response = await fetch(
-          `/api/tools/dataforseo/status/${analysisId}`
-        )
+        const response = await fetch(`/api/tools/keywords/status/${analysisId}`)
         if (!response.ok) throw new Error("Failed to get analysis status")
 
         const data = await response.json()
@@ -212,7 +208,6 @@ export function DataForSEOAnalysis() {
           })
         }
       } catch (error) {
-        console.error("Error polling progress:", error)
         clearInterval(pollInterval)
         setAnalysisInProgress(null)
       }
@@ -224,7 +219,7 @@ export function DataForSEOAnalysis() {
     if (!analysisInProgress) return
 
     try {
-      await fetch(`/api/tools/dataforseo/cancel/${analysisInProgress.id}`, {
+      await fetch(`/api/tools/keywords/cancel/${analysisInProgress.id}`, {
         method: "POST",
       })
 
@@ -234,9 +229,7 @@ export function DataForSEOAnalysis() {
         type: "info",
         duration: 3000,
       })
-    } catch (error) {
-      console.error("Error cancelling analysis:", error)
-    }
+    } catch (error) {}
   }
 
   useEffect(() => {
@@ -261,8 +254,8 @@ export function DataForSEOAnalysis() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900/20">
-                <BarChart3 className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              <div className="rounded-lg bg-violet-100 p-2 dark:bg-violet-900/20">
+                <Search className="h-6 w-6 text-violet-600 dark:text-violet-400" />
               </div>
               <div>
                 <CardTitle>{t("title")}</CardTitle>
@@ -304,7 +297,7 @@ export function DataForSEOAnalysis() {
                     <SelectTrigger>
                       <SelectValue placeholder={t("selectWebsite")} />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
                       {websites.map((website) => (
                         <SelectItem key={website.id} value={website.id}>
                           <div className="flex items-center gap-2">
@@ -326,7 +319,7 @@ export function DataForSEOAnalysis() {
                     <Button
                       onClick={startAnalysis}
                       disabled={!selectedWebsite}
-                      className="bg-blue-600 hover:bg-blue-700"
+                      className="bg-gradient-to-r from-violet-600 to-purple-600 text-white hover:from-violet-700 hover:to-purple-700 disabled:opacity-50"
                     >
                       <PlayCircle className="mr-2 h-4 w-4" />
                       {t("startAnalysis")}
@@ -359,7 +352,7 @@ export function DataForSEOAnalysis() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                    <Loader2 className="h-5 w-5 animate-spin text-violet-600" />
                     <span className="font-medium">
                       {analysisInProgress.currentStep}
                     </span>
@@ -392,7 +385,7 @@ export function DataForSEOAnalysis() {
 
         {/* Analysis Results */}
         {analysisResults && (
-          <DataForSEOResults
+          <KeywordResults
             results={analysisResults}
             websiteName={
               websites.find((w) => w.id === selectedWebsite)?.name ||

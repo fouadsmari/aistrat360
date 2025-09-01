@@ -612,13 +612,13 @@
         "failed": "Failed"
       }
     },
-    "dataforseo": {
-      "title": "DataForSEO Keywords Analysis",
+    "keywords": {
+      "title": "Keywords Analysis",
       "description": "Analyze SEO performance of your websites",
       "selectWebsite": "Select a website",
       "noWebsites": "No websites configured",
       "addWebsiteFirst": "Add a website first in your profile",
-      "startAnalysis": "Start analysis",
+      "startAnalysis": "Analyze Keywords",
       "analysisRunning": "Analysis running",
       "progress": {
         "step1": "Fetching website content...",
@@ -629,9 +629,11 @@
       },
       "results": {
         "title": "Analysis results",
+        "websiteLabel": "Website",
         "totalKeywords": "Total keywords",
         "rankedKeywords": "Ranked keywords",
         "opportunities": "Opportunities",
+        "totalVolume": "Total volume",
         "avgPosition": "Average position",
         "searchVolume": "Search volume",
         "difficulty": "Difficulty",
@@ -642,17 +644,35 @@
         "exportCsv": "Export CSV",
         "viewDetails": "View details",
         "noResults": "No results found",
-        "cost": "Analysis cost"
+        "cost": "Analysis cost",
+        "showingResults": "Showing {count} results of {total}",
+        "keywordsList": "Keywords list",
+        "ranked": "Ranked",
+        "suggestion": "Suggestion",
+        "table": {
+          "keyword": "Keyword",
+          "type": "Type",
+          "volume": "Volume",
+          "difficulty": "Difficulty",
+          "cpc": "CPC",
+          "position": "Position",
+          "url": "URL"
+        }
       },
       "filters": {
+        "title": "Filters",
         "searchVolume": "Search volume",
         "minVolume": "Minimum volume",
         "maxVolume": "Maximum volume",
         "difficulty": "Difficulty",
         "keywordType": "Keyword type",
-        "allTypes": "All types",
+        "all": "All",
         "ranked": "Ranked",
-        "suggestions": "Suggestions"
+        "suggestions": "Suggestions",
+        "searchKeywords": "Search keywords",
+        "searchPlaceholder": "Search for a keyword...",
+        "volumeRange": "Volume range",
+        "clearFilters": "Clear filters"
       },
       "errors": {
         "noWebsiteSelected": "Please select a website",

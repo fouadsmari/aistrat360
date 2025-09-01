@@ -2,6 +2,8 @@
 
 ## 🚀 En Cours
 
+_Aucune tâche en cours actuellement_
+
 ### **[PRIORITÉ MAXIMALE] - Refonte Workflow Analyse Profitabilité**
 
 **🎯 OBJECTIF** : Simplifier drastiquement l'analyse pour obtenir des résultats ultra-pertinents
@@ -1138,6 +1140,18 @@ _(Architecture détaillée après validation outils précédents)_
     - ✅ Application 100% conforme maitre.md, prête production
     - ✅ Roadmap mis à jour avec correction violations
 
+## ✅ Terminé Récemment
+
+- **[2025-01-09]** Nettoyage complet interface et suppression outil analyse
+  - ✅ **FIX UI CRITIQUE** : Correction Select dropdowns transparents dans profile
+  - ✅ **SUPPRESSION OUTIL INUTILISÉ** : Analyse complète des dépendances `/tools/analyse`
+  - ✅ **FICHIERS SUPPRIMÉS** : 6 fichiers analyse + composant form + API routes
+  - ✅ **SIDEBAR NETTOYÉE** : Suppression référence analyse du menu Google Ads
+  - ✅ **DATABASE CLEANUP** : Migration 028 pour supprimer table `profitability_analyses`
+  - ✅ **BIBLIOTHÈQUE SUPPRIMÉE** : Suppression `/lib/profitability-predictor.ts` non utilisé
+  - ✅ **VÉRIFICATION SÉCURISÉE** : Aucun impact sur outil keywords fonctionnel
+  - ✅ **RÉSULTAT** : Application allégée, interface transparence fixée, code propre
+
 ---
 
-_Dernière mise à jour : 2025-08-28 - Phase 2.3 terminée - Violations maitre.md corrigées, devise canadienne fixée, code production-ready_
+_Dernière mise à jour : 2025-01-09 - Nettoyage interface et suppression outil analyse obsolète_

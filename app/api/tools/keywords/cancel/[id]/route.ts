@@ -76,7 +76,6 @@ export async function POST(
       .eq("id", id)
 
     if (updateError) {
-      console.error("Error cancelling analysis:", updateError)
       return NextResponse.json(
         { error: "Failed to cancel analysis" },
         { status: 500 }
@@ -87,10 +86,6 @@ export async function POST(
       message: "Analysis cancelled successfully",
     })
   } catch (error: any) {
-    console.error(
-      "Unexpected error in POST /api/tools/dataforseo/cancel:",
-      error
-    )
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

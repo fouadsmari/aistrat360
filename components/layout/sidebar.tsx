@@ -276,52 +276,23 @@ export function Sidebar({
                 <div className="ml-4 space-y-1">
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Link href={`/${locale}/tools/analyse`}>
+                      <Link href={`/${locale}/tools/keywords`}>
                         <Button
                           variant={
-                            pathname === `/${locale}/tools/analyse`
+                            pathname === `/${locale}/tools/keywords`
                               ? "secondary"
                               : "ghost"
                           }
                           className={cn(
                             "w-full justify-start",
-                            pathname === `/${locale}/tools/analyse` &&
-                              "bg-violet-50 text-violet-600 dark:bg-violet-950/30 dark:text-violet-400"
-                          )}
-                        >
-                          <BarChart3
-                            className={cn(
-                              "mr-3 h-4 w-4",
-                              pathname === `/${locale}/tools/analyse`
-                                ? "text-violet-600 dark:text-violet-400"
-                                : "text-gray-600 dark:text-gray-400"
-                            )}
-                          />
-                          <span className="text-sm">Analyse</span>
-                        </Button>
-                      </Link>
-                    </TooltipTrigger>
-                  </Tooltip>
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Link href={`/${locale}/tools/dataforseo`}>
-                        <Button
-                          variant={
-                            pathname === `/${locale}/tools/dataforseo`
-                              ? "secondary"
-                              : "ghost"
-                          }
-                          className={cn(
-                            "w-full justify-start",
-                            pathname === `/${locale}/tools/dataforseo` &&
+                            pathname === `/${locale}/tools/keywords` &&
                               "bg-violet-50 text-violet-600 dark:bg-violet-950/30 dark:text-violet-400"
                           )}
                         >
                           <Search
                             className={cn(
                               "mr-3 h-4 w-4",
-                              pathname === `/${locale}/tools/dataforseo`
+                              pathname === `/${locale}/tools/keywords`
                                 ? "text-violet-600 dark:text-violet-400"
                                 : "text-gray-600 dark:text-gray-400"
                             )}

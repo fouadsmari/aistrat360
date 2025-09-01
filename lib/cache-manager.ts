@@ -32,6 +32,7 @@ export class CacheManager {
     serviceType: string,
     endpointType: string
   ): Promise<any | null> {
+    // Cache enabled
     try {
       const supabase = await createSupabaseServerClient()
       const cacheKey = this.generateCacheKey(

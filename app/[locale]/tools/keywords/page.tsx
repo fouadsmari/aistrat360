@@ -1,9 +1,9 @@
 import { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
-import { DataForSEOAnalysis } from "@/components/tools/dataforseo-analysis"
+import { KeywordAnalysis } from "@/components/tools/keyword-analysis"
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("tools.dataforseo")
+  const t = await getTranslations("tools.keywords")
 
   return {
     title: t("title"),
@@ -11,10 +11,10 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-export default function DataForSEOPage() {
+export default function KeywordsPage() {
   return (
     <div className="container mx-auto space-y-6 py-6">
-      <DataForSEOAnalysis />
+      <KeywordAnalysis />
     </div>
   )
 }

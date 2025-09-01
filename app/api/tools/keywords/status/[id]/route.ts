@@ -100,10 +100,6 @@ export async function GET(
 
     return NextResponse.json(response)
   } catch (error: any) {
-    console.error(
-      "Unexpected error in GET /api/tools/dataforseo/status:",
-      error
-    )
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

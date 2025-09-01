@@ -117,16 +117,11 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (analysisError || !analysis) {
-      console.error("Error creating analysis:", analysisError)
       return NextResponse.json(
         { error: "Failed to create analysis" },
         { status: 500 }
       )
     }
-
-    console.log(
-      `🚀 Starting DataForSEO analysis ${analysis.id} for website ${website.url}`
-    )
 
     // Start background analysis process
     performAnalysisInBackground(analysis.id, website, country, language)
@@ -139,10 +134,6 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     )
   } catch (error: any) {
-    console.error(
-      "Unexpected error in POST /api/tools/dataforseo/analyze:",
-      error
-    )
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -175,14 +166,10 @@ async function performAnalysisInBackground(
   try {
     // Update status to processing
     await updateProgress(supabase, analysisId, 10, "processing")
-    console.log(`📊 Step 1: Starting analysis for ${website.url}`)
 
     // Step 1: Get page content for keyword extraction (20%)
     await updateProgress(supabase, analysisId, 20)
     const pageContent = await dataforSEO.getWebsiteHTML(website.url)
-    console.log(
-      `📄 Step 2: Retrieved page content (${pageContent?.length || 0} chars)`
-    )
 
     // Step 2: Get ranked keywords (50%)
     await updateProgress(supabase, analysisId, 40)
@@ -192,7 +179,6 @@ async function performAnalysisInBackground(
       country,
       900
     )
-    console.log(`🎯 Step 3: Retrieved ${rankedKeywords.length} ranked keywords`)
 
     // Step 3: Extract seed keywords and get suggestions (70%)
     await updateProgress(supabase, analysisId, 60)
@@ -205,30 +191,60 @@ async function performAnalysisInBackground(
       country,
       100
     )
-    console.log(
-      `💡 Step 4: Retrieved ${keywordSuggestions.length} keyword suggestions`
-    )
 
     // Step 4: Process and save results (90%)
     await updateProgress(supabase, analysisId, 80)
 
     const allKeywords = []
 
-    // Process ranked keywords
-    for (const item of rankedKeywords) {
+    // Process ranked keywords - Extract items from DataForSEO result
+    const allRankedItems = []
+
+    // Extract all items from the result objects
+    for (const result of rankedKeywords) {
+      if (result.items && Array.isArray(result.items)) {
+        allRankedItems.push(...result.items)
+      }
+    }
+
+    for (const item of allRankedItems) {
+      // Defensive programming: try multiple possible structures
+      let keyword = null
+      let keywordData = null
+
       if (item.keyword_data?.keyword) {
+        // Standard DataForSEO structure
+        keyword = item.keyword_data.keyword
+        keywordData = item.keyword_data
+      } else if (item.keyword) {
+        // Alternative structure
+        keyword = item.keyword
+        keywordData = item
+      }
+
+      if (keyword) {
         allKeywords.push({
           analysis_id: analysisId,
-          keyword: item.keyword_data.keyword,
+          keyword: keyword,
           keyword_type: "ranked",
-          search_volume: item.keyword_data.keyword_info?.search_volume || 0,
+          search_volume:
+            keywordData.keyword_info?.search_volume ||
+            keywordData.search_volume ||
+            0,
           keyword_difficulty:
-            item.keyword_data.keyword_info?.keyword_difficulty || 0,
-          cpc: item.keyword_data.keyword_info?.cpc || 0,
-          competition: item.keyword_data.keyword_info?.competition || 0,
+            keywordData.keyword_info?.keyword_difficulty ||
+            keywordData.keyword_difficulty ||
+            0,
+          cpc: keywordData.keyword_info?.cpc || keywordData.cpc || 0,
+          competition:
+            keywordData.keyword_info?.competition ||
+            keywordData.competition ||
+            0,
           current_position:
-            item.ranked_serp_element?.serp_item?.rank_absolute || null,
-          url: item.ranked_serp_element?.serp_item?.url || null,
+            item.ranked_serp_element?.serp_item?.rank_absolute ||
+            item.position ||
+            null,
+          url: item.ranked_serp_element?.serp_item?.url || item.url || null,
         })
       }
     }
@@ -296,12 +312,7 @@ async function performAnalysisInBackground(
     }
 
     await updateProgress(supabase, analysisId, 100, "completed")
-    console.log(
-      `✅ Analysis ${analysisId} completed successfully with ${allKeywords.length} keywords`
-    )
   } catch (error: any) {
-    console.error(`❌ Analysis ${analysisId} failed:`, error)
-
     // Update analysis with error
     await supabase
       .from("dataforseo_analyses")
