@@ -334,7 +334,58 @@
     "systemTheme": "Système",
     "updateProfile": "Mettre à jour le profil",
     "updateSuccess": "Profil mis à jour avec succès",
-    "updateError": "Erreur lors de la mise à jour du profil"
+    "updateError": "Erreur lors de la mise à jour du profil",
+    "websites": {
+      "title": "Mes sites internet",
+      "addWebsite": "Ajouter un site",
+      "editWebsite": "Modifier le site",
+      "deleteWebsite": "Supprimer le site",
+      "noWebsites": "Aucun site configuré",
+      "websiteUrl": "URL du site",
+      "websiteName": "Nom du site",
+      "businessType": "Type d'entreprise",
+      "targetCountries": "Pays ciblés",
+      "siteLanguages": "Langues du site",
+      "industry": "Secteur d'activité",
+      "monthlyBudget": "Budget mensuel Google Ads",
+      "isPrimary": "Site principal",
+      "isVerified": "Site vérifié",
+      "businessTypes": {
+        "ecommerce": "E-commerce",
+        "service": "Service",
+        "vitrine": "Site vitrine"
+      },
+      "countries": {
+        "CA": "Canada",
+        "FR": "France",
+        "US": "États-Unis",
+        "BE": "Belgique",
+        "CH": "Suisse",
+        "UK": "Royaume-Uni",
+        "DE": "Allemagne",
+        "ES": "Espagne",
+        "IT": "Italie"
+      },
+      "languages": {
+        "fr": "Français",
+        "en": "Anglais",
+        "es": "Espagnol",
+        "de": "Allemand",
+        "it": "Italien",
+        "nl": "Néerlandais"
+      },
+      "quotaReached": "Quota de sites atteint pour votre plan",
+      "upgradeToAddMore": "Passez à un plan supérieur pour ajouter plus de sites",
+      "websiteAdded": "Site ajouté avec succès",
+      "websiteUpdated": "Site mis à jour avec succès",
+      "websiteDeleted": "Site supprimé avec succès",
+      "websiteError": "Erreur lors de la gestion du site",
+      "invalidUrl": "URL invalide",
+      "urlRequired": "URL requise",
+      "businessTypeRequired": "Type d'entreprise requis",
+      "countriesRequired": "Au moins un pays doit être sélectionné",
+      "languagesRequired": "Au moins une langue doit être sélectionnée"
+    }
   },
   "subscription": {
     "title": "Mon abonnement",

@@ -38,6 +38,7 @@ import {
   EyeOff,
 } from "lucide-react"
 import { createSupabaseClient } from "@/lib/supabase"
+import { WebsiteManagement } from "@/components/profile/website-management"
 
 interface UserProfile {
   id: string
@@ -725,6 +726,11 @@ export default function ProfilePage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Website Management Card */}
+        <div className="lg:col-span-2">
+          <WebsiteManagement />
+        </div>
 
         {/* Password Change Card */}
         <Card className="border-gray-200/30 bg-white/50 dark:border-gray-800/20 dark:bg-gray-900/30 lg:col-span-2">

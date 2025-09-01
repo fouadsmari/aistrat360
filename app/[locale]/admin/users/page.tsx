@@ -42,6 +42,7 @@ import {
   Crown,
   User,
   Trash2,
+  Globe,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -769,6 +770,20 @@ export default function AdminUsersPage() {
                         onClick={() => openEditDialog(user)}
                       >
                         <Settings className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 w-8 p-0 text-violet-600 hover:text-violet-700"
+                        onClick={() =>
+                          window.open(
+                            `/${locale}/admin/users/${user.id}/websites`,
+                            "_blank"
+                          )
+                        }
+                        title="Gérer les sites web"
+                      >
+                        <Globe className="h-3 w-3" />
                       </Button>
                       {user.is_active ? (
                         <Button

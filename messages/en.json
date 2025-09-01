@@ -334,7 +334,58 @@
     "systemTheme": "System",
     "updateProfile": "Update Profile",
     "updateSuccess": "Profile updated successfully",
-    "updateError": "Error updating profile"
+    "updateError": "Error updating profile",
+    "websites": {
+      "title": "My Websites",
+      "addWebsite": "Add Website",
+      "editWebsite": "Edit Website",
+      "deleteWebsite": "Delete Website",
+      "noWebsites": "No websites configured",
+      "websiteUrl": "Website URL",
+      "websiteName": "Website Name",
+      "businessType": "Business Type",
+      "targetCountries": "Target Countries",
+      "siteLanguages": "Site Languages",
+      "industry": "Industry",
+      "monthlyBudget": "Monthly Google Ads Budget",
+      "isPrimary": "Primary Website",
+      "isVerified": "Verified Website",
+      "businessTypes": {
+        "ecommerce": "E-commerce",
+        "service": "Service",
+        "vitrine": "Showcase Site"
+      },
+      "countries": {
+        "CA": "Canada",
+        "FR": "France",
+        "US": "United States",
+        "BE": "Belgium",
+        "CH": "Switzerland",
+        "UK": "United Kingdom",
+        "DE": "Germany",
+        "ES": "Spain",
+        "IT": "Italy"
+      },
+      "languages": {
+        "fr": "French",
+        "en": "English",
+        "es": "Spanish",
+        "de": "German",
+        "it": "Italian",
+        "nl": "Dutch"
+      },
+      "quotaReached": "Website quota reached for your plan",
+      "upgradeToAddMore": "Upgrade to a higher plan to add more websites",
+      "websiteAdded": "Website added successfully",
+      "websiteUpdated": "Website updated successfully",
+      "websiteDeleted": "Website deleted successfully",
+      "websiteError": "Error managing website",
+      "invalidUrl": "Invalid URL",
+      "urlRequired": "URL is required",
+      "businessTypeRequired": "Business type is required",
+      "countriesRequired": "At least one country must be selected",
+      "languagesRequired": "At least one language must be selected"
+    }
   },
   "subscription": {
     "title": "My Subscription",

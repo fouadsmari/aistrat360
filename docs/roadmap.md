@@ -37,7 +37,30 @@
 
 ## 📝 À Faire
 
-### **[Phase 2] - Outils Google Ads Intelligence**
+### **[PRIORITÉ] Phase 1 - Page Profil Section "Mon Site"** ✅ TERMINÉ
+
+- ✅ Analyser la structure de l'app et base de données Supabase
+- ✅ Analyser le système multilingue existant
+- ✅ Créer table pour enregistrer les données des sites internet
+- ✅ Créer APIs pour gestion des sites (user et admin)
+- ✅ Ajouter section "Mon Site" dans profil avec CRUD complet
+- ✅ Ajouter gestion sites dans panel admin avec bouton Globe
+- ✅ Support multilingue FR/EN complet
+- ✅ Quotas par plan : Free/Starter (1), Pro (3), Advanced (5)
+- ✅ Validation Zod et RLS Supabase
+- ✅ Fix compatibilité Next.js 15
+
+### **Phase 2 - Intégration DataForSEO Labs API pour analyse Google Ads**
+
+- Implémenter les endpoints DataForSEO Labs API pour extraire automatiquement les mots-clés commerciaux, volumes de recherche et CPC des sites clients
+- Utiliser ranked_keywords et keyword_suggestions pour obtenir les vrais mots-clés à cibler avec leurs métriques business (volume, CPC, compétition) pour calculer le ROI Google Ads
+- Configurer un système de cache de 90 jours pour économiser les coûts API et stocker les analyses de mots-clés en base de données
+- Utiliser uniquement les endpoints ranked_keywords (0.012$) et keyword_suggestions (0.0115$) pour un coût total de 0.0235$ par analyse client
+- Ces deux endpoints suffisent pour obtenir les mots-clés actuels du site et les opportunités manquées avec toutes les métriques nécessaires au calcul ROI
+- Limiter ranked_keywords à 900 mots-clés maximum pour rester sous 0.10$ car le prix est de 0.11$ par tranche de 1000 mots-clés retournés
+- Cette limite à 900 garantit d'obtenir les mots-clés principaux tout en optimisant les coûts pour les gros sites avec beaucoup de positionnements
+
+### **[Phase 3] - Outils Google Ads Intelligence**
 
 ## ✅ **ÉTAPE 2.1 & 2.2 : GOOGLE ADS PROFITABILITY PREDICTOR MVP - TERMINÉ**
 
@@ -922,6 +945,34 @@ _(Outil simple pour économiser 40% budget Google Ads - Architecture détaillée
 
 **Durée : 8-10 semaines | Priorité 3**
 _(Architecture détaillée après validation outils précédents)_
+=======
+### **[PRIORITÉ] Phase 1 - Page Profil Section "Mon Site"**
+
+- Analyser la structure de l'app et la base de donnée supabase (voir le fichier maitre.md)
+- analyse le multi langues mise en place dans l'app
+- prévoir la traduction de tout ce que tu vas implémenter et qui respecte la structure mise en place
+- créer une table pour enregistrer les données des sites internet
+- créer un onglet gestions sites internet (l'utilisateur ne pourra pas modifier et ou supprimer son site aprés l'avoir ajouter seul l'admin ou super admin pourra le faire pour lui via user management dans le panel admin https://aistrat360.vercel.app/en/admin/users) donc prévoir le champ dans edit user
+- Ajouter une section "Mon Site" dans la page profil utilisateur pour configurer les informations business une seule fois
+- URL du site principal avec validation et vérification d'accessibilité
+- Type de business (dropdown) : E-commerce, Service, Site vitrine
+- Pays cibles (checkboxes multiples) : Canada, France, USA, Belgique, Suisse, etc.
+- Langues du site (checkboxes multiples) : Français, Anglais, Espagnol, etc.
+- Secteur d'activité (auto-détecté via analyse du site + modifiable manuellement)
+- Budget Google Ads mensuel (champ optionnel) pour personnaliser les recommandations ROI
+- Gestion des quotas sites par plan : Free (1 site), Starter (1 site), Pro (3 sites), Advanced (5 sites)
+- Interface multi-sites avec sélecteur de site actif et upgrade suggestions pour les utilisateurs au quota maximum
+
+### **Phase 2 - Intégration DataForSEO Labs API pour analyse Google Ads**
+
+- Implémenter les endpoints DataForSEO Labs API pour extraire automatiquement les mots-clés commerciaux, volumes de recherche et CPC des sites clients
+- Utiliser ranked_keywords et keyword_suggestions pour obtenir les vrais mots-clés à cibler avec leurs métriques business (volume, CPC, compétition) pour calculer le ROI Google Ads
+- Configurer un système de cache de 90 jours pour économiser les coûts API et stocker les analyses de mots-clés en base de données
+- Utiliser uniquement les endpoints ranked_keywords (0.012$) et keyword_suggestions (0.0115$) pour un coût total de 0.0235$ par analyse client
+- Ces deux endpoints suffisent pour obtenir les mots-clés actuels du site et les opportunités manquées avec toutes les métriques nécessaires au calcul ROI
+- Limiter ranked_keywords à 900 mots-clés maximum pour rester sous 0.10$ car le prix est de 0.11$ par tranche de 1000 mots-clés retournés
+- Cette limite à 900 garantit d'obtenir les mots-clés principaux tout en optimisant les coûts pour les gros sites avec beaucoup de positionnements
+>>>>>>> fee0928 (✨ Phase 1 - Système de gestion des sites web complet)
 
 ## ✅ Terminé
 
