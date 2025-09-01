@@ -179,7 +179,7 @@ export async function getSubscriptionPacks(): Promise<SubscriptionPack[]> {
   try {
     const supabase = createSupabaseClient()
     const { data, error } = await supabase
-      .from("subscription_packs")
+      .from("subscription_plans")
       .select("*")
       .eq("is_enabled", true)
       .order("sort_order", { ascending: true })

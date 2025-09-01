@@ -38,7 +38,7 @@ export async function GET(
     // Fetch pack by ID
     const { id } = await params
     const { data: pack, error: packError } = await supabase
-      .from("subscription_packs")
+      .from("subscription_plans")
       .select("*")
       .eq("id", id)
       .single()
@@ -98,7 +98,7 @@ export async function POST(
     // Validate pack exists
     const { id } = await params
     const { data: existingPack, error: existError } = await supabase
-      .from("subscription_packs")
+      .from("subscription_plans")
       .select("id, name")
       .eq("id", id)
       .single()
@@ -148,7 +148,7 @@ export async function POST(
 
     // Update pack
     const { data, error } = await supabase
-      .from("subscription_packs")
+      .from("subscription_plans")
       .update(updateData)
       .eq("id", id)
       .select()
@@ -231,7 +231,7 @@ export async function DELETE(
 
     // Delete pack
     const { error } = await supabase
-      .from("subscription_packs")
+      .from("subscription_plans")
       .delete()
       .eq("id", id)
 

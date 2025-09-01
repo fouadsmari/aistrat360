@@ -32,6 +32,8 @@ import {
   PlayCircle,
   CheckCircle,
   XCircle,
+  History,
+  Calendar,
 } from "lucide-react"
 
 interface UserWebsite {
@@ -57,6 +59,10 @@ interface AnalysisResults {
   rankedKeywords: number
   opportunities: number
   cost: number
+  status?: string
+  websiteName?: string
+  created_at?: string
+  completed_at?: string
   keywords: Array<{
     keyword: string
     type: "ranked" | "suggestion"
@@ -82,6 +88,14 @@ export function KeywordAnalysis() {
     useState<AnalysisProgress | null>(null)
   const [analysisResults, setAnalysisResults] =
     useState<AnalysisResults | null>(null)
+  const [analysisHistory, setAnalysisHistory] = useState<AnalysisResults[]>([])
+  const [showHistory, setShowHistory] = useState(false)
+  const [quota, setQuota] = useState<{
+    used: number
+    limit: number
+    remaining: number
+    isUnlimited?: boolean
+  } | null>(null)
 
   // Progress steps with their messages
   const progressSteps = [
@@ -92,14 +106,38 @@ export function KeywordAnalysis() {
     { progress: 100, message: t("progress.step5") },
   ]
 
-  // Fetch user websites
+  // Fetch user websites, quota and analysis history
   const fetchWebsites = useCallback(async () => {
     try {
-      const response = await fetch("/api/profile/websites")
-      if (!response.ok) throw new Error("Failed to fetch websites")
+      const [websitesResponse, quotaResponse, historyResponse] =
+        await Promise.all([
+          fetch("/api/profile/websites"),
+          fetch("/api/tools/keywords/quota"),
+          fetch("/api/tools/keywords/history"),
+        ])
 
-      const data = await response.json()
-      setWebsites(data.websites || [])
+      if (!websitesResponse.ok) throw new Error("Failed to fetch websites")
+
+      const websitesData = await websitesResponse.json()
+      setWebsites(websitesData.websites || [])
+
+      if (quotaResponse.ok) {
+        const quotaData = await quotaResponse.json()
+        setQuota(quotaData.quota)
+      }
+
+      if (historyResponse.ok) {
+        const historyData = await historyResponse.json()
+        setAnalysisHistory(historyData.analyses || [])
+
+        // Load last completed analysis as current result
+        const lastCompleted = historyData.analyses?.find(
+          (a: any) => a.status === "completed"
+        )
+        if (lastCompleted) {
+          setAnalysisResults(lastCompleted)
+        }
+      }
     } catch (error) {
       showToast({
         message: t("errors.networkError"),
@@ -313,12 +351,56 @@ export function KeywordAnalysis() {
                   </Select>
                 </div>
 
+                {/* Quota Display */}
+                {quota && (
+                  <div className="rounded-lg border bg-gray-50 p-3 dark:bg-gray-800">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <BarChart3 className="h-4 w-4 text-violet-600" />
+                        <span className="text-sm font-medium">
+                          {t("quota.title")}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-medium">
+                          {quota.isUnlimited ? (
+                            <span className="text-green-600">∞ Illimité</span>
+                          ) : (
+                            <span>
+                              {quota.used}/{quota.limit}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {quota.remaining} restant
+                          {quota.remaining !== 1 ? "s" : ""}
+                        </div>
+                      </div>
+                    </div>
+                    {!quota.isUnlimited && (
+                      <div className="mt-2">
+                        <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+                          <div
+                            className="h-2 rounded-full bg-gradient-to-r from-violet-600 to-purple-600"
+                            style={{
+                              width: `${Math.min((quota.used / quota.limit) * 100, 100)}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Analysis Controls */}
                 <div className="flex items-center gap-3">
                   {!analysisInProgress ? (
                     <Button
                       onClick={startAnalysis}
-                      disabled={!selectedWebsite}
+                      disabled={
+                        !selectedWebsite ||
+                        (quota?.remaining !== undefined && quota.remaining <= 0)
+                      }
                       className="bg-gradient-to-r from-violet-600 to-purple-600 text-white hover:from-violet-700 hover:to-purple-700 disabled:opacity-50"
                     >
                       <PlayCircle className="mr-2 h-4 w-4" />
@@ -337,6 +419,23 @@ export function KeywordAnalysis() {
                       <span className="text-sm text-gray-600 dark:text-gray-400">
                         {t("analysisRunning")}
                       </span>
+                    </div>
+                  )}
+
+                  {quota && quota.remaining <= 0 && !quota.isUnlimited && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-red-600">
+                        {t("quota.exceeded")}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          window.open(`/${locale}/pricing`, "_blank")
+                        }
+                      >
+                        {t("quota.upgrade")}
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -383,11 +482,95 @@ export function KeywordAnalysis() {
           </Card>
         )}
 
+        {/* Analysis History */}
+        {analysisHistory.length > 0 && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <History className="h-5 w-5 text-violet-600" />
+                    {t("history.title")}
+                  </CardTitle>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {t("history.description")}
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowHistory(!showHistory)}
+                >
+                  {showHistory ? t("history.hide") : t("history.show")}
+                </Button>
+              </div>
+            </CardHeader>
+            {showHistory && (
+              <CardContent>
+                <div className="space-y-3">
+                  {analysisHistory.slice(0, 5).map((analysis) => (
+                    <div
+                      key={analysis.id}
+                      className="flex cursor-pointer items-center justify-between rounded-lg border p-3 hover:bg-gray-50 dark:hover:bg-gray-800"
+                      onClick={() => setAnalysisResults(analysis)}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div>
+                          <Badge
+                            variant={
+                              analysis.status === "completed"
+                                ? "default"
+                                : analysis.status === "failed"
+                                  ? "destructive"
+                                  : "secondary"
+                            }
+                            className="text-xs"
+                          >
+                            {analysis.status === "completed" && "✓"}
+                            {analysis.status === "failed" && "✗"}
+                            {analysis.status === "processing" && "⏳"}
+                            {analysis.status}
+                          </Badge>
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium">
+                            {analysis.websiteName}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {analysis.totalKeywords} mots-clés •{" "}
+                            {analysis.created_at
+                              ? new Date(
+                                  analysis.created_at
+                                ).toLocaleDateString()
+                              : ""}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-medium">
+                          €{analysis.cost.toFixed(3)}
+                        </div>
+                        <div className="flex items-center gap-1 text-xs text-gray-500">
+                          <Calendar className="h-3 w-3" />
+                          {analysis.created_at
+                            ? new Date(analysis.created_at).toLocaleTimeString()
+                            : ""}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            )}
+          </Card>
+        )}
+
         {/* Analysis Results */}
         {analysisResults && (
           <KeywordResults
             results={analysisResults}
             websiteName={
+              analysisResults.websiteName ||
               websites.find((w) => w.id === selectedWebsite)?.name ||
               websites.find((w) => w.id === selectedWebsite)?.url ||
               ""

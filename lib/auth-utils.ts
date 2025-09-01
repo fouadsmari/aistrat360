@@ -1,4 +1,36 @@
 import { createSupabaseClient } from "./supabase"
+import { createSupabaseServerClient } from "./supabase-server"
+
+/**
+ * Get authenticated user for API routes
+ */
+export async function getAuthenticatedUser() {
+  try {
+    const supabase = await createSupabaseServerClient()
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return {
+        error: "Unauthorized",
+        status: 401,
+      }
+    }
+
+    return {
+      user,
+      supabase,
+    }
+  } catch (error) {
+    return {
+      error: "Internal server error",
+      status: 500,
+    }
+  }
+}
 
 /**
  * Refresh user session and profile data

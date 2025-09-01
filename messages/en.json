@@ -620,6 +620,17 @@
       "addWebsiteFirst": "Add a website first in your profile",
       "startAnalysis": "Analyze Keywords",
       "analysisRunning": "Analysis running",
+      "quota": {
+        "title": "Analysis quota",
+        "exceeded": "Quota exhausted",
+        "upgrade": "Upgrade"
+      },
+      "history": {
+        "title": "Analysis history",
+        "description": "Your recent analyses with results",
+        "show": "Show",
+        "hide": "Hide"
+      },
       "progress": {
         "step1": "Fetching website content...",
         "step2": "Analyzing ranked keywords...",

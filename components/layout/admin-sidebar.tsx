@@ -67,7 +67,7 @@ export function AdminSidebar({
     {
       title: "Packs",
       icon: Package,
-      href: "/admin/packs",
+      href: "/admin/plans",
     },
     {
       title: t("revenueAnalytics"),

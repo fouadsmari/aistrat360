@@ -35,7 +35,7 @@ export async function GET() {
 
     // Fetch all packs from database
     const { data: packs, error: packsError } = await supabase
-      .from("subscription_packs")
+      .from("subscription_plans")
       .select("*")
       .order("sort_order", { ascending: true })
 
@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { data, error } = await supabase
-      .from("subscription_packs")
+      .from("subscription_plans")
       .upsert(packData)
       .select()
       .single()

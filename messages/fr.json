@@ -620,6 +620,17 @@
       "addWebsiteFirst": "Ajoutez d'abord un site web dans votre profil",
       "startAnalysis": "Analyser les mots-clés",
       "analysisRunning": "Analyse en cours",
+      "quota": {
+        "title": "Quota d'analyses",
+        "exceeded": "Quota épuisé",
+        "upgrade": "Upgrader"
+      },
+      "history": {
+        "title": "Historique des analyses",
+        "description": "Vos analyses récentes avec résultats",
+        "show": "Afficher",
+        "hide": "Masquer"
+      },
       "progress": {
         "step1": "Récupération du contenu du site...",
         "step2": "Analyse des mots-clés positionnés...",

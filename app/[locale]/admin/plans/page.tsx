@@ -115,7 +115,7 @@ export default function PacksManagementPage() {
   const fetchPacks = useCallback(async () => {
     try {
       setLoading(true)
-      const response = await fetch("/api/admin/packs")
+      const response = await fetch("/api/admin/plans")
       const result = await response.json()
 
       if (response.ok) {
@@ -137,8 +137,8 @@ export default function PacksManagementPage() {
   const onSubmit = async (data: PackFormData) => {
     try {
       const url = editingPack
-        ? `/api/admin/packs/${editingPack.id}`
-        : "/api/admin/packs"
+        ? `/api/admin/plans/${editingPack.id}`
+        : "/api/admin/plans"
       const method = "POST"
 
       const response = await fetch(url, {
@@ -199,7 +199,7 @@ export default function PacksManagementPage() {
     }
 
     try {
-      const response = await fetch(`/api/admin/packs/${pack.id}`, {
+      const response = await fetch(`/api/admin/plans/${pack.id}`, {
         method: "DELETE",
       })
 
