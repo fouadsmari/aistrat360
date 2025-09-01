@@ -200,14 +200,33 @@ export function WebsiteManagement() {
     setSubmitting(true)
 
     try {
-      const submitData = {
-        ...formData,
-        monthly_ads_budget: formData.monthly_ads_budget
-          ? parseFloat(formData.monthly_ads_budget)
-          : null,
-        name: formData.name || null,
-        industry: formData.industry || null,
+      // Parse and validate budget
+      let budget = null
+      if (formData.monthly_ads_budget && formData.monthly_ads_budget.trim() !== "") {
+        const parsedBudget = parseFloat(formData.monthly_ads_budget)
+        if (isNaN(parsedBudget) || parsedBudget < 0) {
+          showToast({
+            message: "Budget must be a valid positive number",
+            type: "error",
+            duration: 4000,
+          })
+          return
+        }
+        budget = parsedBudget
       }
+
+      const submitData = {
+        url: formData.url.trim(),
+        name: formData.name.trim() || null,
+        business_type: formData.business_type,
+        target_countries: formData.target_countries,
+        site_languages: formData.site_languages,
+        industry: formData.industry.trim() || null,
+        monthly_ads_budget: budget,
+        is_primary: formData.is_primary,
+      }
+
+      console.log("Submitting website data:", submitData)
 
       const response = await fetch(
         editingWebsite
@@ -224,6 +243,14 @@ export function WebsiteManagement() {
 
       if (!response.ok) {
         const errorData = await response.json()
+        console.error("API Error Details:", errorData)
+        
+        // Handle validation errors specifically
+        if (response.status === 400 && errorData.details) {
+          const validationErrors = errorData.details.map((detail: any) => detail.message).join(", ")
+          throw new Error(`Validation failed: ${validationErrors}`)
+        }
+        
         throw new Error(errorData.error || "Failed to save website")
       }
 

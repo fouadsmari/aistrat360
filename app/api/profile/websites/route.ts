@@ -6,7 +6,7 @@ import { z } from "zod"
 // Validation schema for website data
 const websiteSchema = z.object({
   url: z.string().url("Invalid URL format"),
-  name: z.string().optional(),
+  name: z.string().nullable().optional(),
   business_type: z.enum(["ecommerce", "service", "vitrine"]),
   target_countries: z
     .array(z.string())
@@ -14,8 +14,8 @@ const websiteSchema = z.object({
   site_languages: z
     .array(z.string())
     .min(1, "At least one language must be selected"),
-  industry: z.string().optional(),
-  monthly_ads_budget: z.number().min(0, "Budget must be positive").optional(),
+  industry: z.string().nullable().optional(),
+  monthly_ads_budget: z.number().min(0, "Budget must be positive").nullable().optional(),
   is_primary: z.boolean().optional().default(false),
 })
 
