@@ -109,12 +109,17 @@ export function KeywordAnalysis() {
   // Fetch user websites, quota and analysis history
   const fetchWebsites = useCallback(async () => {
     try {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10s timeout
+
       const [websitesResponse, quotaResponse, historyResponse] =
         await Promise.all([
-          fetch("/api/profile/websites"),
-          fetch("/api/tools/keywords/quota"),
-          fetch("/api/tools/keywords/history"),
+          fetch("/api/profile/websites", { signal: controller.signal }),
+          fetch("/api/tools/keywords/quota", { signal: controller.signal }),
+          fetch("/api/tools/keywords/history", { signal: controller.signal }),
         ])
+
+      clearTimeout(timeoutId)
 
       if (!websitesResponse.ok) throw new Error("Failed to fetch websites")
 
@@ -138,16 +143,16 @@ export function KeywordAnalysis() {
           setAnalysisResults(lastCompleted)
         }
       }
-    } catch (error) {
-      showToast({
-        message: t("errors.networkError"),
-        type: "error",
-        duration: 4000,
-      })
+    } catch (error: any) {
+      console.error("Network error:", error)
+      // Only show error for non-timeout/abort errors
+      if (error.name !== "AbortError") {
+        console.error("Fetch failed:", error.message)
+      }
     } finally {
       setLoading(false)
     }
-  }, [showToast, t])
+  }, [])
 
   // Start keyword analysis
   const startAnalysis = async () => {
