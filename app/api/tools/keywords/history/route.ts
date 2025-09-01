@@ -1,5 +1,33 @@
+import { createServerClient } from "@supabase/ssr"
 import { NextRequest, NextResponse } from "next/server"
-import { getAuthenticatedUser } from "@/lib/auth-utils"
+import { cookies } from "next/headers"
+
+// Helper function to check authentication and get user
+async function getAuthenticatedUser() {
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+      },
+    }
+  )
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return { error: "Authentication required", status: 401 }
+  }
+
+  return { user, supabase }
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -44,20 +72,42 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Transform data to match frontend interface
-    const transformedAnalyses =
-      analyses?.map((analysis) => {
-        const results = analysis.analysis_results || {}
+    // Get keywords for each analysis
+    const transformedAnalyses = await Promise.all(
+      analyses?.map(async (analysis) => {
+        // Get keywords for this analysis
+        const { data: keywords } = await supabase
+          .from("dataforseo_keywords")
+          .select("*")
+          .eq("analysis_id", analysis.id)
+
+        const formattedKeywords =
+          keywords?.map((kw: any) => ({
+            keyword: kw.keyword,
+            type: kw.keyword_type === "ranked" ? "ranked" : "suggestion",
+            searchVolume: kw.search_volume || 0,
+            difficulty: kw.keyword_difficulty || 0,
+            cpc: kw.cpc || 0,
+            position: kw.current_position,
+            url: kw.url,
+          })) || []
+
+        const rankedCount = formattedKeywords.filter(
+          (k: any) => k.type === "ranked"
+        ).length
+        const suggestionCount = formattedKeywords.filter(
+          (k: any) => k.type === "suggestion"
+        ).length
 
         return {
           id: analysis.id,
           status: analysis.status,
           progress: analysis.progress,
-          totalKeywords: analysis.total_keywords || 0,
-          rankedKeywords: results.ranked_keywords_count || 0,
-          opportunities: results.suggestions_count || 0,
+          totalKeywords: formattedKeywords.length,
+          rankedKeywords: rankedCount,
+          opportunities: suggestionCount,
           cost: parseFloat(analysis.dataforseo_cost || "0"),
-          keywords: results.keywords || [],
+          keywords: formattedKeywords,
           created_at: analysis.created_at,
           completed_at: analysis.completed_at,
           websiteName:
@@ -66,6 +116,7 @@ export async function GET(request: NextRequest) {
             "Unknown",
         }
       }) || []
+    )
 
     return NextResponse.json({
       analyses: transformedAnalyses,

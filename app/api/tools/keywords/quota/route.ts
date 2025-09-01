@@ -1,5 +1,33 @@
+import { createServerClient } from "@supabase/ssr"
 import { NextRequest, NextResponse } from "next/server"
-import { getAuthenticatedUser } from "@/lib/auth-utils"
+import { cookies } from "next/headers"
+
+// Helper function to check authentication and get user
+async function getAuthenticatedUser() {
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+      },
+    }
+  )
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return { error: "Authentication required", status: 401 }
+  }
+
+  return { user, supabase }
+}
 
 export async function GET(request: NextRequest) {
   try {
