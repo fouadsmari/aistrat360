@@ -36,6 +36,7 @@ import {
   Hash,
   Award,
 } from "lucide-react"
+import { EnhancedKeywordResults } from "./enhanced-keyword-results"
 
 interface KeywordData {
   keyword: string
@@ -45,6 +46,26 @@ interface KeywordData {
   cpc: number
   position?: number
   url?: string
+  // New rich data fields
+  competition?: number
+  competitionLevel?: string
+  previousPosition?: number
+  isUp?: boolean
+  isDown?: boolean
+  isNew?: boolean
+  title?: string
+  description?: string
+  domain?: string
+  intent?: string
+  foreignIntent?: string[]
+  monthlySearches?: Array<{ year: number, month: number, search_volume: number }>
+  trends?: { yearly: number, monthly: number, quarterly: number }
+  etv?: number
+  estimatedPaidCost?: number
+  backlinks?: any
+  serpFeatures?: string[]
+  categories?: number[]
+  lastUpdated?: string
 }
 
 interface AnalysisResults {
@@ -54,6 +75,14 @@ interface AnalysisResults {
   opportunities: number
   cost: number
   keywords: KeywordData[]
+  // New summary data
+  summary?: {
+    avgSearchVolume: number
+    avgCpc: number
+    avgPosition: number
+    totalEtv: number
+    intentDistribution: { [key: string]: number }
+  }
 }
 
 interface Props {
@@ -214,6 +243,8 @@ export function KeywordResults({ results, websiteName }: Props) {
 
   return (
     <div className="space-y-6">
+      {/* Enhanced Interactive Results */}
+      <EnhancedKeywordResults analysisId={results.id} websiteName={websiteName} />
       {/* Header & Summary Stats */}
       <Card>
         <CardHeader>
@@ -399,6 +430,7 @@ export function KeywordResults({ results, websiteName }: Props) {
                     {t("table.difficulty")}
                   </TableHead>
                   <TableHead className="text-right">{t("table.cpc")}</TableHead>
+                  <TableHead className="text-right">ETV (€)</TableHead>
                   <TableHead className="text-right">
                     {t("table.position")}
                   </TableHead>
@@ -409,7 +441,41 @@ export function KeywordResults({ results, websiteName }: Props) {
                 {filteredKeywords.map((keyword, index) => (
                   <TableRow key={index}>
                     <TableCell className="font-medium">
-                      {keyword.keyword}
+                      <div className="flex items-center gap-2">
+                        <span>{keyword.keyword}</span>
+                        {keyword.isNew && <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800">NEW</Badge>}
+                        {keyword.isUp && <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">↑</Badge>}
+                        {keyword.isDown && <Badge variant="secondary" className="text-xs bg-red-100 text-red-800">↓</Badge>}
+                        {keyword.intent && keyword.intent !== 'unknown' && (
+                          <Badge variant="outline" className="text-xs">
+                            {keyword.intent === 'transactional' ? '💰' : 
+                             keyword.intent === 'informational' ? '📖' : 
+                             keyword.intent === 'navigational' ? '🧭' : '❓'}
+                          </Badge>
+                        )}
+                      </div>
+                      {keyword.competitionLevel && keyword.competitionLevel !== 'UNKNOWN' && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          Competition: <span className={`font-medium ${
+                            keyword.competitionLevel === 'LOW' ? 'text-green-600' :
+                            keyword.competitionLevel === 'MEDIUM' ? 'text-yellow-600' : 'text-red-600'
+                          }`}>{keyword.competitionLevel}</span>
+                        </div>
+                      )}
+                      {keyword.serpFeatures && keyword.serpFeatures.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {keyword.serpFeatures.slice(0, 3).map((feature, idx) => (
+                            <Badge key={idx} variant="outline" className="text-xs px-1 py-0">
+                              {feature.replace(/_/g, ' ').toLowerCase()}
+                            </Badge>
+                          ))}
+                          {keyword.serpFeatures.length > 3 && (
+                            <Badge variant="outline" className="text-xs px-1 py-0">
+                              +{keyword.serpFeatures.length - 3}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell>
                       <Badge
@@ -428,7 +494,23 @@ export function KeywordResults({ results, websiteName }: Props) {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      {formatNumber(keyword.searchVolume)}
+                      <div className="flex items-center justify-end gap-1">
+                        <span>{formatNumber(keyword.searchVolume)}</span>
+                        {keyword.trends && keyword.trends.monthly && (
+                          <span className={`text-xs ${
+                            keyword.trends.monthly > 0 ? 'text-green-500' : 
+                            keyword.trends.monthly < 0 ? 'text-red-500' : 'text-gray-400'
+                          }`}>
+                            {keyword.trends.monthly > 0 ? '↗' : 
+                             keyword.trends.monthly < 0 ? '↘' : '→'}
+                          </span>
+                        )}
+                      </div>
+                      {keyword.monthlySearches && keyword.monthlySearches.length > 0 && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          Avg: {Math.round(keyword.monthlySearches.reduce((sum: number, m: any) => sum + m.search_volume, 0) / keyword.monthlySearches.length)}
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell className="text-right">
                       <Badge
@@ -440,6 +522,15 @@ export function KeywordResults({ results, websiteName }: Props) {
                     </TableCell>
                     <TableCell className="text-right">
                       €{keyword.cpc.toFixed(2)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {keyword.etv ? (
+                        <span className="font-medium text-green-600">
+                          €{keyword.etv.toFixed(2)}
+                        </span>
+                      ) : (
+                        "-"
+                      )}
                     </TableCell>
                     <TableCell className="text-right">
                       {keyword.position ? (

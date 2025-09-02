@@ -72,25 +72,79 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Get keywords for each analysis
+    // Get keywords with FULL JSON data for each analysis
     const transformedAnalyses = await Promise.all(
       analyses?.map(async (analysis) => {
-        // Get keywords for this analysis
-        const { data: keywords } = await supabase
-          .from("dataforseo_keywords")
-          .select("*")
-          .eq("analysis_id", analysis.id)
+        // Get FULL JSON responses instead of simplified table
+        const { data: fullAnalysis } = await supabase
+          .from("dataforseo_analyses")
+          .select("ranked_keywords_response, keyword_suggestions_response")
+          .eq("id", analysis.id)
+          .single()
 
-        const formattedKeywords =
-          keywords?.map((kw: any) => ({
-            keyword: kw.keyword,
-            type: kw.keyword_type === "ranked" ? "ranked" : "suggestion",
-            searchVolume: kw.search_volume || 0,
-            difficulty: kw.keyword_difficulty || 0,
-            cpc: kw.cpc || 0,
-            position: kw.current_position,
-            url: kw.url,
-          })) || []
+        let formattedKeywords: any[] = []
+
+        // Process ranked keywords with FULL data
+        if (fullAnalysis?.ranked_keywords_response?.[0]?.items) {
+          const rankedItems = fullAnalysis.ranked_keywords_response[0].items
+          
+          formattedKeywords = rankedItems.map((item: any) => {
+            const keywordData = item.keyword_data
+            const serpItem = item.ranked_serp_element?.serp_item
+            
+            return {
+              keyword: keywordData.keyword,
+              type: "ranked",
+              searchVolume: keywordData.keyword_info?.search_volume || 0,
+              difficulty: keywordData.keyword_properties?.keyword_difficulty || item.ranked_serp_element?.keyword_difficulty || 0,
+              cpc: keywordData.keyword_info?.cpc || 0,
+              competition: keywordData.keyword_info?.competition || 0,
+              competitionLevel: keywordData.keyword_info?.competition_level || "UNKNOWN",
+              position: serpItem?.rank_absolute || null,
+              previousPosition: serpItem?.rank_changes?.previous_rank_absolute || null,
+              isUp: serpItem?.rank_changes?.is_up || false,
+              isDown: serpItem?.rank_changes?.is_down || false,
+              isNew: serpItem?.rank_changes?.is_new || false,
+              url: serpItem?.url || null,
+              title: serpItem?.title || null,
+              description: serpItem?.description || null,
+              domain: serpItem?.domain || null,
+              intent: keywordData.search_intent_info?.main_intent || "unknown",
+              foreignIntent: keywordData.search_intent_info?.foreign_intent || [],
+              monthlySearches: keywordData.keyword_info?.monthly_searches || [],
+              trends: keywordData.keyword_info?.search_volume_trend || {},
+              etv: serpItem?.etv || 0,
+              estimatedPaidCost: serpItem?.estimated_paid_traffic_cost || 0,
+              backlinks: serpItem?.backlinks_info || null,
+              serpFeatures: keywordData.serp_info?.serp_item_types || [],
+              categories: keywordData.keyword_info?.categories || [],
+              lastUpdated: keywordData.keyword_info?.last_updated_time || keywordData.serp_info?.last_updated_time
+            }
+          })
+        }
+
+        // Add keyword suggestions with full data
+        if (fullAnalysis?.keyword_suggestions_response?.[0]?.items) {
+          const suggestionItems = fullAnalysis.keyword_suggestions_response[0].items
+          
+          const suggestionKeywords = suggestionItems.map((item: any) => ({
+            keyword: item.keyword_data?.keyword || item.keyword,
+            type: "suggestion",
+            searchVolume: item.keyword_data?.search_volume || 0,
+            difficulty: item.keyword_data?.keyword_difficulty || 0,
+            cpc: item.keyword_data?.cpc || 0,
+            competition: item.keyword_data?.competition || 0,
+            competitionLevel: item.keyword_data?.competition_level || "UNKNOWN",
+            position: null,
+            intent: item.search_intent_info?.main_intent || "unknown",
+            monthlySearches: item.keyword_data?.monthly_searches || [],
+            trends: item.keyword_data?.search_volume_trend || {},
+            serpFeatures: [],
+            categories: item.keyword_data?.categories || []
+          }))
+          
+          formattedKeywords = [...formattedKeywords, ...suggestionKeywords]
+        }
 
         const rankedCount = formattedKeywords.filter(
           (k: any) => k.type === "ranked"

@@ -115,7 +115,9 @@ export default function ProfilePage() {
       } = await supabase.auth.getUser()
 
       if (authError || !user) {
-        router.push(`/${locale}/login`)
+        // Hardcode the locale for now to avoid dependency loop
+        const currentLocale = window.location.pathname.includes('/fr') ? 'fr' : 'en'
+        router.push(`/${currentLocale}/login`)
         return
       }
 
@@ -186,6 +188,7 @@ export default function ProfilePage() {
       }
     } catch (error) {
       // Show basic profile even if error
+      const currentLocale = window.location.pathname.includes('/fr') ? 'fr' : 'en'
       setProfile({
         id: "temp",
         email: "user@example.com",
@@ -194,7 +197,7 @@ export default function ProfilePage() {
         full_name: null,
         avatar_url: null,
         role: "subscriber",
-        preferred_language: locale,
+        preferred_language: currentLocale,
         phone: null,
         company: null,
         address: null,
@@ -205,7 +208,7 @@ export default function ProfilePage() {
     } finally {
       setLoading(false)
     }
-  }, [locale, router])
+  }, [])
 
   useEffect(() => {
     fetchProfile()

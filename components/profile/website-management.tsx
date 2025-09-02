@@ -124,7 +124,14 @@ export function WebsiteManagement() {
   // Fetch websites and quota
   const fetchWebsites = useCallback(async () => {
     try {
-      const response = await fetch("/api/profile/websites")
+      const abortController = new AbortController()
+      const timeoutId = setTimeout(() => abortController.abort(), 10000)
+
+      const response = await fetch("/api/profile/websites", {
+        signal: abortController.signal
+      })
+
+      clearTimeout(timeoutId)
 
       if (!response.ok) {
         throw new Error("Failed to fetch websites")
@@ -134,16 +141,20 @@ export function WebsiteManagement() {
       setWebsites(data.websites || [])
       setQuota(data.quota || null)
     } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.log('Request aborted')
+        return
+      }
       console.error("Error fetching websites:", error)
       showToast({
-        message: t("websiteError"),
+        message: "Erreur lors de la récupération des sites",
         type: "error",
         duration: 4000,
       })
     } finally {
       setLoading(false)
     }
-  }, [t, showToast])
+  }, [])
 
   useEffect(() => {
     fetchWebsites()
