@@ -616,6 +616,7 @@
     "keywords": {
       "title": "Analyse de Mots-clés",
       "description": "Analysez les performances SEO de vos sites web",
+      "sitePerformance": "Analyse de performance de {siteName}",
       "selectWebsite": "Sélectionner un site web",
       "noWebsites": "Aucun site web configuré",
       "addWebsiteFirst": "Ajoutez d'abord un site web dans votre profil",

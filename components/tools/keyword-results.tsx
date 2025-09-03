@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react"
 import { useTranslations } from "next-intl"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { formatCPC, getCurrencySymbol } from "@/lib/currency-utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -94,6 +95,7 @@ interface AnalysisResults {
 interface Props {
   results: AnalysisResults
   websiteName: string
+  targetCountry?: string
 }
 
 interface Filters {
@@ -105,7 +107,11 @@ interface Filters {
   search: string
 }
 
-export function KeywordResults({ results, websiteName }: Props) {
+export function KeywordResults({
+  results,
+  websiteName,
+  targetCountry = "FR",
+}: Props) {
   const t = useTranslations("tools.keywords.results")
   const tFilters = useTranslations("tools.keywords.filters")
   const tCommon = useTranslations("common")
@@ -219,7 +225,7 @@ export function KeywordResults({ results, websiteName }: Props) {
           keyword.type,
           keyword.searchVolume,
           keyword.difficulty,
-          keyword.cpc.toFixed(2),
+          formatCPC(keyword.cpc, targetCountry),
           keyword.position || "",
           `"${keyword.url || ""}"`,
         ].join(",")
@@ -442,7 +448,9 @@ export function KeywordResults({ results, websiteName }: Props) {
                     {t("table.difficulty")}
                   </TableHead>
                   <TableHead className="text-right">{t("table.cpc")}</TableHead>
-                  <TableHead className="text-right">ETV (€)</TableHead>
+                  <TableHead className="text-right">
+                    ETV ({getCurrencySymbol(targetCountry)})
+                  </TableHead>
                   <TableHead className="text-right">
                     {t("table.position")}
                   </TableHead>
@@ -603,12 +611,12 @@ export function KeywordResults({ results, websiteName }: Props) {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      €{keyword.cpc.toFixed(2)}
+                      {formatCPC(keyword.cpc, targetCountry)}
                     </TableCell>
                     <TableCell className="text-right">
                       {keyword.etv ? (
                         <span className="font-medium text-green-600">
-                          €{keyword.etv.toFixed(2)}
+                          {formatCPC(keyword.etv, targetCountry)}
                         </span>
                       ) : (
                         "-"

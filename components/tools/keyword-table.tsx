@@ -29,6 +29,7 @@ import {
   ArrowDown,
   Filter,
 } from "lucide-react"
+import { formatCPC } from "@/lib/currency-utils"
 
 interface KeywordData {
   keyword: string
@@ -315,8 +316,7 @@ export function KeywordTable({
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="font-semibold">
-                      {currencySymbol}
-                      {(kw.cpc || 0).toFixed(2)}
+                      {formatCPC(kw.cpc || 0, targetCountry)}
                     </div>
                   </TableCell>
                   <TableCell className="text-right">

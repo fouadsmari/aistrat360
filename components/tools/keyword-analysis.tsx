@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl"
 import { useParams } from "next/navigation"
 import { useToast } from "@/components/ui/toast"
 import { Button } from "@/components/ui/button"
+import { formatAnalysisCost } from "@/lib/currency-utils"
 import {
   Card,
   CardContent,
@@ -149,16 +150,16 @@ export function KeywordAnalysis() {
       } catch (fetchError: any) {
         clearTimeout(timeoutId)
         if (fetchError.name === "AbortError") {
-          console.log("Request was aborted due to timeout")
+          // Request was aborted due to timeout
           return
         }
         throw fetchError
       }
     } catch (error: any) {
-      console.error("Network error:", error)
+      // Handle network errors silently
       // Only show error for non-timeout/abort errors
       if (error.name !== "AbortError") {
-        console.error("Fetch failed:", error.message)
+        // Fetch failed
       }
     } finally {
       setLoading(false)
@@ -364,7 +365,15 @@ export function KeywordAnalysis() {
                   {t("title")}
                 </CardTitle>
                 <CardDescription className="text-gray-600 dark:text-gray-300">
-                  {t("description")}
+                  {selectedSiteId &&
+                  websites.find((w) => w.id === selectedSiteId)
+                    ? t("sitePerformance", {
+                        siteName:
+                          websites.find((w) => w.id === selectedSiteId)?.name ||
+                          websites.find((w) => w.id === selectedSiteId)?.url ||
+                          "Site",
+                      })
+                    : t("description")}
                 </CardDescription>
               </div>
             </div>
@@ -401,122 +410,97 @@ export function KeywordAnalysis() {
               </div>
             ) : (
               <div className="space-y-4">
-                {/* Selected Website Display */}
-                <div className="rounded-lg border bg-gradient-to-r from-violet-50 to-purple-50 p-4 dark:from-violet-900/20 dark:to-purple-900/20">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Globe className="h-5 w-5 text-violet-600" />
-                      <div>
-                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                          Site sélectionné
-                        </p>
-                        <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                          {websites.find((w) => w.id === selectedSiteId)
-                            ?.name ||
-                            websites.find((w) => w.id === selectedSiteId)
-                              ?.url ||
-                            "..."}
-                        </p>
+                {/* Quota and Analysis Controls */}
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Quota Display */}
+                  {quota && (
+                    <div className="rounded-lg border bg-gray-50 p-3 dark:bg-gray-800">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <BarChart3 className="h-4 w-4 text-violet-600" />
+                          <span className="text-sm font-medium">
+                            {t("quota.title")}
+                          </span>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm font-medium">
+                            {quota.isUnlimited ? (
+                              <span className="text-green-600">∞ Illimité</span>
+                            ) : (
+                              <span>
+                                {quota.used}/{quota.limit}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {quota.remaining} restant
+                            {quota.remaining !== 1 ? "s" : ""}
+                          </div>
+                        </div>
                       </div>
+                      {!quota.isUnlimited && (
+                        <div className="mt-2">
+                          <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+                            <div
+                              className="h-2 rounded-full bg-gradient-to-r from-violet-600 to-purple-600"
+                              style={{
+                                width: `${Math.min((quota.used / quota.limit) * 100, 100)}%`,
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    {websites.find((w) => w.id === selectedSiteId) && (
-                      <Badge variant="outline" className="text-xs">
-                        {
-                          websites.find((w) => w.id === selectedSiteId)
-                            ?.business_type
-                        }
-                      </Badge>
-                    )}
-                  </div>
-                </div>
+                  )}
 
-                {/* Quota Display */}
-                {quota && (
-                  <div className="rounded-lg border bg-gray-50 p-3 dark:bg-gray-800">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <BarChart3 className="h-4 w-4 text-violet-600" />
-                        <span className="text-sm font-medium">
-                          {t("quota.title")}
+                  {/* Analysis Button */}
+                  <div className="flex items-center justify-center">
+                    {!analysisInProgress ? (
+                      <Button
+                        onClick={startAnalysis}
+                        disabled={
+                          !selectedSiteId ||
+                          (quota?.remaining !== undefined &&
+                            quota.remaining <= 0)
+                        }
+                        className="w-full bg-gradient-to-r from-violet-600 to-purple-600 text-white hover:from-violet-700 hover:to-purple-700 disabled:opacity-50"
+                      >
+                        <PlayCircle className="mr-2 h-4 w-4" />
+                        {t("startAnalysis")}
+                      </Button>
+                    ) : (
+                      <div className="flex items-center gap-3">
+                        <Button
+                          onClick={cancelAnalysis}
+                          variant="outline"
+                          size="sm"
+                        >
+                          <XCircle className="mr-2 h-4 w-4" />
+                          {tCommon("cancel")}
+                        </Button>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                          {t("analysisRunning")}
                         </span>
                       </div>
-                      <div className="text-right">
-                        <div className="text-sm font-medium">
-                          {quota.isUnlimited ? (
-                            <span className="text-green-600">∞ Illimité</span>
-                          ) : (
-                            <span>
-                              {quota.used}/{quota.limit}
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {quota.remaining} restant
-                          {quota.remaining !== 1 ? "s" : ""}
-                        </div>
-                      </div>
-                    </div>
-                    {!quota.isUnlimited && (
-                      <div className="mt-2">
-                        <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
-                          <div
-                            className="h-2 rounded-full bg-gradient-to-r from-violet-600 to-purple-600"
-                            style={{
-                              width: `${Math.min((quota.used / quota.limit) * 100, 100)}%`,
-                            }}
-                          />
-                        </div>
+                    )}
+
+                    {quota && quota.remaining <= 0 && !quota.isUnlimited && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-red-600">
+                          {t("quota.exceeded")}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            window.open(`/${locale}/pricing`, "_blank")
+                          }
+                        >
+                          {t("quota.upgrade")}
+                        </Button>
                       </div>
                     )}
                   </div>
-                )}
-
-                {/* Analysis Controls */}
-                <div className="flex items-center gap-3">
-                  {!analysisInProgress ? (
-                    <Button
-                      onClick={startAnalysis}
-                      disabled={
-                        !selectedSiteId ||
-                        (quota?.remaining !== undefined && quota.remaining <= 0)
-                      }
-                      className="bg-gradient-to-r from-violet-600 to-purple-600 text-white hover:from-violet-700 hover:to-purple-700 disabled:opacity-50"
-                    >
-                      <PlayCircle className="mr-2 h-4 w-4" />
-                      {t("startAnalysis")}
-                    </Button>
-                  ) : (
-                    <div className="flex items-center gap-3">
-                      <Button
-                        onClick={cancelAnalysis}
-                        variant="outline"
-                        size="sm"
-                      >
-                        <XCircle className="mr-2 h-4 w-4" />
-                        {tCommon("cancel")}
-                      </Button>
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {t("analysisRunning")}
-                      </span>
-                    </div>
-                  )}
-
-                  {quota && quota.remaining <= 0 && !quota.isUnlimited && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-red-600">
-                        {t("quota.exceeded")}
-                      </span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          window.open(`/${locale}/pricing`, "_blank")
-                        }
-                      >
-                        {t("quota.upgrade")}
-                      </Button>
-                    </div>
-                  )}
                 </div>
               </div>
             )}
@@ -626,9 +610,25 @@ export function KeywordAnalysis() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm font-medium">
-                          €{analysis.cost.toFixed(3)}
-                        </div>
+                        {(() => {
+                          const website = websites.find(
+                            (w) =>
+                              w.name === analysis.websiteName ||
+                              w.url === analysis.websiteName
+                          )
+                          const targetCountry =
+                            website?.target_countries?.[0] || "FR"
+                          const costDisplay = formatAnalysisCost(
+                            analysis.cost,
+                            targetCountry
+                          )
+
+                          return costDisplay ? (
+                            <div className="text-sm font-medium">
+                              {costDisplay}
+                            </div>
+                          ) : null
+                        })()}
                         <div className="flex items-center gap-1 text-xs text-gray-500">
                           <Calendar className="h-3 w-3" />
                           {analysis.created_at
@@ -653,6 +653,10 @@ export function KeywordAnalysis() {
               websites.find((w) => w.id === selectedSiteId)?.name ||
               websites.find((w) => w.id === selectedSiteId)?.url ||
               ""
+            }
+            targetCountry={
+              websites.find((w) => w.id === selectedSiteId)
+                ?.target_countries[0] || "FR"
             }
           />
         )}

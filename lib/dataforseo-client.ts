@@ -631,12 +631,13 @@ export class DataForSEOClient {
   }
 
   /**
-   * Get keyword suggestions based on seed keywords (Phase 2 - DataForSEO Labs API)
+   * Get keyword ideas based on seed keywords (Phase 2 - DataForSEO Labs API)
+   * Uses keyword_ideas endpoint which is more cost-effective and supports multiple keywords
    */
   async getKeywordSuggestions(
     keywords: string[],
     location: string = "FR",
-    limit: number = 100
+    limit: number = 199
   ): Promise<any[]> {
     const locationMap: Record<string, number> = {
       FR: 2250,
@@ -650,21 +651,21 @@ export class DataForSEOClient {
       IT: 2380,
     }
 
-    // Take up to 5 seed keywords to avoid too many suggestions
-    const seedKeywords = keywords.slice(0, 5)
+    // Take up to 10 seed keywords (keyword_ideas supports up to 200)
+    const seedKeywords = keywords.slice(0, 10)
 
     const inputData = {
       keywords: seedKeywords.sort(),
       location_code: locationMap[location] || locationMap["FR"],
       language_code: location === "CA" ? "en" : location === "US" ? "en" : "fr",
-      limit,
+      limit: Math.min(limit, 199), // Maximum 199 keywords
     }
 
     // Check cache first
     const cached = await this.cache.getCachedResponse(
       inputData,
       "dataforseo",
-      "keyword_suggestions"
+      "keyword_ideas"
     )
     if (cached) {
       return cached
@@ -672,7 +673,7 @@ export class DataForSEOClient {
 
     try {
       const response = await fetch(
-        `${this.config.baseUrl}/v3/dataforseo_labs/google/keyword_suggestions/live`,
+        `${this.config.baseUrl}/v3/dataforseo_labs/google/keyword_ideas/live`,
         {
           method: "POST",
           headers: {
@@ -681,16 +682,17 @@ export class DataForSEOClient {
           },
           body: JSON.stringify([
             {
-              keywords: seedKeywords,
+              keywords: seedKeywords, // Multiple keywords supported
               location_code: inputData.location_code,
               language_code: inputData.language_code,
               limit: inputData.limit,
-              offset: 0,
-              filters: [
-                ["keyword_data.search_volume", ">", 50], // Only keywords with volume > 50
-                ["keyword_data.keyword_difficulty", "<", 80], // Exclude very difficult keywords
-              ],
-              order_by: ["keyword_data.search_volume,desc"],
+              include_serp_info: true, // Include SERP information
+              // Remove volume filter to get more results for testing
+              // filters: [
+              //   ["keyword_info.search_volume", ">", 50], // Only keywords with volume > 50
+              // ],
+              order_field: "_score", // Order by relevance score
+              order_type: "desc", // Descending order
             },
           ]),
         }
@@ -703,18 +705,30 @@ export class DataForSEOClient {
       }
 
       const data = await response.json()
+      console.log(
+        "DEBUG getKeywordSuggestions (keyword_ideas) response:",
+        JSON.stringify(data, null, 2)
+      )
 
       if (data.status_code !== 20000) {
+        console.log(
+          "DEBUG getKeywordSuggestions (keyword_ideas) error:",
+          data.status_message
+        )
         throw new Error(`DataForSEO error: ${data.status_message}`)
       }
 
       const suggestions = data.tasks?.[0]?.result || []
+      console.log(
+        "DEBUG getKeywordSuggestions (keyword_ideas) final suggestions:",
+        suggestions.length
+      )
 
       // Cache the results for 90 days
       await this.cache.setCachedResponse(
         inputData,
         "dataforseo",
-        "keyword_suggestions",
+        "keyword_ideas",
         suggestions
       )
 

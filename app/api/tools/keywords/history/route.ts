@@ -132,6 +132,10 @@ export async function GET(request: NextRequest) {
         }
 
         // Add keyword suggestions with full data
+        console.log(
+          "DEBUG keyword_suggestions_response:",
+          JSON.stringify(fullAnalysis?.keyword_suggestions_response, null, 2)
+        )
         if (fullAnalysis?.keyword_suggestions_response?.[0]?.items) {
           const suggestionItems =
             fullAnalysis.keyword_suggestions_response[0].items

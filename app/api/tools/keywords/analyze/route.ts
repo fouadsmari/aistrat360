@@ -234,16 +234,39 @@ async function performAnalysisInBackground(
       900
     )
 
-    // Step 3: Extract seed keywords and get suggestions (70%)
+    // Step 3: Use top ranked keywords as seeds for keyword ideas (70%)
     await updateProgress(supabase, analysisId, 60)
-    const seedKeywords = dataforSEO.extractMainKeywords(
-      { tasks: [{ result: [{ items: [{ meta: { title: website.name } }] }] }] },
-      10
+
+    // Extract keywords from ranked results and take top 199 (or less if fewer available)
+    const rankedKeywordsList: string[] = []
+    for (const result of rankedKeywords) {
+      if (result.items && Array.isArray(result.items)) {
+        for (const item of result.items) {
+          if (item.keyword_data?.keyword) {
+            rankedKeywordsList.push(item.keyword_data.keyword)
+          }
+        }
+      }
+    }
+
+    // Take top 199 keywords (DataForSEO keyword_ideas limit is 200, keep 1 slot)
+    const seedKeywords = rankedKeywordsList.slice(0, 199)
+    console.log(
+      "DEBUG: seedKeywords from ranked results:",
+      seedKeywords.length,
+      "keywords"
     )
+    console.log("DEBUG: First 10 seedKeywords:", seedKeywords.slice(0, 10))
+
     const keywordSuggestions = await dataforSEO.getKeywordSuggestions(
       seedKeywords,
       country,
-      100
+      199
+    )
+    console.log(
+      "DEBUG: keywordSuggestions received:",
+      keywordSuggestions.length,
+      "suggestions"
     )
 
     // Step 4: Process and save results (90%)
@@ -303,20 +326,55 @@ async function performAnalysisInBackground(
       }
     }
 
-    // Process keyword suggestions
-    for (const item of keywordSuggestions) {
-      if (item.keyword_data?.keyword) {
-        allKeywords.push({
-          analysis_id: analysisId,
-          keyword: item.keyword_data.keyword,
-          keyword_type: "suggestion",
-          search_volume: item.keyword_data.search_volume || 0,
-          keyword_difficulty: item.keyword_data.keyword_difficulty || 0,
-          cpc: item.keyword_data.cpc || 0,
-          competition: item.keyword_data.competition || 0,
-        })
+    // Process keyword ideas (new structure from keyword_ideas API)
+    console.log(
+      "DEBUG: Processing",
+      keywordSuggestions.length,
+      "keyword idea results"
+    )
+    for (const result of keywordSuggestions) {
+      console.log(
+        "DEBUG: Processing keyword ideas result:",
+        JSON.stringify(result, null, 2)
+      )
+
+      // keyword_ideas returns results with items array
+      if (result.items && Array.isArray(result.items)) {
+        console.log(
+          "DEBUG: Found",
+          result.items.length,
+          "keyword ideas in result"
+        )
+        for (const item of result.items) {
+          console.log(
+            "DEBUG: Processing keyword idea item:",
+            JSON.stringify(item, null, 2)
+          )
+          if (item.keyword_data?.keyword || item.keyword) {
+            allKeywords.push({
+              analysis_id: analysisId,
+              keyword: item.keyword_data?.keyword || item.keyword,
+              keyword_type: "suggestion",
+              search_volume:
+                item.keyword_data?.search_volume || item.search_volume || 0,
+              keyword_difficulty:
+                item.keyword_data?.keyword_difficulty ||
+                item.keyword_difficulty ||
+                0,
+              cpc: item.keyword_data?.cpc || item.cpc || 0,
+              competition:
+                item.keyword_data?.competition || item.competition || 0,
+            })
+          }
+        }
+      } else {
+        console.log("DEBUG: No items found in result or items is null")
       }
     }
+    console.log(
+      "DEBUG: Total allKeywords after suggestions:",
+      allKeywords.length
+    )
 
     // Save keywords to database
     if (allKeywords.length > 0) {

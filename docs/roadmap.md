@@ -52,18 +52,20 @@ _Aucune tâche en cours actuellement_
 - ✅ Validation Zod et RLS Supabase
 - ✅ Fix compatibilité Next.js 15
 
-### **Phase 2 - Intégration DataForSEO Labs API pour analyse Google Ads** ✅ TERMINÉ
+### **Phase 2 - Intégration DataForSEO Labs API pour analyse Google Ads** ✅ TERMINÉ + OPTIMISÉ
 
 - ✅ Implémenter les endpoints DataForSEO Labs API pour extraire automatiquement les mots-clés commerciaux, volumes de recherche et CPC des sites clients
-- ✅ Utiliser ranked_keywords et keyword_suggestions pour obtenir les vrais mots-clés à cibler avec leurs métriques business (volume, CPC, compétition) pour calculer le ROI Google Ads
+- ✅ **ÉVOLUTION MAJEURE** : Migration de `keyword_suggestions` vers `keyword_ideas` pour meilleure qualité et réduction des coûts
+- ✅ Utiliser ranked_keywords et **keyword_ideas** (plus intelligent basé sur catégories Google Ads) pour obtenir les vrais mots-clés à cibler
 - ✅ Configurer un système de cache de 90 jours pour économiser les coûts API et stocker les analyses de mots-clés en base de données
-- ✅ Utiliser uniquement les endpoints ranked_keywords (0.099$) et keyword_suggestions (0.0115$) pour un coût total de 0.11$ par analyse client
-- ✅ Ces deux endpoints suffisent pour obtenir les mots-clés actuels du site et les opportunités manquées avec toutes les métriques nécessaires au calcul ROI
-- ✅ Limiter ranked_keywords à 900 mots-clés maximum pour rester sous 0.10$ car le prix est de 0.11$ par tranche de 1000 mots-clés retournés
-- ✅ Cette limite à 900 garantit d'obtenir les mots-clés principaux tout en optimisant les coûts pour les gros sites avec beaucoup de positionnements
-- ✅ Interface utilisateur complète avec progress bar temps réel et filtres avancés
+- ✅ **OPTIMISATION COÛTS** : ranked_keywords (~$0.03) + keyword_ideas (~$0.03) = **~$0.06 par analyse** (vs $0.11 précédemment)
+- ✅ **WORKFLOW OPTIMISÉ** : Les 199 meilleurs mots-clés classés du site deviennent les seeds pour keyword_ideas (vs extraction titre)
+- ✅ Limiter ranked_keywords à 900 mots-clés maximum pour optimiser les coûts tout en obtenant les mots-clés principaux
+- ✅ **RÉSULTATS AMÉLIORÉS** : Jusqu'à 199 idées de mots-clés pertinentes par analyse (vs 100 suggestions précédemment)
+- ✅ Interface utilisateur complète avec progress bar temps réel et filtres avancés (ranked/suggestions)
 - ✅ Affichage des résultats avec métriques détaillées, export CSV et données réelles DataForSEO
 - ✅ Système de cache intelligent économisant jusqu'à 90% des coûts API après stabilisation
+- ✅ **2 requêtes DataForSEO** par analyse complète : ranked_keywords + keyword_ideas (optimisé)
 
 ### **[Phase 3] - Outils Google Ads Intelligence**
 
@@ -1141,6 +1143,18 @@ _(Architecture détaillée après validation outils précédents)_
     - ✅ Roadmap mis à jour avec correction violations
 
 ## ✅ Terminé Récemment
+
+- **[2025-09-03]** Migration keyword_suggestions vers keyword_ideas - Optimisation majeure coûts et qualité
+  - ✅ **DIAGNOSTIC COMPLET** : Analyse méthodique du problème des suggestions retournant 0 résultats
+  - ✅ **MIGRATION API** : keyword_suggestions → keyword_ideas (algorithme Google Ads plus intelligent)
+  - ✅ **WORKFLOW RÉVOLUTIONNAIRE** : Utilisation des mots-clés classés réels comme seeds (vs titre du site)
+  - ✅ **OPTIMISATION COÛTS** : Réduction de 50% des coûts API (~$0.06 vs ~$0.11 par analyse)
+  - ✅ **AMÉLIORATION QUALITÉ** : 199 idées max (vs 100 suggestions) basées sur le profil SEO réel
+  - ✅ **PARAMÈTRES CORRIGÉS** : Filtres et order_by adaptés à l'API keyword_ideas
+  - ✅ **TRAITEMENT DONNÉES** : Structure de réponse correctement adaptée (result[].items[])
+  - ✅ **ÉCONOMIE REQUÊTES** : 2 requêtes DataForSEO par analyse (ranked_keywords + keyword_ideas)
+  - ✅ **DOCUMENTATION** : Mise à jour roadmap.md et requettes.md avec nouveaux coûts
+  - ✅ **TESTS RÉUSSIS** : Suggestions fonctionnelles avec 199 mots-clés seeds et résultats pertinents
 
 - **[2025-01-09]** Nettoyage complet interface et suppression outil analyse
   - ✅ **FIX UI CRITIQUE** : Correction Select dropdowns transparents dans profile

@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react"
 import { useTranslations } from "next-intl"
+import { formatCPC } from "@/lib/currency-utils"
 import {
   Card,
   CardContent,
@@ -329,7 +330,7 @@ export function GroupedKeywordResults({ analysisId, websiteName }: Props) {
           keyword.keyword,
           keyword.searchVolume.toString(),
           keyword.difficulty.toString(),
-          keyword.cpc.toFixed(2),
+          formatCPC(keyword.cpc, "FR"),
           keyword.currentPosition?.toString() || "",
           keyword.etv.toFixed(2),
         ])
