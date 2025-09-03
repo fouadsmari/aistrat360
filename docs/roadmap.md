@@ -1152,6 +1152,16 @@ _(Architecture détaillée après validation outils précédents)_
   - ✅ **VÉRIFICATION SÉCURISÉE** : Aucun impact sur outil keywords fonctionnel
   - ✅ **RÉSULTAT** : Application allégée, interface transparence fixée, code propre
 
+- **[2025-09-03]** Amélioration du sélecteur de sites dans le header
+  - ✅ **SÉPARATION VISUELLE** : Badge de type d'entreprise à droite, nom du site à gauche
+  - ✅ **BADGES COLORÉS** : Bleu pour E-commerce, Vert pour Service, Violet pour Vitrine
+  - ✅ **RESPONSIVE** : Largeur adaptative sur mobile avec max-width
+  - ✅ **NETTOYAGE CODE** : Suppression console.error selon maitre.md
+  - ✅ **TRADUCTIONS** : Ajout des clés manquantes dans en.json
+  - ✅ **TESTS** : Tous les tests passent (21/21)
+  - ✅ **BUILD** : Build production réussi sans erreurs
+  - ✅ **DÉPLOIEMENT** : Push sur GitHub réussi
+
 ---
 
-_Dernière mise à jour : 2025-01-09 - Nettoyage interface et suppression outil analyse obsolète_
+_Dernière mise à jour : 2025-09-03 - Amélioration du sélecteur de sites dans le header_
