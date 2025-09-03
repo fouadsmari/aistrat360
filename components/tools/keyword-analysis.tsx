@@ -82,7 +82,7 @@ export function KeywordAnalysis() {
   const { showToast, ToastComponent } = useToast()
 
   const [websites, setWebsites] = useState<UserWebsite[]>([])
-  const [selectedWebsite, setSelectedWebsite] = useState<string>("")
+  const [selectedSiteId, setSelectedSiteId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [analysisInProgress, setAnalysisInProgress] =
     useState<AnalysisProgress | null>(null)
@@ -110,38 +110,49 @@ export function KeywordAnalysis() {
   const fetchWebsites = useCallback(async () => {
     try {
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10s timeout
+      const timeoutId = setTimeout(() => {
+        controller.abort()
+      }, 10000) // 10s timeout
 
-      const [websitesResponse, quotaResponse, historyResponse] =
-        await Promise.all([
-          fetch("/api/profile/websites", { signal: controller.signal }),
-          fetch("/api/tools/keywords/quota", { signal: controller.signal }),
-          fetch("/api/tools/keywords/history", { signal: controller.signal }),
-        ])
+      try {
+        const [websitesResponse, quotaResponse, historyResponse] =
+          await Promise.all([
+            fetch("/api/profile/websites", { signal: controller.signal }),
+            fetch("/api/tools/keywords/quota", { signal: controller.signal }),
+            fetch("/api/tools/keywords/history", { signal: controller.signal }),
+          ])
 
-      clearTimeout(timeoutId)
+        clearTimeout(timeoutId)
 
-      if (!websitesResponse.ok) throw new Error("Failed to fetch websites")
+        if (!websitesResponse.ok) throw new Error("Failed to fetch websites")
 
-      const websitesData = await websitesResponse.json()
-      setWebsites(websitesData.websites || [])
+        const websitesData = await websitesResponse.json()
+        setWebsites(websitesData.websites || [])
 
-      if (quotaResponse.ok) {
-        const quotaData = await quotaResponse.json()
-        setQuota(quotaData.quota)
-      }
-
-      if (historyResponse.ok) {
-        const historyData = await historyResponse.json()
-        setAnalysisHistory(historyData.analyses || [])
-
-        // Load last completed analysis as current result
-        const lastCompleted = historyData.analyses?.find(
-          (a: any) => a.status === "completed"
-        )
-        if (lastCompleted) {
-          setAnalysisResults(lastCompleted)
+        if (quotaResponse.ok) {
+          const quotaData = await quotaResponse.json()
+          setQuota(quotaData.quota)
         }
+
+        if (historyResponse.ok) {
+          const historyData = await historyResponse.json()
+          setAnalysisHistory(historyData.analyses || [])
+
+          // Load last completed analysis as current result
+          const lastCompleted = historyData.analyses?.find(
+            (a: any) => a.status === "completed"
+          )
+          if (lastCompleted) {
+            setAnalysisResults(lastCompleted)
+          }
+        }
+      } catch (fetchError: any) {
+        clearTimeout(timeoutId)
+        if (fetchError.name === "AbortError") {
+          console.log("Request was aborted due to timeout")
+          return
+        }
+        throw fetchError
       }
     } catch (error: any) {
       console.error("Network error:", error)
@@ -156,7 +167,7 @@ export function KeywordAnalysis() {
 
   // Start keyword analysis
   const startAnalysis = async () => {
-    if (!selectedWebsite) {
+    if (!selectedSiteId) {
       showToast({
         message: t("errors.noWebsiteSelected"),
         type: "error",
@@ -165,7 +176,7 @@ export function KeywordAnalysis() {
       return
     }
 
-    const website = websites.find((w) => w.id === selectedWebsite)
+    const website = websites.find((w) => w.id === selectedSiteId)
     if (!website) return
 
     try {
@@ -173,7 +184,7 @@ export function KeywordAnalysis() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          websiteId: selectedWebsite,
+          websiteId: selectedSiteId,
           country: website.target_countries[0] || "FR",
           language: website.site_languages[0] || "fr",
         }),
@@ -277,22 +288,42 @@ export function KeywordAnalysis() {
 
   useEffect(() => {
     fetchWebsites()
+
+    // Load saved site selection
+    const savedSite = localStorage.getItem("selectedSiteId")
+    if (savedSite) {
+      setSelectedSiteId(savedSite)
+    }
+
+    // Listen for site changes
+    const handleSiteChange = (event: CustomEvent) => {
+      setSelectedSiteId(event.detail)
+    }
+
+    window.addEventListener("siteChanged", handleSiteChange as EventListener)
+
+    return () => {
+      window.removeEventListener(
+        "siteChanged",
+        handleSiteChange as EventListener
+      )
+    }
   }, [fetchWebsites])
 
   // Auto-load last report when website is selected
   useEffect(() => {
-    if (selectedWebsite && analysisHistory.length > 0) {
+    if (selectedSiteId && analysisHistory.length > 0) {
       // Find the website data to match by URL
-      const selectedWebsiteData = websites.find((w) => w.id === selectedWebsite)
-      if (!selectedWebsiteData) return
+      const selectedSiteIdData = websites.find((w) => w.id === selectedSiteId)
+      if (!selectedSiteIdData) return
 
       // Find analyses for this website
       const websiteAnalyses = analysisHistory.filter((a: any) => {
         // Match by website name or URL
         return (
-          (a.websiteName === selectedWebsiteData.name ||
-            a.websiteName === selectedWebsiteData.url ||
-            a.websiteId === selectedWebsite) &&
+          (a.websiteName === selectedSiteIdData.name ||
+            a.websiteName === selectedSiteIdData.url ||
+            a.websiteId === selectedSiteId) &&
           a.status === "completed"
         )
       })
@@ -305,7 +336,7 @@ export function KeywordAnalysis() {
         setAnalysisResults(null)
       }
     }
-  }, [selectedWebsite, analysisHistory, websites])
+  }, [selectedSiteId, analysisHistory, websites])
 
   if (loading) {
     return (
@@ -358,35 +389,45 @@ export function KeywordAnalysis() {
                   {t("goToProfile")}
                 </Button>
               </div>
+            ) : !selectedSiteId ? (
+              <div className="py-8 text-center">
+                <Globe className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+                <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-gray-100">
+                  {t("selectWebsite")}
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Veuillez sélectionner un site dans le menu en haut de la page
+                </p>
+              </div>
             ) : (
               <div className="space-y-4">
-                {/* Website Selection */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">
-                    {t("selectWebsite")}
-                  </label>
-                  <Select
-                    value={selectedWebsite}
-                    onValueChange={setSelectedWebsite}
-                    disabled={!!analysisInProgress}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={t("selectWebsite")} />
-                    </SelectTrigger>
-                    <SelectContent className="border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
-                      {websites.map((website) => (
-                        <SelectItem key={website.id} value={website.id}>
-                          <div className="flex items-center gap-2">
-                            <Globe className="h-4 w-4" />
-                            <span>{website.name || website.url}</span>
-                            <Badge variant="outline" className="text-xs">
-                              {website.business_type}
-                            </Badge>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                {/* Selected Website Display */}
+                <div className="rounded-lg border bg-gradient-to-r from-violet-50 to-purple-50 p-4 dark:from-violet-900/20 dark:to-purple-900/20">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Globe className="h-5 w-5 text-violet-600" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                          Site sélectionné
+                        </p>
+                        <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                          {websites.find((w) => w.id === selectedSiteId)
+                            ?.name ||
+                            websites.find((w) => w.id === selectedSiteId)
+                              ?.url ||
+                            "..."}
+                        </p>
+                      </div>
+                    </div>
+                    {websites.find((w) => w.id === selectedSiteId) && (
+                      <Badge variant="outline" className="text-xs">
+                        {
+                          websites.find((w) => w.id === selectedSiteId)
+                            ?.business_type
+                        }
+                      </Badge>
+                    )}
+                  </div>
                 </div>
 
                 {/* Quota Display */}
@@ -436,7 +477,7 @@ export function KeywordAnalysis() {
                     <Button
                       onClick={startAnalysis}
                       disabled={
-                        !selectedWebsite ||
+                        !selectedSiteId ||
                         (quota?.remaining !== undefined && quota.remaining <= 0)
                       }
                       className="bg-gradient-to-r from-violet-600 to-purple-600 text-white hover:from-violet-700 hover:to-purple-700 disabled:opacity-50"
@@ -609,8 +650,8 @@ export function KeywordAnalysis() {
             results={analysisResults}
             websiteName={
               analysisResults.websiteName ||
-              websites.find((w) => w.id === selectedWebsite)?.name ||
-              websites.find((w) => w.id === selectedWebsite)?.url ||
+              websites.find((w) => w.id === selectedSiteId)?.name ||
+              websites.find((w) => w.id === selectedSiteId)?.url ||
               ""
             }
           />

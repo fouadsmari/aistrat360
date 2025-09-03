@@ -758,6 +758,8 @@
   },
   "sites": {
     "title": "Sites Internet",
-    "description": "Gérez vos sites web et leurs analyses SEO"
+    "description": "Gérez vos sites web et leurs analyses SEO",
+    "selectSite": "Sélectionner un site",
+    "addSite": "Ajouter un site"
   }
 }

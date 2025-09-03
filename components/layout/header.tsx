@@ -1,11 +1,10 @@
 "use client"
 
-import { Bell, Menu, Moon, Search, Sun, User, LogOut } from "lucide-react"
+import { Bell, Menu, Moon, Sun, User, LogOut } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useParams, useRouter } from "next/navigation"
 import { createSupabaseClient } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +17,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useTheme } from "next-themes"
 import { Sheet, SheetTrigger } from "@/components/ui/sheet"
 import { LanguageSwitcher } from "@/components/ui/language-switcher"
-import { SiteSelector } from "@/components/layout/site-selector-safe"
+import { SiteSelector } from "@/components/layout/site-selector"
 
 interface HeaderProps {
   onMenuClick: () => void
@@ -62,17 +61,8 @@ export function Header({ onMenuClick, isMobile = false }: HeaderProps) {
           </Button>
         )}
 
-        <div className="flex flex-1 items-center space-x-4">
-          <div className="relative max-w-md flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <Input
-              type="search"
-              placeholder={t("search")}
-              className="border-gray-200 bg-gray-50 pl-10 dark:border-gray-700 dark:bg-gray-800"
-            />
-          </div>
-
-          <SiteSelector className="hidden md:flex" />
+        <div className="flex flex-1 items-center justify-start px-4">
+          <SiteSelector className="w-full max-w-lg" />
         </div>
 
         <div className="flex items-center space-x-2">

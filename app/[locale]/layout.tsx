@@ -3,6 +3,7 @@ import { getMessages, setRequestLocale } from "next-intl/server"
 import { notFound } from "next/navigation"
 import { routing } from "@/src/i18n/routing"
 import { ThemeProvider } from "@/components/providers/theme-provider"
+import { SiteProvider } from "@/contexts/site-context"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "../globals.css"
@@ -49,7 +50,7 @@ export default async function LocaleLayout({
           disableTransitionOnChange
         >
           <NextIntlClientProvider locale={locale} messages={messages}>
-            {children}
+            <SiteProvider>{children}</SiteProvider>
           </NextIntlClientProvider>
         </ThemeProvider>
       </body>

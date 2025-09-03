@@ -758,6 +758,8 @@
   },
   "sites": {
     "title": "Websites",
-    "description": "Manage your websites and their SEO analyses"
+    "description": "Manage your websites and their SEO analyses",
+    "selectSite": "Select a website",
+    "addSite": "Add a website"
   }
 }
