@@ -75,27 +75,36 @@ export async function GET(
     }
 
     // If analysis is completed, include FULL results with all data
-    if (analysis.status === "completed" && (analysis.ranked_keywords_response || analysis.keyword_suggestions_response)) {
+    if (
+      analysis.status === "completed" &&
+      (analysis.ranked_keywords_response ||
+        analysis.keyword_suggestions_response)
+    ) {
       let allKeywords: any[] = []
 
       // Process ranked keywords with FULL data
       if (analysis.ranked_keywords_response?.[0]?.items) {
         const rankedItems = analysis.ranked_keywords_response[0].items
-        
+
         const rankedKeywords = rankedItems.map((item: any) => {
           const keywordData = item.keyword_data
           const serpItem = item.ranked_serp_element?.serp_item
-          
+
           return {
             keyword: keywordData.keyword,
             type: "ranked",
             searchVolume: keywordData.keyword_info?.search_volume || 0,
-            difficulty: keywordData.keyword_properties?.keyword_difficulty || item.ranked_serp_element?.keyword_difficulty || 0,
+            difficulty:
+              keywordData.keyword_properties?.keyword_difficulty ||
+              item.ranked_serp_element?.keyword_difficulty ||
+              0,
             cpc: keywordData.keyword_info?.cpc || 0,
             competition: keywordData.keyword_info?.competition || 0,
-            competitionLevel: keywordData.keyword_info?.competition_level || "UNKNOWN",
+            competitionLevel:
+              keywordData.keyword_info?.competition_level || "UNKNOWN",
             position: serpItem?.rank_absolute || null,
-            previousPosition: serpItem?.rank_changes?.previous_rank_absolute || null,
+            previousPosition:
+              serpItem?.rank_changes?.previous_rank_absolute || null,
             isUp: serpItem?.rank_changes?.is_up || false,
             isDown: serpItem?.rank_changes?.is_down || false,
             isNew: serpItem?.rank_changes?.is_new || false,
@@ -112,17 +121,19 @@ export async function GET(
             backlinks: serpItem?.backlinks_info || null,
             serpFeatures: keywordData.serp_info?.serp_item_types || [],
             categories: keywordData.keyword_info?.categories || [],
-            lastUpdated: keywordData.keyword_info?.last_updated_time || keywordData.serp_info?.last_updated_time
+            lastUpdated:
+              keywordData.keyword_info?.last_updated_time ||
+              keywordData.serp_info?.last_updated_time,
           }
         })
-        
+
         allKeywords = [...allKeywords, ...rankedKeywords]
       }
 
       // Process keyword suggestions with full data
       if (analysis.keyword_suggestions_response?.[0]?.items) {
         const suggestionItems = analysis.keyword_suggestions_response[0].items
-        
+
         const suggestions = suggestionItems.map((item: any) => ({
           keyword: item.keyword_data?.keyword || item.keyword,
           type: "suggestion",
@@ -136,14 +147,18 @@ export async function GET(
           monthlySearches: item.keyword_data?.monthly_searches || [],
           trends: item.keyword_data?.search_volume_trend || {},
           serpFeatures: [],
-          categories: item.keyword_data?.categories || []
+          categories: item.keyword_data?.categories || [],
         }))
-        
+
         allKeywords = [...allKeywords, ...suggestions]
       }
 
-      const rankedCount = allKeywords.filter((k: any) => k.type === "ranked").length
-      const suggestionCount = allKeywords.filter((k: any) => k.type === "suggestion").length
+      const rankedCount = allKeywords.filter(
+        (k: any) => k.type === "ranked"
+      ).length
+      const suggestionCount = allKeywords.filter(
+        (k: any) => k.type === "suggestion"
+      ).length
 
       response.results = {
         id: analysis.id,
@@ -154,15 +169,38 @@ export async function GET(
         keywords: allKeywords,
         // Additional rich data
         summary: {
-          avgSearchVolume: Math.round(allKeywords.reduce((sum: number, k: any) => sum + k.searchVolume, 0) / allKeywords.length) || 0,
-          avgCpc: Math.round(allKeywords.reduce((sum: number, k: any) => sum + k.cpc, 0) / allKeywords.length * 100) / 100 || 0,
-          avgPosition: Math.round(allKeywords.filter((k: any) => k.position).reduce((sum: number, k: any, _: any, arr: any[]) => sum + (k.position || 0) / arr.length, 0)) || 0,
-          totalEtv: Math.round(allKeywords.reduce((sum: number, k: any) => sum + k.etv, 0) * 100) / 100,
+          avgSearchVolume:
+            Math.round(
+              allKeywords.reduce(
+                (sum: number, k: any) => sum + k.searchVolume,
+                0
+              ) / allKeywords.length
+            ) || 0,
+          avgCpc:
+            Math.round(
+              (allKeywords.reduce((sum: number, k: any) => sum + k.cpc, 0) /
+                allKeywords.length) *
+                100
+            ) / 100 || 0,
+          avgPosition:
+            Math.round(
+              allKeywords
+                .filter((k: any) => k.position)
+                .reduce(
+                  (sum: number, k: any, _: any, arr: any[]) =>
+                    sum + (k.position || 0) / arr.length,
+                  0
+                )
+            ) || 0,
+          totalEtv:
+            Math.round(
+              allKeywords.reduce((sum: number, k: any) => sum + k.etv, 0) * 100
+            ) / 100,
           intentDistribution: allKeywords.reduce((acc: any, k: any) => {
             acc[k.intent] = (acc[k.intent] || 0) + 1
             return acc
-          }, {})
-        }
+          }, {}),
+        },
       }
     }
 

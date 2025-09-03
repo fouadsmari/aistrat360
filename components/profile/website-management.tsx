@@ -128,7 +128,7 @@ export function WebsiteManagement() {
       const timeoutId = setTimeout(() => abortController.abort(), 10000)
 
       const response = await fetch("/api/profile/websites", {
-        signal: abortController.signal
+        signal: abortController.signal,
       })
 
       clearTimeout(timeoutId)
@@ -141,8 +141,8 @@ export function WebsiteManagement() {
       setWebsites(data.websites || [])
       setQuota(data.quota || null)
     } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        console.log('Request aborted')
+      if (error instanceof Error && error.name === "AbortError") {
+        console.log("Request aborted")
         return
       }
       console.error("Error fetching websites:", error)
@@ -154,7 +154,7 @@ export function WebsiteManagement() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [showToast])
 
   useEffect(() => {
     fetchWebsites()

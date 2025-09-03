@@ -279,6 +279,34 @@ export function KeywordAnalysis() {
     fetchWebsites()
   }, [fetchWebsites])
 
+  // Auto-load last report when website is selected
+  useEffect(() => {
+    if (selectedWebsite && analysisHistory.length > 0) {
+      // Find the website data to match by URL
+      const selectedWebsiteData = websites.find((w) => w.id === selectedWebsite)
+      if (!selectedWebsiteData) return
+
+      // Find analyses for this website
+      const websiteAnalyses = analysisHistory.filter((a: any) => {
+        // Match by website name or URL
+        return (
+          (a.websiteName === selectedWebsiteData.name ||
+            a.websiteName === selectedWebsiteData.url ||
+            a.websiteId === selectedWebsite) &&
+          a.status === "completed"
+        )
+      })
+
+      if (websiteAnalyses.length > 0) {
+        const lastAnalysis = websiteAnalyses[0] // Already sorted by date in API
+        setAnalysisResults(lastAnalysis)
+      } else {
+        // Clear results if no analysis found for this website
+        setAnalysisResults(null)
+      }
+    }
+  }, [selectedWebsite, analysisHistory, websites])
+
   if (loading) {
     return (
       <Card>
@@ -294,15 +322,19 @@ export function KeywordAnalysis() {
     <>
       <div className="space-y-6">
         {/* Header */}
-        <Card>
+        <Card className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
           <CardHeader>
             <div className="flex items-center gap-3">
               <div className="rounded-lg bg-violet-100 p-2 dark:bg-violet-900/20">
                 <Search className="h-6 w-6 text-violet-600 dark:text-violet-400" />
               </div>
               <div>
-                <CardTitle>{t("title")}</CardTitle>
-                <CardDescription>{t("description")}</CardDescription>
+                <CardTitle className="text-gray-900 dark:text-white">
+                  {t("title")}
+                </CardTitle>
+                <CardDescription className="text-gray-600 dark:text-gray-300">
+                  {t("description")}
+                </CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -320,9 +352,10 @@ export function KeywordAnalysis() {
                 <Button
                   onClick={() => window.open(`/${locale}/profile`, "_blank")}
                   variant="outline"
+                  className="border-gray-200 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
                 >
                   <Globe className="mr-2 h-4 w-4" />
-                  Go to Profile
+                  {t("goToProfile")}
                 </Button>
               </div>
             ) : (

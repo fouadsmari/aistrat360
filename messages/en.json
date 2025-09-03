@@ -505,6 +505,7 @@
   },
   "sidebar": {
     "dashboard": "Dashboard",
+    "sites": "Websites",
     "analytics": "Analytics",
     "users": "Users",
     "products": "Products",
@@ -620,6 +621,29 @@
       "addWebsiteFirst": "Add a website first in your profile",
       "startAnalysis": "Analyze Keywords",
       "analysisRunning": "Analysis running",
+      "selectWebsiteToStart": "Select a website to start",
+      "analysis": {
+        "title": "Keyword Analysis",
+        "description": "Analyze your website keywords to improve your SEO",
+        "selectWebsite": "Select a website",
+        "startAnalysis": "Start Analysis",
+        "analyzing": "Analyzing...",
+        "completed": "Analysis completed",
+        "failed": "Analysis failed",
+        "started": "Analysis started successfully",
+        "keywords": "keywords",
+        "progress": {
+          "fetchingPages": "Fetching pages...",
+          "analyzingKeywords": "Analyzing keywords...",
+          "processingSuggestions": "Processing suggestions...",
+          "calculatingMetrics": "Calculating metrics...",
+          "finalizingResults": "Finalizing results..."
+        },
+        "noResults": {
+          "title": "No analysis available",
+          "description": "Launch your first analysis to see results"
+        }
+      },
       "quota": {
         "title": "Analysis quota",
         "exceeded": "Quota exhausted",
@@ -685,6 +709,45 @@
         "volumeRange": "Volume range",
         "clearFilters": "Clear filters"
       },
+      "grouped": {
+        "title": "Keywords by Page",
+        "description": "Keywords analysis grouped by page for {websiteName}",
+        "totalPages": "Total pages",
+        "totalKeywords": "Total keywords",
+        "totalVolume": "Total volume",
+        "totalValue": "Total value",
+        "searchPages": "Search pages",
+        "searchPlaceholder": "Search for a page or keyword...",
+        "sortBy": "Sort by",
+        "sortByKeywordsDesc": "Number of keywords (descending)",
+        "sortByKeywordsAsc": "Number of keywords (ascending)",
+        "sortByVolumeDesc": "Average volume (descending)",
+        "sortByVolumeAsc": "Average volume (ascending)",
+        "sortByCpcDesc": "Average CPC (descending)",
+        "sortByCpcAsc": "Average CPC (ascending)",
+        "sortByDifficultyDesc": "Average difficulty (descending)",
+        "sortByDifficultyAsc": "Average difficulty (ascending)",
+        "sortByPositionDesc": "Average position (descending)",
+        "sortByPositionAsc": "Average position (ascending)",
+        "sortByValueDesc": "Total value (descending)",
+        "sortByValueAsc": "Total value (ascending)",
+        "volumeRange": "Volume range",
+        "showingPages": "Showing {count} pages of {total}",
+        "clearFilters": "Clear filters",
+        "keywords": "keywords",
+        "avgVolume": "Avg. Vol.",
+        "avgCpc": "Avg. CPC",
+        "avgDifficulty": "Avg. Diff.",
+        "avgPosition": "Avg. Pos.",
+        "bestPosition": "Best position",
+        "visitPage": "Visit page",
+        "unrankedKeywords": "Unranked keywords",
+        "noData": "No data available",
+        "noResults": "No results found",
+        "listView": "Keywords list",
+        "groupedView": "Keywords by page"
+      },
+      "goToProfile": "Go to Profile",
       "errors": {
         "noWebsiteSelected": "Please select a website",
         "analysisError": "Error during analysis",
@@ -692,5 +755,9 @@
         "networkError": "Connection error"
       }
     }
+  },
+  "sites": {
+    "title": "Websites",
+    "description": "Manage your websites and their SEO analyses"
   }
 }

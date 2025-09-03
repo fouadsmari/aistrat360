@@ -505,6 +505,7 @@
   },
   "sidebar": {
     "dashboard": "Tableau de bord",
+    "sites": "Sites Internet",
     "analytics": "Analytiques",
     "users": "Utilisateurs",
     "products": "Produits",
@@ -620,6 +621,29 @@
       "addWebsiteFirst": "Ajoutez d'abord un site web dans votre profil",
       "startAnalysis": "Analyser les mots-clés",
       "analysisRunning": "Analyse en cours",
+      "selectWebsiteToStart": "Sélectionnez un site pour commencer",
+      "analysis": {
+        "title": "Analyse de Mots-clés",
+        "description": "Analysez les mots-clés de votre site pour améliorer votre SEO",
+        "selectWebsite": "Sélectionner un site web",
+        "startAnalysis": "Lancer l'analyse",
+        "analyzing": "Analyse en cours...",
+        "completed": "Analyse terminée",
+        "failed": "Analyse échouée",
+        "started": "Analyse démarrée avec succès",
+        "keywords": "mots-clés",
+        "progress": {
+          "fetchingPages": "Récupération des pages...",
+          "analyzingKeywords": "Analyse des mots-clés...",
+          "processingSuggestions": "Traitement des suggestions...",
+          "calculatingMetrics": "Calcul des métriques...",
+          "finalizingResults": "Finalisation des résultats..."
+        },
+        "noResults": {
+          "title": "Aucune analyse disponible",
+          "description": "Lancez votre première analyse pour voir les résultats"
+        }
+      },
       "quota": {
         "title": "Quota d'analyses",
         "exceeded": "Quota épuisé",
@@ -685,6 +709,45 @@
         "volumeRange": "Plage de volume",
         "clearFilters": "Effacer les filtres"
       },
+      "grouped": {
+        "title": "Mots-clés par Page",
+        "description": "Analyse des mots-clés groupés par page pour {websiteName}",
+        "totalPages": "Pages totales",
+        "totalKeywords": "Total mots-clés",
+        "totalVolume": "Volume total",
+        "totalValue": "Valeur totale",
+        "searchPages": "Rechercher des pages",
+        "searchPlaceholder": "Rechercher une page ou mot-clé...",
+        "sortBy": "Trier par",
+        "sortByKeywordsDesc": "Nombre de mots-clés (décroissant)",
+        "sortByKeywordsAsc": "Nombre de mots-clés (croissant)",
+        "sortByVolumeDesc": "Volume moyen (décroissant)",
+        "sortByVolumeAsc": "Volume moyen (croissant)",
+        "sortByCpcDesc": "CPC moyen (décroissant)",
+        "sortByCpcAsc": "CPC moyen (croissant)",
+        "sortByDifficultyDesc": "Difficulté moyenne (décroissante)",
+        "sortByDifficultyAsc": "Difficulté moyenne (croissante)",
+        "sortByPositionDesc": "Position moyenne (décroissante)",
+        "sortByPositionAsc": "Position moyenne (croissante)",
+        "sortByValueDesc": "Valeur totale (décroissante)",
+        "sortByValueAsc": "Valeur totale (croissante)",
+        "volumeRange": "Plage de volume",
+        "showingPages": "Affichage de {count} pages sur {total}",
+        "clearFilters": "Effacer les filtres",
+        "keywords": "mots-clés",
+        "avgVolume": "Vol. moy.",
+        "avgCpc": "CPC moy.",
+        "avgDifficulty": "Diff. moy.",
+        "avgPosition": "Pos. moy.",
+        "bestPosition": "Meilleure position",
+        "visitPage": "Visiter la page",
+        "unrankedKeywords": "Mots-clés non positionnés",
+        "noData": "Aucune donnée disponible",
+        "noResults": "Aucun résultat trouvé",
+        "listView": "Liste des mots-clés",
+        "groupedView": "Mots-clés par page"
+      },
+      "goToProfile": "Aller au profil",
       "errors": {
         "noWebsiteSelected": "Veuillez sélectionner un site web",
         "analysisError": "Erreur lors de l'analyse",
@@ -692,5 +755,9 @@
         "networkError": "Erreur de connexion"
       }
     }
+  },
+  "sites": {
+    "title": "Sites Internet",
+    "description": "Gérez vos sites web et leurs analyses SEO"
   }
 }

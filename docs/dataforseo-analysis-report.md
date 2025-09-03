@@ -9,7 +9,7 @@
    - Contient les réponses JSON complètes de DataForSEO
    - Garde l'historique et le statut
 
-2. **`dataforseo_keywords`** - Table détaillée 
+2. **`dataforseo_keywords`** - Table détaillée
    - Stocke chaque mot-clé individuellement
    - Permet des requêtes rapides et filtrages
    - Évite de parser du JSON à chaque requête
@@ -37,17 +37,22 @@
         "serp_info": {
           "se_type": "google",
           "check_url": "https://www.google.com/search?q=quartier%20laval...",
-          "serp_item_types": ["images", "organic", "people_also_ask", "related_searches"],
+          "serp_item_types": [
+            "images",
+            "organic",
+            "people_also_ask",
+            "related_searches"
+          ],
           "se_results_count": 21200000,
           "last_updated_time": "2025-07-29 02:22:21 +00:00"
         },
         "keyword_info": {
           "cpc": 0.21,
-          "competition": 0.10,
+          "competition": 0.1,
           "search_volume": 1900,
           "monthly_searches": [
-            {"year": 2025, "month": 6, "search_volume": 2400},
-            {"year": 2025, "month": 5, "search_volume": 2400},
+            { "year": 2025, "month": 6, "search_volume": 2400 },
+            { "year": 2025, "month": 5, "search_volume": 2400 }
             // ... 12 mois d'historique
           ],
           "competition_level": "LOW",
@@ -61,7 +66,7 @@
           "rank": 40.79,
           "dofollow": 19,
           "backlinks": 24.79,
-          "referring_pages": 23.10,
+          "referring_pages": 23.1,
           "main_domain_rank": 407.29,
           "referring_domains": 9.89,
           "referring_main_domains": 9.39
@@ -81,7 +86,7 @@
         "is_lost": false,
         "check_url": "https://www.google.com/search?q=quartier%20laval...",
         "serp_item": {
-          "etv": 3.99,  // Estimated Traffic Value
+          "etv": 3.99, // Estimated Traffic Value
           "url": "https://quartiermetta.com/",
           "type": "organic",
           "title": "Quartier Metta: Accueil",
@@ -123,6 +128,7 @@
 ## 🔗 **URLs Multiples du Site (Réponse à ta question)**
 
 **POURQUOI tu vois plusieurs URLs dans l'app :**
+
 - DataForSEO retourne TOUTES les pages du domaine qui rankent
 - Chaque mot-clé peut avoir une URL différente du même site
 - Exemples trouvés dans la base :
@@ -171,35 +177,42 @@
 ## 💡 **Ce qu'on peut ajouter au Rapport :**
 
 ### 1. **Graphique de Tendance de Volume**
+
 Utiliser `monthly_searches` pour afficher l'évolution sur 12 mois
 
 ### 2. **Score d'Opportunité Personnalisé**
+
 Formule : `(search_volume * (1 - competition) * cpc) / keyword_difficulty`
 
 ### 3. **Analyse d'Intent pour Google Ads**
+
 - Informational → Campagnes Display
 - Transactional → Campagnes Search prioritaires
 - Navigational → Protection de marque
 
 ### 4. **Tracking de Position**
+
 Afficher si les positions montent ↑ ou descendent ↓
 
 ### 5. **Valeur Monétaire du Trafic**
+
 Calculer : `ETV * nombre de mots-clés` = Valeur totale du trafic organique
 
 ### 6. **Analyse Concurrentielle**
+
 Top 3 concurrents par mot-clé avec leurs métriques
 
 ### 7. **Recommandations Google Ads Spécifiques**
 
 ```markdown
 Pour "quartier laval":
+
 - CPC suggéré: 0.21€
 - Competition: LOW (10%)
 - Volume: 1900/mois
 - Landing Page: https://quartiermetta.com/
 - Intent: Informational
-→ Recommandation: Campagne Display avec CPC max 0.15€
+  → Recommandation: Campagne Display avec CPC max 0.15€
 ```
 
 ## 🚀 **Données pour Campagnes Google Ads**
@@ -221,7 +234,7 @@ Campagne 1: "Quick Wins"
 - Budget: CPC moyen * 1.2
 - Landing: URLs existantes avec rank_absolute < 50
 
-Campagne 2: "Brand Protection"  
+Campagne 2: "Brand Protection"
 - Mots-clés: Contenant "quartier metta"
 - Budget: CPC * 1.5 (enchères agressives)
 - Landing: Homepage
@@ -243,11 +256,13 @@ Campagne 3: "Expansion"
 ## ⚠️ **POURQUOI CES DONNÉES NE SONT PAS AFFICHÉES ? (Réponse directe)**
 
 **CONFIRMÉ** : Les données avancées EXISTENT dans la base ✅
+
 - `monthly_searches` ✅ PRÉSENT dans `ranked_keywords_response`
-- `backlinks_info` ✅ PRÉSENT dans `ranked_keywords_response` 
+- `backlinks_info` ✅ PRÉSENT dans `ranked_keywords_response`
 - `search_intent_info` ✅ PRÉSENT dans `ranked_keywords_response`
 
 **PROBLÈME** : Le composant `KeywordResults` lit seulement la table `dataforseo_keywords` qui contient :
+
 ```sql
 -- Données AFFICHÉES (table dataforseo_keywords)
 keyword, search_volume, difficulty, cpc, position, url
@@ -257,6 +272,7 @@ monthly_searches[], backlinks_info{}, search_intent_info{}, etc.
 ```
 
 **SOLUTION** : Pour afficher ces données, il faut :
+
 1. Lire `dataforseo_analyses.ranked_keywords_response` (JSON)
 2. Parser le JSON dans le frontend
 3. Ajouter ces métriques au rapport

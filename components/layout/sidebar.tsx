@@ -10,7 +10,6 @@ import {
   BarChart3,
   ChevronLeft,
   ChevronRight,
-  ChevronDown,
   FileText,
   Home,
   Layers,
@@ -23,9 +22,8 @@ import {
   HelpCircle,
   Shield,
   CreditCard,
-  Target,
   Zap,
-  Search,
+  Globe,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -52,7 +50,6 @@ export function Sidebar({
   const t = useTranslations("sidebar")
   const locale = params.locale as string
   const [userRole, setUserRole] = useState<string | null>(null)
-  const [isGoogleAdsOpen, setIsGoogleAdsOpen] = useState(false)
 
   useEffect(() => {
     async function getUserRole() {
@@ -80,6 +77,11 @@ export function Sidebar({
       title: t("dashboard"),
       icon: Home,
       href: `/${locale}/dashboard`,
+    },
+    {
+      title: t("sites"),
+      icon: Globe,
+      href: `/${locale}/sites`,
     },
     {
       title: t("analytics"),
@@ -227,84 +229,6 @@ export function Sidebar({
                 </Tooltip>
               )
             })}
-
-            {/* Google Ads Dropdown */}
-            <div className="space-y-1">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    onClick={() => setIsGoogleAdsOpen(!isGoogleAdsOpen)}
-                    className={cn(
-                      "w-full justify-start",
-                      pathname.includes("/tools/") &&
-                        "bg-violet-50 text-violet-600 dark:bg-violet-950/30 dark:text-violet-400",
-                      isCollapsed && "justify-center px-2"
-                    )}
-                  >
-                    <Target
-                      className={cn(
-                        "h-5 w-5",
-                        !isCollapsed && "mr-3",
-                        pathname.includes("/tools/")
-                          ? "text-violet-600 dark:text-violet-400"
-                          : "text-gray-600 dark:text-gray-400"
-                      )}
-                    />
-                    {!isCollapsed && (
-                      <>
-                        <span className="flex-1 text-left text-sm">
-                          Google Ads
-                        </span>
-                        <ChevronDown
-                          className={cn(
-                            "h-4 w-4 transition-transform",
-                            isGoogleAdsOpen ? "rotate-180" : ""
-                          )}
-                        />
-                      </>
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                {isCollapsed && (
-                  <TooltipContent side="right">Google Ads</TooltipContent>
-                )}
-              </Tooltip>
-
-              {/* Google Ads Submenu */}
-              {!isCollapsed && isGoogleAdsOpen && (
-                <div className="ml-4 space-y-1">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Link href={`/${locale}/tools/keywords`}>
-                        <Button
-                          variant={
-                            pathname === `/${locale}/tools/keywords`
-                              ? "secondary"
-                              : "ghost"
-                          }
-                          className={cn(
-                            "w-full justify-start",
-                            pathname === `/${locale}/tools/keywords` &&
-                              "bg-violet-50 text-violet-600 dark:bg-violet-950/30 dark:text-violet-400"
-                          )}
-                        >
-                          <Search
-                            className={cn(
-                              "mr-3 h-4 w-4",
-                              pathname === `/${locale}/tools/keywords`
-                                ? "text-violet-600 dark:text-violet-400"
-                                : "text-gray-600 dark:text-gray-400"
-                            )}
-                          />
-                          <span className="text-sm">Mots-clés</span>
-                        </Button>
-                      </Link>
-                    </TooltipTrigger>
-                  </Tooltip>
-                </div>
-              )}
-            </div>
           </TooltipProvider>
         </nav>
       </ScrollArea>

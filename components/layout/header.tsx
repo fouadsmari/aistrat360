@@ -18,6 +18,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useTheme } from "next-themes"
 import { Sheet, SheetTrigger } from "@/components/ui/sheet"
 import { LanguageSwitcher } from "@/components/ui/language-switcher"
+import { SiteSelector } from "@/components/layout/site-selector-safe"
 
 interface HeaderProps {
   onMenuClick: () => void
@@ -70,6 +71,8 @@ export function Header({ onMenuClick, isMobile = false }: HeaderProps) {
               className="border-gray-200 bg-gray-50 pl-10 dark:border-gray-700 dark:bg-gray-800"
             />
           </div>
+
+          <SiteSelector className="hidden md:flex" />
         </div>
 
         <div className="flex items-center space-x-2">

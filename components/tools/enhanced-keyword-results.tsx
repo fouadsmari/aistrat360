@@ -2,21 +2,74 @@
 
 import { useState, useMemo, useEffect } from "react"
 import { useTranslations } from "next-intl"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { GroupedKeywordResults } from "./grouped-keyword-results"
 import {
-  LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
-} from 'recharts'
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+} from "recharts"
 import {
-  TrendingUp, TrendingDown, Eye, ExternalLink, Award, Crown, Target,
-  Calendar, DollarSign, BarChart3, Zap, AlertCircle, CheckCircle,
-  ArrowUp, ArrowDown, Minus, ChevronDown, ChevronUp, Users, Globe,
-  Search, Hash, Clock, Activity, Shield, Star
+  TrendingUp,
+  TrendingDown,
+  Eye,
+  ExternalLink,
+  Award,
+  Crown,
+  Target,
+  Calendar,
+  DollarSign,
+  BarChart3,
+  Zap,
+  AlertCircle,
+  CheckCircle,
+  ArrowUp,
+  ArrowDown,
+  Minus,
+  ChevronDown,
+  ChevronUp,
+  Users,
+  Globe,
+  Search,
+  Hash,
+  Clock,
+  Activity,
+  Shield,
+  Star,
+  FileText,
 } from "lucide-react"
 
 interface DetailedKeyword {
@@ -28,8 +81,8 @@ interface DetailedKeyword {
   difficulty: number
   intent: string
   foreignIntent: string[]
-  monthlySearches: Array<{ year: number, month: number, search_volume: number }>
-  trends: { yearly: number, monthly: number, quarterly: number }
+  monthlySearches: Array<{ year: number; month: number; search_volume: number }>
+  trends: { yearly: number; monthly: number; quarterly: number }
   currentPosition: number | null
   previousPosition: number | null
   isUp: boolean
@@ -47,22 +100,11 @@ interface DetailedKeyword {
   lastUpdated: string
 }
 
-interface Competitor {
-  domain: string
-  websiteName: string
-  appearances: number
-  avgPosition: number
-  totalEtv: number
-  backlinks: any
-  keywords: Array<{ keyword: string, position: number, etv: number }>
-}
-
 interface EnhancedAnalysisData {
   id: string
-  website: { name: string, url: string }
+  website: { name: string; url: string }
   rankedKeywords: DetailedKeyword[]
   suggestions: DetailedKeyword[]
-  competitors: Competitor[]
   summary: {
     avgSearchVolume: number
     avgCpc: number
@@ -81,7 +123,8 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
   const t = useTranslations("tools.keywords.results")
   const [data, setData] = useState<EnhancedAnalysisData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [selectedKeyword, setSelectedKeyword] = useState<DetailedKeyword | null>(null)
+  const [selectedKeyword, setSelectedKeyword] =
+    useState<DetailedKeyword | null>(null)
   const [showKeywordModal, setShowKeywordModal] = useState(false)
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set())
   const [activeTab, setActiveTab] = useState("overview")
@@ -90,7 +133,9 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
   useEffect(() => {
     const fetchDetailedData = async () => {
       try {
-        const response = await fetch(`/api/tools/keywords/detailed/${analysisId}`)
+        const response = await fetch(
+          `/api/tools/keywords/detailed/${analysisId}`
+        )
         if (response.ok) {
           const result = await response.json()
           setData(result)
@@ -125,113 +170,166 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
   // Prepare chart data
   const monthlyTrendData = useMemo(() => {
     if (!selectedKeyword?.monthlySearches) return []
-    
-    return selectedKeyword.monthlySearches.map(item => ({
-      month: `${item.year}-${item.month.toString().padStart(2, '0')}`,
-      volume: item.search_volume,
-      monthName: new Date(item.year, item.month - 1).toLocaleDateString('fr-FR', { month: 'short' })
-    })).reverse()
+
+    return selectedKeyword.monthlySearches
+      .map((item) => ({
+        month: `${item.year}-${item.month.toString().padStart(2, "0")}`,
+        volume: item.search_volume,
+        monthName: new Date(item.year, item.month - 1).toLocaleDateString(
+          "fr-FR",
+          { month: "short" }
+        ),
+      }))
+      .reverse()
   }, [selectedKeyword])
 
   const competitionDistribution = useMemo(() => {
     if (!data?.rankedKeywords) return []
-    
+
     const levels = { LOW: 0, MEDIUM: 0, HIGH: 0, UNKNOWN: 0 }
-    data.rankedKeywords.forEach(kw => {
+    data.rankedKeywords.forEach((kw) => {
       levels[kw.competitionLevel as keyof typeof levels] += 1
     })
-    
+
     return Object.entries(levels).map(([level, count]) => ({
       name: level,
       value: count,
-      color: level === 'LOW' ? '#10b981' : level === 'MEDIUM' ? '#f59e0b' : level === 'HIGH' ? '#ef4444' : '#6b7280'
+      color:
+        level === "LOW"
+          ? "#10b981"
+          : level === "MEDIUM"
+            ? "#f59e0b"
+            : level === "HIGH"
+              ? "#ef4444"
+              : "#6b7280",
     }))
   }, [data])
 
   const intentDistribution = useMemo(() => {
     if (!data?.rankedKeywords) return []
-    
+
     const intents: { [key: string]: number } = {}
-    data.rankedKeywords.forEach(kw => {
+    data.rankedKeywords.forEach((kw) => {
       intents[kw.intent] = (intents[kw.intent] || 0) + 1
     })
-    
+
     return Object.entries(intents).map(([intent, count]) => ({
       intent,
       count,
-      percentage: Math.round((count / data.rankedKeywords.length) * 100)
+      percentage: Math.round((count / data.rankedKeywords.length) * 100),
     }))
   }, [data])
 
   const getIntentIcon = (intent: string) => {
     switch (intent) {
-      case 'transactional': return <DollarSign className="h-4 w-4 text-green-500" />
-      case 'informational': return <Search className="h-4 w-4 text-blue-500" />
-      case 'navigational': return <Globe className="h-4 w-4 text-purple-500" />
-      default: return <Hash className="h-4 w-4 text-gray-500" />
+      case "transactional":
+        return <DollarSign className="h-4 w-4 text-green-500" />
+      case "informational":
+        return <Search className="h-4 w-4 text-blue-500" />
+      case "navigational":
+        return <Globe className="h-4 w-4 text-purple-500" />
+      default:
+        return <Hash className="h-4 w-4 text-gray-500" />
     }
   }
 
   const getPositionTrend = (keyword: DetailedKeyword) => {
-    if (keyword.isNew) return <Badge className="bg-blue-500"><Star className="h-3 w-3 mr-1" />New</Badge>
-    if (keyword.isUp) return <Badge className="bg-green-500"><ArrowUp className="h-3 w-3 mr-1" />↑</Badge>
-    if (keyword.isDown) return <Badge className="bg-red-500"><ArrowDown className="h-3 w-3 mr-1" />↓</Badge>
-    return <Badge variant="outline"><Minus className="h-3 w-3 mr-1" />-</Badge>
+    if (keyword.isNew)
+      return (
+        <Badge className="bg-blue-500">
+          <Star className="mr-1 h-3 w-3" />
+          New
+        </Badge>
+      )
+    if (keyword.isUp)
+      return (
+        <Badge className="bg-green-500">
+          <ArrowUp className="mr-1 h-3 w-3" />↑
+        </Badge>
+      )
+    if (keyword.isDown)
+      return (
+        <Badge className="bg-red-500">
+          <ArrowDown className="mr-1 h-3 w-3" />↓
+        </Badge>
+      )
+    return (
+      <Badge variant="outline">
+        <Minus className="mr-1 h-3 w-3" />-
+      </Badge>
+    )
   }
 
   const getDifficultyColor = (difficulty: number) => {
-    if (difficulty <= 30) return 'text-green-600'
-    if (difficulty <= 70) return 'text-yellow-600'
-    return 'text-red-600'
+    if (difficulty <= 30) return "text-green-600"
+    if (difficulty <= 70) return "text-yellow-600"
+    return "text-red-600"
   }
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
         <span className="ml-2">Chargement des données avancées...</span>
       </div>
     )
   }
 
   if (!data) {
-    return <div className="text-center py-8 text-gray-500">Aucune donnée disponible</div>
+    return (
+      <div className="py-8 text-center text-gray-500">
+        Aucune donnée disponible
+      </div>
+    )
   }
 
   return (
     <div className="space-y-6">
       {/* Hero Dashboard */}
-      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950">
+      <Card className="border-violet-200 bg-gradient-to-r from-violet-50 to-purple-50 dark:border-violet-800 dark:from-violet-950/30 dark:to-purple-950/30">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Crown className="h-6 w-6 text-yellow-500" />
+          <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+            <Award className="h-6 w-6 text-violet-600 dark:text-violet-400" />
             Analyse Complète - {websiteName}
           </CardTitle>
-          <CardDescription>
-            Données enrichies de {data.rankedKeywords.length} mots-clés avec insights concurrentiels
+          <CardDescription className="text-gray-600 dark:text-gray-300">
+            Données enrichies de {data.rankedKeywords.length} mots-clés avec
+            insights concurrentiels
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            <div className="text-center p-4 bg-white dark:bg-gray-800 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600">{data.summary.avgSearchVolume.toLocaleString()}</div>
-              <div className="text-sm text-gray-500">Volume Moyen</div>
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            <div className="rounded-lg border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800">
+              <div className="text-2xl font-bold text-violet-600 dark:text-violet-400">
+                {data.summary.avgSearchVolume.toLocaleString()}
+              </div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                Volume Moyen
+              </div>
             </div>
-            <div className="text-center p-4 bg-white dark:bg-gray-800 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">#{data.summary.avgPosition}</div>
-              <div className="text-sm text-gray-500">Position Moy.</div>
+            <div className="rounded-lg border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800">
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                #{data.summary.avgPosition}
+              </div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                Position Moy.
+              </div>
             </div>
-            <div className="text-center p-4 bg-white dark:bg-gray-800 rounded-lg">
-              <div className="text-2xl font-bold text-purple-600">€{data.summary.avgCpc.toFixed(2)}</div>
-              <div className="text-sm text-gray-500">CPC Moyen</div>
+            <div className="rounded-lg border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800">
+              <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                €{data.summary.avgCpc.toFixed(2)}
+              </div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                CPC Moyen
+              </div>
             </div>
-            <div className="text-center p-4 bg-white dark:bg-gray-800 rounded-lg">
-              <div className="text-2xl font-bold text-orange-600">€{data.summary.totalEtv.toFixed(0)}</div>
-              <div className="text-sm text-gray-500">Valeur Trafic</div>
-            </div>
-            <div className="text-center p-4 bg-white dark:bg-gray-800 rounded-lg">
-              <div className="text-2xl font-bold text-red-600">{data.competitors.length}</div>
-              <div className="text-sm text-gray-500">Concurrents</div>
+            <div className="rounded-lg border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800">
+              <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                €{data.summary.totalEtv.toFixed(0)}
+              </div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                Valeur Trafic
+              </div>
             </div>
           </div>
         </CardContent>
@@ -239,21 +337,38 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
 
       {/* Tabs Navigation */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-4 w-full">
-          <TabsTrigger value="overview">📊 Vue d&apos;ensemble</TabsTrigger>
-          <TabsTrigger value="keywords">🔍 Mots-clés</TabsTrigger>
-          <TabsTrigger value="competitors">👥 Concurrents</TabsTrigger>
-          <TabsTrigger value="insights">💡 Insights</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 bg-gray-100 dark:bg-gray-800">
+          <TabsTrigger
+            value="overview"
+            className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-violet-600 dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-violet-400"
+          >
+            <BarChart3 className="h-4 w-4" />
+            Vue d&apos;ensemble
+          </TabsTrigger>
+          <TabsTrigger
+            value="keywords"
+            className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-violet-600 dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-violet-400"
+          >
+            <Search className="h-4 w-4" />
+            Mots-clés
+          </TabsTrigger>
+          <TabsTrigger
+            value="pages"
+            className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-violet-600 dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-violet-400"
+          >
+            <FileText className="h-4 w-4" />
+            Pages
+          </TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {/* Competition Distribution */}
-            <Card>
+            <Card className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+                  <Shield className="h-5 w-5 text-violet-600 dark:text-violet-400" />
                   Distribution de la Concurrence
                 </CardTitle>
               </CardHeader>
@@ -276,10 +391,17 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
                     <Tooltip />
                   </PieChart>
                 </ResponsiveContainer>
-                <div className="flex flex-wrap gap-2 mt-4">
+                <div className="mt-4 flex flex-wrap gap-2">
                   {competitionDistribution.map((item) => (
-                    <Badge key={item.name} variant="outline" className="flex items-center gap-1">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
+                    <Badge
+                      key={item.name}
+                      variant="outline"
+                      className="flex items-center gap-1"
+                    >
+                      <div
+                        className="h-3 w-3 rounded-full"
+                        style={{ backgroundColor: item.color }}
+                      ></div>
                       {item.name}: {item.value}
                     </Badge>
                   ))}
@@ -288,24 +410,29 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
             </Card>
 
             {/* Intent Analysis */}
-            <Card>
+            <Card className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+                  <Target className="h-5 w-5 text-violet-600 dark:text-violet-400" />
                   Analyse d&apos;Intention
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   {intentDistribution.map((item) => (
-                    <div key={item.intent} className="flex items-center justify-between">
+                    <div
+                      key={item.intent}
+                      className="flex items-center justify-between"
+                    >
                       <div className="flex items-center gap-2">
                         {getIntentIcon(item.intent)}
                         <span className="capitalize">{item.intent}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Progress value={item.percentage} className="w-20" />
-                        <span className="text-sm font-medium">{item.percentage}%</span>
+                        <span className="text-sm font-medium">
+                          {item.percentage}%
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -319,15 +446,15 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
         <TabsContent value="keywords" className="space-y-4">
           <div className="grid gap-4">
             {data.rankedKeywords.slice(0, 20).map((keyword, index) => (
-              <Card 
-                key={keyword.keyword} 
-                className="cursor-pointer hover:shadow-md transition-shadow"
+              <Card
+                key={keyword.keyword}
+                className="cursor-pointer border-gray-200 bg-white transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-gray-900"
                 onClick={() => openKeywordModal(keyword)}
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="text-lg font-semibold text-blue-600">
+                      <div className="text-lg font-semibold text-violet-600 dark:text-violet-400">
                         {keyword.keyword}
                       </div>
                       {getPositionTrend(keyword)}
@@ -335,38 +462,54 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
                     </div>
                     <div className="flex items-center gap-2">
                       {keyword.currentPosition && (
-                        <Badge variant="outline">#{keyword.currentPosition}</Badge>
+                        <Badge variant="outline">
+                          #{keyword.currentPosition}
+                        </Badge>
                       )}
-                      <Button variant="ghost" size="sm">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-600 hover:text-violet-600 dark:text-gray-400 dark:hover:text-violet-400"
+                      >
                         <Eye className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
                     <div>
                       <div className="text-gray-500">Volume</div>
-                      <div className="font-medium">{keyword.searchVolume.toLocaleString()}/mois</div>
+                      <div className="font-medium">
+                        {keyword.searchVolume.toLocaleString()}/mois
+                      </div>
                     </div>
                     <div>
                       <div className="text-gray-500">CPC</div>
-                      <div className="font-medium">€{keyword.cpc.toFixed(2)}</div>
+                      <div className="font-medium">
+                        €{keyword.cpc.toFixed(2)}
+                      </div>
                     </div>
                     <div>
                       <div className="text-gray-500">Difficulté</div>
-                      <div className={`font-medium ${getDifficultyColor(keyword.difficulty)}`}>
-                        {keyword.difficulty > 0 ? `${keyword.difficulty}%` : 'N/A'}
+                      <div
+                        className={`font-medium ${getDifficultyColor(keyword.difficulty)}`}
+                      >
+                        {keyword.difficulty > 0
+                          ? `${keyword.difficulty}%`
+                          : "N/A"}
                       </div>
                     </div>
                     <div>
                       <div className="text-gray-500">Valeur</div>
-                      <div className="font-medium text-green-600">€{keyword.etv.toFixed(2)}</div>
+                      <div className="font-medium text-green-600">
+                        €{keyword.etv.toFixed(2)}
+                      </div>
                     </div>
                   </div>
-                  
+
                   {keyword.description && (
-                    <div className="mt-3 text-sm text-gray-600 truncate">
+                    <div className="mt-3 truncate text-sm text-gray-600">
                       {keyword.description}
                     </div>
                   )}
@@ -376,134 +519,18 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
           </div>
         </TabsContent>
 
-        {/* Competitors Tab */}
-        <TabsContent value="competitors" className="space-y-4">
-          <div className="grid gap-4">
-            {data.competitors.map((competitor, index) => (
-              <Card key={competitor.domain}>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Badge className="bg-gradient-to-r from-red-500 to-orange-500">
-                        #{index + 1}
-                      </Badge>
-                      <div>
-                        <div className="font-semibold">{competitor.websiteName}</div>
-                        <div className="text-sm text-gray-500">{competitor.domain}</div>
-                      </div>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      <ExternalLink className="h-4 w-4 mr-1" />
-                      Visiter
-                    </Button>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                    <div className="text-center p-3 bg-blue-50 rounded-lg">
-                      <div className="text-xl font-bold text-blue-600">{competitor.appearances}</div>
-                      <div className="text-sm text-gray-600">Mots-clés</div>
-                    </div>
-                    <div className="text-center p-3 bg-green-50 rounded-lg">
-                      <div className="text-xl font-bold text-green-600">#{competitor.avgPosition}</div>
-                      <div className="text-sm text-gray-600">Position Moy.</div>
-                    </div>
-                    <div className="text-center p-3 bg-purple-50 rounded-lg">
-                      <div className="text-xl font-bold text-purple-600">€{competitor.totalEtv}</div>
-                      <div className="text-sm text-gray-600">Valeur ETV</div>
-                    </div>
-                    <div className="text-center p-3 bg-orange-50 rounded-lg">
-                      <div className="text-xl font-bold text-orange-600">
-                        {competitor.backlinks?.backlinks || 'N/A'}
-                      </div>
-                      <div className="text-sm text-gray-600">Backlinks</div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="text-sm font-medium">Top mots-clés concurrentiels:</div>
-                    <div className="flex flex-wrap gap-2">
-                      {competitor.keywords.slice(0, 8).map((kw) => (
-                        <Badge key={kw.keyword} variant="secondary" className="text-xs">
-                          {kw.keyword} (#{kw.position})
-                        </Badge>
-                      ))}
-                      {competitor.keywords.length > 8 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{competitor.keywords.length - 8} autres
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        {/* Insights Tab */}
-        <TabsContent value="insights" className="space-y-4">
-          <div className="grid gap-4">
-            <Card className="bg-gradient-to-r from-green-50 to-blue-50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-yellow-500" />
-                  Opportunités Rapides
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {data.rankedKeywords
-                    .filter(kw => kw.competitionLevel === 'LOW' && kw.searchVolume > 500)
-                    .slice(0, 5)
-                    .map((kw) => (
-                      <div key={kw.keyword} className="flex items-center justify-between p-3 bg-white rounded-lg">
-                        <div>
-                          <div className="font-medium">{kw.keyword}</div>
-                          <div className="text-sm text-gray-500">
-                            {kw.searchVolume.toLocaleString()} recherches • Faible concurrence
-                          </div>
-                        </div>
-                        <Badge className="bg-green-500">Opportunité</Badge>
-                      </div>
-                    ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-r from-yellow-50 to-orange-50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <AlertCircle className="h-5 w-5 text-orange-500" />
-                  Positions à Améliorer
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {data.rankedKeywords
-                    .filter(kw => kw.currentPosition && kw.currentPosition > 10 && kw.searchVolume > 300)
-                    .slice(0, 5)
-                    .map((kw) => (
-                      <div key={kw.keyword} className="flex items-center justify-between p-3 bg-white rounded-lg">
-                        <div>
-                          <div className="font-medium">{kw.keyword}</div>
-                          <div className="text-sm text-gray-500">
-                            Position #{kw.currentPosition} • {kw.searchVolume.toLocaleString()} recherches
-                          </div>
-                        </div>
-                        <Badge className="bg-orange-500">À Améliorer</Badge>
-                      </div>
-                    ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        {/* Pages Tab */}
+        <TabsContent value="pages" className="space-y-4">
+          <GroupedKeywordResults
+            analysisId={analysisId}
+            websiteName={websiteName}
+          />
         </TabsContent>
       </Tabs>
 
       {/* Keyword Detail Modal */}
       <Dialog open={showKeywordModal} onOpenChange={setShowKeywordModal}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-h-[80vh] max-w-4xl overflow-y-auto">
           {selectedKeyword && (
             <>
               <DialogHeader>
@@ -515,25 +542,35 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
                   Analyse détaillée et historique des performances
                 </DialogDescription>
               </DialogHeader>
-              
+
               <div className="space-y-6">
                 {/* Key Metrics */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="p-4 bg-blue-50 rounded-lg text-center">
-                    <div className="text-2xl font-bold text-blue-600">{selectedKeyword.searchVolume.toLocaleString()}</div>
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                  <div className="rounded-lg bg-blue-50 p-4 text-center">
+                    <div className="text-2xl font-bold text-blue-600">
+                      {selectedKeyword.searchVolume.toLocaleString()}
+                    </div>
                     <div className="text-sm text-gray-600">Volume/mois</div>
                   </div>
-                  <div className="p-4 bg-green-50 rounded-lg text-center">
-                    <div className="text-2xl font-bold text-green-600">#{selectedKeyword.currentPosition || 'N/A'}</div>
+                  <div className="rounded-lg bg-green-50 p-4 text-center">
+                    <div className="text-2xl font-bold text-green-600">
+                      #{selectedKeyword.currentPosition || "N/A"}
+                    </div>
                     <div className="text-sm text-gray-600">Position</div>
                   </div>
-                  <div className="p-4 bg-purple-50 rounded-lg text-center">
-                    <div className="text-2xl font-bold text-purple-600">€{selectedKeyword.cpc.toFixed(2)}</div>
+                  <div className="rounded-lg bg-purple-50 p-4 text-center">
+                    <div className="text-2xl font-bold text-purple-600">
+                      €{selectedKeyword.cpc.toFixed(2)}
+                    </div>
                     <div className="text-sm text-gray-600">CPC</div>
                   </div>
-                  <div className="p-4 bg-orange-50 rounded-lg text-center">
-                    <div className={`text-2xl font-bold ${getDifficultyColor(selectedKeyword.difficulty)}`}>
-                      {selectedKeyword.difficulty > 0 ? `${selectedKeyword.difficulty}%` : 'N/A'}
+                  <div className="rounded-lg bg-orange-50 p-4 text-center">
+                    <div
+                      className={`text-2xl font-bold ${getDifficultyColor(selectedKeyword.difficulty)}`}
+                    >
+                      {selectedKeyword.difficulty > 0
+                        ? `${selectedKeyword.difficulty}%`
+                        : "N/A"}
                     </div>
                     <div className="text-sm text-gray-600">Difficulté</div>
                   </div>
@@ -554,8 +591,18 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis dataKey="monthName" />
                           <YAxis />
-                          <Tooltip formatter={(value) => [`${value} recherches`, 'Volume']} />
-                          <Line type="monotone" dataKey="volume" stroke="#3b82f6" strokeWidth={2} />
+                          <Tooltip
+                            formatter={(value) => [
+                              `${value} recherches`,
+                              "Volume",
+                            ]}
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="volume"
+                            stroke="#3b82f6"
+                            strokeWidth={2}
+                          />
                         </LineChart>
                       </ResponsiveContainer>
                     </CardContent>
@@ -563,7 +610,7 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
                 )}
 
                 {/* Additional Details */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <Card>
                     <CardHeader>
                       <CardTitle className="text-lg">Détails SEO</CardTitle>
@@ -573,23 +620,40 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
                         <span className="text-sm text-gray-600">Intent:</span>
                         <div className="flex items-center gap-1">
                           {getIntentIcon(selectedKeyword.intent)}
-                          <span className="capitalize">{selectedKeyword.intent}</span>
+                          <span className="capitalize">
+                            {selectedKeyword.intent}
+                          </span>
                         </div>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">Concurrence:</span>
-                        <Badge variant={selectedKeyword.competitionLevel === 'LOW' ? 'default' : 
-                                      selectedKeyword.competitionLevel === 'MEDIUM' ? 'secondary' : 'destructive'}>
+                        <span className="text-sm text-gray-600">
+                          Concurrence:
+                        </span>
+                        <Badge
+                          variant={
+                            selectedKeyword.competitionLevel === "LOW"
+                              ? "default"
+                              : selectedKeyword.competitionLevel === "MEDIUM"
+                                ? "secondary"
+                                : "destructive"
+                          }
+                        >
                           {selectedKeyword.competitionLevel}
                         </Badge>
                       </div>
                       {selectedKeyword.serpFeatures.length > 0 && (
                         <div>
-                          <span className="text-sm text-gray-600">SERP Features:</span>
-                          <div className="flex flex-wrap gap-1 mt-1">
+                          <span className="text-sm text-gray-600">
+                            SERP Features:
+                          </span>
+                          <div className="mt-1 flex flex-wrap gap-1">
                             {selectedKeyword.serpFeatures.map((feature) => (
-                              <Badge key={feature} variant="outline" className="text-xs">
-                                {feature.replace('_', ' ')}
+                              <Badge
+                                key={feature}
+                                variant="outline"
+                                className="text-xs"
+                              >
+                                {feature.replace("_", " ")}
                               </Badge>
                             ))}
                           </div>
@@ -605,21 +669,37 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
                     <CardContent className="space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-600">ETV:</span>
-                        <span className="font-medium text-green-600">€{selectedKeyword.etv.toFixed(2)}</span>
+                        <span className="font-medium text-green-600">
+                          €{selectedKeyword.etv.toFixed(2)}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">Coût Pub Estimé:</span>
-                        <span className="font-medium">€{selectedKeyword.estimatedPaidCost.toFixed(2)}</span>
+                        <span className="text-sm text-gray-600">
+                          Coût Pub Estimé:
+                        </span>
+                        <span className="font-medium">
+                          €{selectedKeyword.estimatedPaidCost.toFixed(2)}
+                        </span>
                       </div>
                       {selectedKeyword.trends && (
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Tendance Annuelle:</span>
-                          <span className={`font-medium flex items-center gap-1 ${
-                            selectedKeyword.trends.yearly > 0 ? 'text-green-600' : 
-                            selectedKeyword.trends.yearly < 0 ? 'text-red-600' : 'text-gray-600'
-                          }`}>
-                            {selectedKeyword.trends.yearly > 0 ? <TrendingUp className="h-4 w-4" /> : 
-                             selectedKeyword.trends.yearly < 0 ? <TrendingDown className="h-4 w-4" /> : null}
+                          <span className="text-sm text-gray-600">
+                            Tendance Annuelle:
+                          </span>
+                          <span
+                            className={`flex items-center gap-1 font-medium ${
+                              selectedKeyword.trends.yearly > 0
+                                ? "text-green-600"
+                                : selectedKeyword.trends.yearly < 0
+                                  ? "text-red-600"
+                                  : "text-gray-600"
+                            }`}
+                          >
+                            {selectedKeyword.trends.yearly > 0 ? (
+                              <TrendingUp className="h-4 w-4" />
+                            ) : selectedKeyword.trends.yearly < 0 ? (
+                              <TrendingDown className="h-4 w-4" />
+                            ) : null}
                             {selectedKeyword.trends.yearly}%
                           </span>
                         </div>
@@ -632,7 +712,7 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
                 {selectedKeyword.url && (
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2">
+                      <CardTitle className="flex items-center gap-2 text-lg">
                         <Globe className="h-5 w-5" />
                         Page qui Rank
                       </CardTitle>
@@ -641,22 +721,34 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
                       <div className="space-y-2">
                         <div>
                           <span className="text-sm text-gray-600">URL:</span>
-                          <a href={selectedKeyword.url} target="_blank" rel="noopener noreferrer" 
-                             className="ml-2 text-blue-600 hover:underline flex items-center gap-1">
+                          <a
+                            href={selectedKeyword.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ml-2 flex items-center gap-1 text-blue-600 hover:underline"
+                          >
                             {selectedKeyword.url}
                             <ExternalLink className="h-3 w-3" />
                           </a>
                         </div>
                         {selectedKeyword.title && (
                           <div>
-                            <span className="text-sm text-gray-600">Titre:</span>
-                            <p className="text-sm mt-1">{selectedKeyword.title}</p>
+                            <span className="text-sm text-gray-600">
+                              Titre:
+                            </span>
+                            <p className="mt-1 text-sm">
+                              {selectedKeyword.title}
+                            </p>
                           </div>
                         )}
                         {selectedKeyword.description && (
                           <div>
-                            <span className="text-sm text-gray-600">Description:</span>
-                            <p className="text-sm text-gray-700 mt-1">{selectedKeyword.description}</p>
+                            <span className="text-sm text-gray-600">
+                              Description:
+                            </span>
+                            <p className="mt-1 text-sm text-gray-700">
+                              {selectedKeyword.description}
+                            </p>
                           </div>
                         )}
                       </div>

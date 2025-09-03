@@ -35,8 +35,10 @@ import {
   ExternalLink,
   Hash,
   Award,
+  Globe,
 } from "lucide-react"
 import { EnhancedKeywordResults } from "./enhanced-keyword-results"
+import { GroupedKeywordResults } from "./grouped-keyword-results"
 
 interface KeywordData {
   keyword: string
@@ -58,8 +60,12 @@ interface KeywordData {
   domain?: string
   intent?: string
   foreignIntent?: string[]
-  monthlySearches?: Array<{ year: number, month: number, search_volume: number }>
-  trends?: { yearly: number, monthly: number, quarterly: number }
+  monthlySearches?: Array<{
+    year: number
+    month: number
+    search_volume: number
+  }>
+  trends?: { yearly: number; monthly: number; quarterly: number }
   etv?: number
   estimatedPaidCost?: number
   backlinks?: any
@@ -112,6 +118,8 @@ export function KeywordResults({ results, websiteName }: Props) {
     maxDifficulty: "",
     search: "",
   })
+
+  const [viewMode, setViewMode] = useState<"list" | "grouped">("list")
 
   // Metrics calculations
   const metrics = useMemo(() => {
@@ -244,7 +252,11 @@ export function KeywordResults({ results, websiteName }: Props) {
   return (
     <div className="space-y-6">
       {/* Enhanced Interactive Results */}
-      <EnhancedKeywordResults analysisId={results.id} websiteName={websiteName} />
+      <EnhancedKeywordResults
+        analysisId={results.id}
+        websiteName={websiteName}
+      />
+
       {/* Header & Summary Stats */}
       <Card>
         <CardHeader>
@@ -443,39 +455,94 @@ export function KeywordResults({ results, websiteName }: Props) {
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">
                         <span>{keyword.keyword}</span>
-                        {keyword.isNew && <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800">NEW</Badge>}
-                        {keyword.isUp && <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">↑</Badge>}
-                        {keyword.isDown && <Badge variant="secondary" className="text-xs bg-red-100 text-red-800">↓</Badge>}
-                        {keyword.intent && keyword.intent !== 'unknown' && (
-                          <Badge variant="outline" className="text-xs">
-                            {keyword.intent === 'transactional' ? '💰' : 
-                             keyword.intent === 'informational' ? '📖' : 
-                             keyword.intent === 'navigational' ? '🧭' : '❓'}
+                        {keyword.isNew && (
+                          <Badge
+                            variant="secondary"
+                            className="bg-blue-100 text-xs text-blue-800"
+                          >
+                            NEW
+                          </Badge>
+                        )}
+                        {keyword.isUp && (
+                          <Badge
+                            variant="secondary"
+                            className="bg-green-100 text-xs text-green-800"
+                          >
+                            ↑
+                          </Badge>
+                        )}
+                        {keyword.isDown && (
+                          <Badge
+                            variant="secondary"
+                            className="bg-red-100 text-xs text-red-800"
+                          >
+                            ↓
+                          </Badge>
+                        )}
+                        {keyword.intent && keyword.intent !== "unknown" && (
+                          <Badge
+                            variant="outline"
+                            className={`text-xs ${
+                              keyword.intent === "transactional"
+                                ? "border-green-300 bg-green-50 text-green-700 dark:border-green-700 dark:bg-green-900/20 dark:text-green-400"
+                                : keyword.intent === "informational"
+                                  ? "border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-700 dark:bg-blue-900/20 dark:text-blue-400"
+                                  : keyword.intent === "navigational"
+                                    ? "border-purple-300 bg-purple-50 text-purple-700 dark:border-purple-700 dark:bg-purple-900/20 dark:text-purple-400"
+                                    : "border-gray-300 bg-gray-50 text-gray-700 dark:border-gray-700 dark:bg-gray-900/20 dark:text-gray-400"
+                            }`}
+                          >
+                            {keyword.intent === "transactional"
+                              ? "Commercial"
+                              : keyword.intent === "informational"
+                                ? "Informationnel"
+                                : keyword.intent === "navigational"
+                                  ? "Navigationnel"
+                                  : keyword.intent}
                           </Badge>
                         )}
                       </div>
-                      {keyword.competitionLevel && keyword.competitionLevel !== 'UNKNOWN' && (
-                        <div className="text-xs text-gray-500 mt-1">
-                          Competition: <span className={`font-medium ${
-                            keyword.competitionLevel === 'LOW' ? 'text-green-600' :
-                            keyword.competitionLevel === 'MEDIUM' ? 'text-yellow-600' : 'text-red-600'
-                          }`}>{keyword.competitionLevel}</span>
-                        </div>
-                      )}
-                      {keyword.serpFeatures && keyword.serpFeatures.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {keyword.serpFeatures.slice(0, 3).map((feature, idx) => (
-                            <Badge key={idx} variant="outline" className="text-xs px-1 py-0">
-                              {feature.replace(/_/g, ' ').toLowerCase()}
-                            </Badge>
-                          ))}
-                          {keyword.serpFeatures.length > 3 && (
-                            <Badge variant="outline" className="text-xs px-1 py-0">
-                              +{keyword.serpFeatures.length - 3}
-                            </Badge>
-                          )}
-                        </div>
-                      )}
+                      {keyword.competitionLevel &&
+                        keyword.competitionLevel !== "UNKNOWN" && (
+                          <div className="mt-1 text-xs text-gray-500">
+                            Competition:{" "}
+                            <span
+                              className={`font-medium ${
+                                keyword.competitionLevel === "LOW"
+                                  ? "text-green-600"
+                                  : keyword.competitionLevel === "MEDIUM"
+                                    ? "text-yellow-600"
+                                    : "text-red-600"
+                              }`}
+                            >
+                              {keyword.competitionLevel}
+                            </span>
+                          </div>
+                        )}
+                      {keyword.serpFeatures &&
+                        keyword.serpFeatures.length > 0 && (
+                          <div className="mt-1 flex flex-wrap gap-1">
+                            {keyword.serpFeatures
+                              .slice(0, 3)
+                              .map((feature, idx) => (
+                                <Badge
+                                  key={idx}
+                                  variant="outline"
+                                  className="px-1 py-0 text-xs"
+                                >
+                                  {feature.replace(/_/g, " ").toLowerCase()}
+                                </Badge>
+                              ))}
+                            {keyword.serpFeatures.length > 3 && (
+                              <Badge
+                                variant="outline"
+                                className="px-1 py-0 text-xs"
+                              >
+                                +{keyword.serpFeatures.length - 3}
+                              </Badge>
+                            )}
+                          </div>
+                        )}
                     </TableCell>
                     <TableCell>
                       <Badge
@@ -497,20 +564,35 @@ export function KeywordResults({ results, websiteName }: Props) {
                       <div className="flex items-center justify-end gap-1">
                         <span>{formatNumber(keyword.searchVolume)}</span>
                         {keyword.trends && keyword.trends.monthly && (
-                          <span className={`text-xs ${
-                            keyword.trends.monthly > 0 ? 'text-green-500' : 
-                            keyword.trends.monthly < 0 ? 'text-red-500' : 'text-gray-400'
-                          }`}>
-                            {keyword.trends.monthly > 0 ? '↗' : 
-                             keyword.trends.monthly < 0 ? '↘' : '→'}
+                          <span
+                            className={`text-xs ${
+                              keyword.trends.monthly > 0
+                                ? "text-green-500"
+                                : keyword.trends.monthly < 0
+                                  ? "text-red-500"
+                                  : "text-gray-400"
+                            }`}
+                          >
+                            {keyword.trends.monthly > 0
+                              ? "↗"
+                              : keyword.trends.monthly < 0
+                                ? "↘"
+                                : "→"}
                           </span>
                         )}
                       </div>
-                      {keyword.monthlySearches && keyword.monthlySearches.length > 0 && (
-                        <div className="text-xs text-gray-500 mt-1">
-                          Avg: {Math.round(keyword.monthlySearches.reduce((sum: number, m: any) => sum + m.search_volume, 0) / keyword.monthlySearches.length)}
-                        </div>
-                      )}
+                      {keyword.monthlySearches &&
+                        keyword.monthlySearches.length > 0 && (
+                          <div className="mt-1 text-xs text-gray-500">
+                            Avg:{" "}
+                            {Math.round(
+                              keyword.monthlySearches.reduce(
+                                (sum: number, m: any) => sum + m.search_volume,
+                                0
+                              ) / keyword.monthlySearches.length
+                            )}
+                          </div>
+                        )}
                     </TableCell>
                     <TableCell className="text-right">
                       <Badge

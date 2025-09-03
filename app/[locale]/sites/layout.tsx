@@ -6,7 +6,7 @@ import { Sidebar } from "@/components/layout/sidebar"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 
-export default function ToolsLayout({
+export default function SitesLayout({
   children,
 }: {
   children: React.ReactNode

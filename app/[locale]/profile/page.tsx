@@ -116,7 +116,9 @@ export default function ProfilePage() {
 
       if (authError || !user) {
         // Hardcode the locale for now to avoid dependency loop
-        const currentLocale = window.location.pathname.includes('/fr') ? 'fr' : 'en'
+        const currentLocale = window.location.pathname.includes("/fr")
+          ? "fr"
+          : "en"
         router.push(`/${currentLocale}/login`)
         return
       }
@@ -188,7 +190,9 @@ export default function ProfilePage() {
       }
     } catch (error) {
       // Show basic profile even if error
-      const currentLocale = window.location.pathname.includes('/fr') ? 'fr' : 'en'
+      const currentLocale = window.location.pathname.includes("/fr")
+        ? "fr"
+        : "en"
       setProfile({
         id: "temp",
         email: "user@example.com",
@@ -208,7 +212,7 @@ export default function ProfilePage() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [locale, router])
 
   useEffect(() => {
     fetchProfile()
