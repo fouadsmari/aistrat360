@@ -142,10 +142,8 @@ export function WebsiteManagement() {
       setQuota(data.quota || null)
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") {
-        console.log("Request aborted")
         return
       }
-      console.error("Error fetching websites:", error)
       showToast({
         message: "Erreur lors de la récupération des sites",
         type: "error",
@@ -240,8 +238,6 @@ export function WebsiteManagement() {
         is_primary: formData.is_primary,
       }
 
-      console.log("Submitting website data:", submitData)
-
       const response = await fetch(
         editingWebsite
           ? `/api/profile/websites/${editingWebsite.id}`
@@ -257,7 +253,6 @@ export function WebsiteManagement() {
 
       if (!response.ok) {
         const errorData = await response.json()
-        console.error("API Error Details:", errorData)
 
         // Handle validation errors specifically
         if (response.status === 400 && errorData.details) {
@@ -280,7 +275,6 @@ export function WebsiteManagement() {
       resetForm()
       await fetchWebsites() // Refresh the list
     } catch (error: any) {
-      console.error("Error saving website:", error)
       showToast({
         message: error.message || t("websiteError"),
         type: "error",
@@ -320,7 +314,6 @@ export function WebsiteManagement() {
 
       await fetchWebsites() // Refresh the list
     } catch (error) {
-      console.error("Error deleting website:", error)
       showToast({
         message: t("websiteError"),
         type: "error",

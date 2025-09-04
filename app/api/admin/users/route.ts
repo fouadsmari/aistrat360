@@ -68,8 +68,8 @@ async function checkAdminAccess() {
   return { authorized: true, userId: user.id, role: profile.role }
 }
 
-// GET - Récupère tous les utilisateurs avec leurs abonnements (service role bypass RLS)
-export async function GET() {
+// GET - Récupère les utilisateurs avec pagination et leurs abonnements
+export async function GET(request: Request) {
   try {
     // Check admin access
     const { authorized, error: authError } = await checkAdminAccess()
@@ -77,11 +77,21 @@ export async function GET() {
       return NextResponse.json({ error: authError }, { status: 403 })
     }
 
-    // Récupère les profils avec les abonnements joints
-    const { data: profiles, error } = await supabaseAdmin
-      .from("profiles")
-      .select(
-        `
+    const { searchParams } = new URL(request.url)
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1"))
+    const limit = Math.min(
+      100,
+      Math.max(1, parseInt(searchParams.get("limit") || "20"))
+    )
+    const search = searchParams.get("search") || ""
+    const role = searchParams.get("role") || ""
+    const subscription_plan = searchParams.get("subscription_plan") || ""
+
+    const offset = (page - 1) * limit
+
+    // Build base query
+    let query = supabaseAdmin.from("profiles").select(
+      `
         *,
         subscriptions (
           plan,
@@ -91,17 +101,49 @@ export async function GET() {
           trial_start,
           trial_end
         )
-      `
+      `,
+      { count: "exact" }
+    )
+
+    // Apply filters
+    if (search) {
+      query = query.or(
+        `email.ilike.%${search}%,full_name.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%`
       )
+    }
+
+    if (role && ["user", "admin", "super_admin"].includes(role)) {
+      query = query.eq("role", role)
+    }
+
+    // Apply pagination and ordering
+    const {
+      data: profiles,
+      error,
+      count,
+    } = await query
       .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1)
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    // Transforme les données pour inclure le plan directement dans l'objet utilisateur
-    const usersWithSubscriptions = profiles.map((profile) => {
-      // CORRECTION : subscriptions est un objet unique, pas un tableau !
+    // Filter by subscription plan if specified
+    let filteredProfiles = profiles || []
+    if (
+      subscription_plan &&
+      ["free", "starter", "pro", "advanced"].includes(subscription_plan)
+    ) {
+      filteredProfiles =
+        profiles?.filter((profile) => {
+          const subscription = profile.subscriptions
+          return (subscription?.plan || "free") === subscription_plan
+        }) || []
+    }
+
+    // Transform data to include subscription info directly
+    const usersWithSubscriptions = filteredProfiles.map((profile) => {
       const subscription = profile.subscriptions
 
       return {
@@ -112,7 +154,25 @@ export async function GET() {
       }
     })
 
-    return NextResponse.json({ users: usersWithSubscriptions })
+    const totalCount = count || 0
+    const totalPages = Math.ceil(totalCount / limit)
+
+    return NextResponse.json({
+      users: usersWithSubscriptions,
+      pagination: {
+        page,
+        limit,
+        totalCount,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+      filters: {
+        search,
+        role,
+        subscription_plan,
+      },
+    })
   } catch (error) {
     return NextResponse.json(
       { error: "Internal server error" },

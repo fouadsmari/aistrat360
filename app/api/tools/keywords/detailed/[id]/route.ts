@@ -184,7 +184,6 @@ export async function GET(
       },
     })
   } catch (error: any) {
-    console.error("Error fetching detailed analysis:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -542,23 +542,17 @@ export class DataForSEOClient {
       limit: Math.min(limit, 900), // Enforce 900 keyword limit
     }
 
-    // DEBUG: Temporarily disable cache to test
     // Check cache first
-    // const cached = await this.cache.getCachedResponse(
-    //   inputData,
-    //   "dataforseo",
-    //   "ranked_keywords"
-    // )
-    // if (cached) {
-    //   return cached
-    // }
+    const cached = await this.cache.getCachedResponse(
+      inputData,
+      "dataforseo",
+      "ranked_keywords"
+    )
+    if (cached) {
+      return cached
+    }
 
     try {
-      // DEBUG: Temporary log for debugging
-      console.log(
-        `[DEBUG] getRankedKeywords call - domain: ${domain}, country: ${location}, locationCode: ${inputData.location_code}`
-      )
-
       const response = await fetch(
         `${this.config.baseUrl}/v3/dataforseo_labs/google/ranked_keywords/live`,
         {
@@ -591,26 +585,11 @@ export class DataForSEOClient {
 
       const data = await response.json()
 
-      // DEBUG: Log response
-      console.log(
-        `[DEBUG] DataForSEO response - status_code: ${data.status_code}, tasks: ${data.tasks?.length || 0}`
-      )
-      if (data.tasks?.[0]) {
-        console.log(
-          `[DEBUG] Task result count: ${data.tasks[0].result?.length || 0}`
-        )
-      }
-
       if (data.status_code !== 20000) {
-        console.log(
-          `[DEBUG] DataForSEO error response:`,
-          JSON.stringify(data, null, 2)
-        )
         throw new Error(`DataForSEO error: ${data.status_message}`)
       }
 
       const keywords = data.tasks?.[0]?.result || []
-      console.log(`[DEBUG] Final keywords array length: ${keywords.length}`)
 
       // Cache the results for 90 days
       await this.cache.setCachedResponse(
@@ -622,10 +601,6 @@ export class DataForSEOClient {
 
       return keywords
     } catch (error) {
-      console.log(
-        `[DEBUG] getRankedKeywords error:`,
-        error instanceof Error ? error.message : error
-      )
       throw error
     }
   }
@@ -705,24 +680,12 @@ export class DataForSEOClient {
       }
 
       const data = await response.json()
-      console.log(
-        "DEBUG getKeywordSuggestions (keyword_ideas) response:",
-        JSON.stringify(data, null, 2)
-      )
 
       if (data.status_code !== 20000) {
-        console.log(
-          "DEBUG getKeywordSuggestions (keyword_ideas) error:",
-          data.status_message
-        )
         throw new Error(`DataForSEO error: ${data.status_message}`)
       }
 
       const suggestions = data.tasks?.[0]?.result || []
-      console.log(
-        "DEBUG getKeywordSuggestions (keyword_ideas) final suggestions:",
-        suggestions.length
-      )
 
       // Cache the results for 90 days
       await this.cache.setCachedResponse(

@@ -70,7 +70,6 @@ export async function GET(
 
     return NextResponse.json(website)
   } catch (error) {
-    console.error("Unexpected error in GET /api/profile/websites/[id]:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -142,7 +141,6 @@ export async function POST(
       .single()
 
     if (updateError || !updatedWebsite) {
-      console.error("Error updating website:", updateError)
       return NextResponse.json(
         { error: "Failed to update website or website not found" },
         { status: updateError?.code === "PGRST116" ? 404 : 500 }
@@ -151,7 +149,6 @@ export async function POST(
 
     return NextResponse.json(updatedWebsite)
   } catch (error) {
-    console.error("Unexpected error in POST /api/profile/websites/[id]:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -204,7 +201,6 @@ export async function DELETE(
       .single()
 
     if (deleteError || !deletedWebsite) {
-      console.error("Error deleting website:", deleteError)
       return NextResponse.json(
         { error: "Failed to delete website or website not found" },
         { status: deleteError?.code === "PGRST116" ? 404 : 500 }
@@ -213,10 +209,6 @@ export async function DELETE(
 
     return NextResponse.json({ message: "Website deleted successfully" })
   } catch (error) {
-    console.error(
-      "Unexpected error in DELETE /api/profile/websites/[id]:",
-      error
-    )
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -43,7 +43,6 @@ export function SiteSelector({ className }: SiteSelectorProps) {
           setWebsites([])
         }
       } catch (error) {
-        console.error("Failed to fetch websites:", error)
         setWebsites([])
       } finally {
         setLoading(false)

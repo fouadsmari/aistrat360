@@ -48,7 +48,7 @@ export function SimpleSiteSelector({ className }: SiteSelectorProps) {
           }
         }
       } catch (error) {
-        console.error("Failed to fetch websites:", error)
+        // Error handled silently
       } finally {
         setLoading(false)
       }

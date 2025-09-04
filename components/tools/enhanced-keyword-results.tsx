@@ -143,7 +143,7 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
           setData(result)
         }
       } catch (error) {
-        console.error("Failed to fetch detailed analysis:", error)
+        // Error handled silently
       } finally {
         setLoading(false)
       }

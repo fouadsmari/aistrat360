@@ -195,13 +195,18 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Background analysis function
+// Background analysis function with timeout
 async function performAnalysisInBackground(
   analysisId: string,
   website: any,
   country: string,
   language: string
 ) {
+  // Set timeout for the entire analysis process (15 minutes max)
+  const ANALYSIS_TIMEOUT = 15 * 60 * 1000 // 15 minutes
+  const timeoutId = setTimeout(() => {
+    throw new Error("Analysis timeout: Process exceeded 15 minutes limit")
+  }, ANALYSIS_TIMEOUT)
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -251,22 +256,11 @@ async function performAnalysisInBackground(
 
     // Take top 199 keywords (DataForSEO keyword_ideas limit is 200, keep 1 slot)
     const seedKeywords = rankedKeywordsList.slice(0, 199)
-    console.log(
-      "DEBUG: seedKeywords from ranked results:",
-      seedKeywords.length,
-      "keywords"
-    )
-    console.log("DEBUG: First 10 seedKeywords:", seedKeywords.slice(0, 10))
 
     const keywordSuggestions = await dataforSEO.getKeywordSuggestions(
       seedKeywords,
       country,
       199
-    )
-    console.log(
-      "DEBUG: keywordSuggestions received:",
-      keywordSuggestions.length,
-      "suggestions"
     )
 
     // Step 4: Process and save results (90%)
@@ -327,24 +321,9 @@ async function performAnalysisInBackground(
     }
 
     // Process keyword ideas (new structure from keyword_ideas API)
-    console.log(
-      "DEBUG: Processing",
-      keywordSuggestions.length,
-      "keyword idea results"
-    )
     for (const result of keywordSuggestions) {
-      console.log(
-        "DEBUG: Processing keyword ideas result:",
-        JSON.stringify(result, null, 2)
-      )
-
       // keyword_ideas returns results with items array
       if (result.items && Array.isArray(result.items)) {
-        console.log(
-          "DEBUG: Found",
-          result.items.length,
-          "keyword ideas in result"
-        )
         for (const item of result.items) {
           if (item.keyword) {
             allKeywords.push({
@@ -359,14 +338,8 @@ async function performAnalysisInBackground(
             })
           }
         }
-      } else {
-        console.log("DEBUG: No items found in result or items is null")
       }
     }
-    console.log(
-      "DEBUG: Total allKeywords after suggestions:",
-      allKeywords.length
-    )
 
     // Save keywords to database
     if (allKeywords.length > 0) {
@@ -416,7 +389,9 @@ async function performAnalysisInBackground(
     }
 
     await updateProgress(supabase, analysisId, 100, "completed")
+    clearTimeout(timeoutId) // Clear timeout on success
   } catch (error: any) {
+    clearTimeout(timeoutId) // Clear timeout on error
     // Update analysis with error
     await supabase
       .from("dataforseo_analyses")

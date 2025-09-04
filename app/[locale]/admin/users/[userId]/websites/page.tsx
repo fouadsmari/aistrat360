@@ -143,7 +143,6 @@ export default function UserWebsitesAdminPage() {
         setUserInfo(data.websites[0].profiles)
       }
     } catch (error) {
-      console.error("Error fetching websites:", error)
       showToast({
         message: "Erreur lors du chargement des sites web",
         type: "error",
@@ -230,7 +229,6 @@ export default function UserWebsitesAdminPage() {
       resetForm()
       await fetchWebsites() // Refresh the list
     } catch (error: any) {
-      console.error("Error updating website:", error)
       showToast({
         message: error.message || "Erreur lors de la mise à jour",
         type: "error",
@@ -264,7 +262,6 @@ export default function UserWebsitesAdminPage() {
 
       await fetchWebsites() // Refresh the list
     } catch (error) {
-      console.error("Error deleting website:", error)
       showToast({
         message: "Erreur lors de la suppression",
         type: "error",

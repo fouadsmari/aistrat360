@@ -44,7 +44,7 @@ async function checkAdminAccess() {
   return { user, profile, supabase }
 }
 
-// GET - Retrieve all websites for admin management
+// GET - Retrieve websites with pagination for admin management
 export async function GET(request: NextRequest) {
   try {
     const accessCheck = await checkAdminAccess()
@@ -58,35 +58,75 @@ export async function GET(request: NextRequest) {
     const { supabase } = accessCheck
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get("user_id")
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1"))
+    const limit = Math.min(
+      100,
+      Math.max(1, parseInt(searchParams.get("limit") || "20"))
+    )
+    const search = searchParams.get("search") || ""
+    const status = searchParams.get("status") || ""
 
-    let query = supabase
-      .from("user_websites")
-      .select(
-        `
+    const offset = (page - 1) * limit
+
+    let query = supabase.from("user_websites").select(
+      `
         *,
         profiles!inner(email, full_name)
-      `
-      )
-      .order("created_at", { ascending: false })
+      `,
+      { count: "exact" }
+    )
 
-    // Filter by user if specified
+    // Apply filters
     if (userId) {
       query = query.eq("user_id", userId)
     }
 
-    const { data: websites, error } = await query
+    if (search) {
+      query = query.or(
+        `name.ilike.%${search}%,url.ilike.%${search}%,domain.ilike.%${search}%`
+      )
+    }
+
+    if (status && ["active", "inactive", "suspended"].includes(status)) {
+      query = query.eq("status", status)
+    }
+
+    // Apply pagination and ordering
+    const {
+      data: websites,
+      error,
+      count,
+    } = await query
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1)
 
     if (error) {
-      console.error("Error fetching websites for admin:", error)
       return NextResponse.json(
         { error: "Failed to fetch websites" },
         { status: 500 }
       )
     }
 
-    return NextResponse.json({ websites })
+    const totalCount = count || 0
+    const totalPages = Math.ceil(totalCount / limit)
+
+    return NextResponse.json({
+      websites: websites || [],
+      pagination: {
+        page,
+        limit,
+        totalCount,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+      filters: {
+        search,
+        status,
+        user_id: userId,
+      },
+    })
   } catch (error) {
-    console.error("Unexpected error in GET /api/admin/websites:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -40,9 +40,19 @@ export async function GET(request: NextRequest) {
     }
 
     const { user, supabase } = authResult
+    const { searchParams } = new URL(request.url)
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1"))
+    const limit = Math.min(
+      50,
+      Math.max(1, parseInt(searchParams.get("limit") || "10"))
+    )
+    const websiteId = searchParams.get("website_id") || ""
+    const status = searchParams.get("status") || ""
 
-    // Get user's analysis history with website details
-    const { data: analyses, error } = await supabase
+    const offset = (page - 1) * limit
+
+    // Build query with filters
+    let query = supabase
       .from("dataforseo_analyses")
       .select(
         `
@@ -59,11 +69,31 @@ export async function GET(request: NextRequest) {
           name,
           url
         )
-      `
+      `,
+        { count: "exact" }
       )
       .eq("user_id", user.id)
+
+    // Apply filters
+    if (websiteId) {
+      query = query.eq("website_id", websiteId)
+    }
+
+    if (
+      status &&
+      ["pending", "processing", "completed", "failed"].includes(status)
+    ) {
+      query = query.eq("status", status)
+    }
+
+    // Apply pagination and ordering
+    const {
+      data: analyses,
+      error,
+      count,
+    } = await query
       .order("created_at", { ascending: false })
-      .limit(10)
+      .range(offset, offset + limit - 1)
 
     if (error) {
       return NextResponse.json(
@@ -132,10 +162,6 @@ export async function GET(request: NextRequest) {
         }
 
         // Add keyword suggestions with full data
-        console.log(
-          "DEBUG keyword_suggestions_response:",
-          JSON.stringify(fullAnalysis?.keyword_suggestions_response, null, 2)
-        )
         if (fullAnalysis?.keyword_suggestions_response?.[0]?.items) {
           const suggestionItems =
             fullAnalysis.keyword_suggestions_response[0].items
@@ -206,8 +232,23 @@ export async function GET(request: NextRequest) {
       }) || []
     )
 
+    const totalCount = count || 0
+    const totalPages = Math.ceil(totalCount / limit)
+
     return NextResponse.json({
       analyses: transformedAnalyses,
+      pagination: {
+        page,
+        limit,
+        totalCount,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+      filters: {
+        website_id: websiteId,
+        status,
+      },
     })
   } catch (error: any) {
     return NextResponse.json(

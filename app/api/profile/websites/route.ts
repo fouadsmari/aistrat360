@@ -54,17 +54,13 @@ export async function GET() {
     }
 
     // Get user's websites with quota information
-    console.log("API: Fetching websites for user:", user.id, user.email)
     const { data: websites, error: websitesError } = await supabase
       .from("user_websites")
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
 
-    console.log("API: Found websites:", websites?.length || 0, websites)
-
     if (websitesError) {
-      console.error("Error fetching websites:", websitesError)
       return NextResponse.json(
         { error: "Failed to fetch websites" },
         { status: 500 }
@@ -79,7 +75,6 @@ export async function GET() {
       .maybeSingle()
 
     if (quotaError) {
-      console.error("Error fetching quota:", quotaError)
       return NextResponse.json(
         { error: "Failed to fetch quota information" },
         { status: 500 }
@@ -100,7 +95,6 @@ export async function GET() {
       quota: quotaInfo || defaultQuotaInfo,
     })
   } catch (error) {
-    console.error("Unexpected error in GET /api/profile/websites:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -182,8 +176,6 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (insertError) {
-      console.error("Error creating website:", insertError)
-
       // Handle quota exceeded error from trigger
       if (insertError.message?.includes("quota exceeded")) {
         return NextResponse.json(
@@ -200,7 +192,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(newWebsite, { status: 201 })
   } catch (error) {
-    console.error("Unexpected error in POST /api/profile/websites:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

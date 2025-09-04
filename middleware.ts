@@ -49,9 +49,12 @@ export async function middleware(req: NextRequest) {
 
   const pathname = req.nextUrl.pathname
 
-  // Extract locale from pathname (should be properly set by intl middleware)
+  // Extract locale from pathname with strict validation
   const pathnameLocale = pathname.split("/")[1]
-  const locale = routing.locales.includes(pathnameLocale as any)
+
+  // Validate locale against whitelist of allowed locales
+  const validLocales = ["fr", "en"] // Explicit whitelist
+  const locale = validLocales.includes(pathnameLocale)
     ? pathnameLocale
     : routing.defaultLocale
 

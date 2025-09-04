@@ -312,7 +312,7 @@ export function KeywordAnalysis() {
         handleSiteChange as EventListener
       )
     }
-  }, [])
+  }, [fetchWebsites])
 
   // Auto-load last report when website is selected
   useEffect(() => {
