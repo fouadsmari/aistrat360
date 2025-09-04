@@ -37,6 +37,8 @@ import {
   Hash,
   Award,
   Globe,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react"
 import { EnhancedKeywordResults } from "./enhanced-keyword-results"
 import { GroupedKeywordResults } from "./grouped-keyword-results"
@@ -104,6 +106,10 @@ interface Filters {
   maxVolume: string
   minDifficulty: string
   maxDifficulty: string
+  minCpc: string
+  maxCpc: string
+  minPosition: string
+  maxPosition: string
   search: string
 }
 
@@ -115,6 +121,7 @@ export function KeywordResults({
   const t = useTranslations("tools.keywords.results")
   const tFilters = useTranslations("tools.keywords.filters")
   const tCommon = useTranslations("common")
+  const tTable = useTranslations("tools.keywords.results.table")
 
   const [filters, setFilters] = useState<Filters>({
     keywordType: "all",
@@ -122,10 +129,18 @@ export function KeywordResults({
     maxVolume: "",
     minDifficulty: "",
     maxDifficulty: "",
+    minCpc: "",
+    maxCpc: "",
+    minPosition: "",
+    maxPosition: "",
     search: "",
   })
 
   const [viewMode, setViewMode] = useState<"list" | "grouped">("list")
+  const [sortConfig, setSortConfig] = useState<{
+    key: string
+    direction: "asc" | "desc"
+  } | null>(null)
 
   // Metrics calculations
   const metrics = useMemo(() => {
@@ -161,9 +176,29 @@ export function KeywordResults({
     }
   }, [results.keywords])
 
-  // Filter keywords
+  // Filter and sort keywords
+  // Helper function to get sortable value from keyword
+  const getKeywordValue = (keyword: KeywordData, key: string): any => {
+    switch (key) {
+      case "keyword":
+        return keyword.keyword.toLowerCase()
+      case "searchVolume":
+        return keyword.searchVolume
+      case "difficulty":
+        return keyword.difficulty
+      case "cpc":
+        return keyword.cpc
+      case "position":
+        return keyword.position || 999 // Put keywords without position at the end
+      case "etv":
+        return keyword.etv || 0
+      default:
+        return 0
+    }
+  }
+
   const filteredKeywords = useMemo(() => {
-    return results.keywords.filter((keyword) => {
+    let filtered = results.keywords.filter((keyword) => {
       // Type filter
       if (filters.keywordType === "ranked" && keyword.type !== "ranked")
         return false
@@ -201,20 +236,71 @@ export function KeywordResults({
         if (keyword.difficulty > max) return false
       }
 
+      // CPC filters
+      if (filters.minCpc) {
+        const min = parseFloat(filters.minCpc)
+        if (keyword.cpc < min) return false
+      }
+      if (filters.maxCpc) {
+        const max = parseFloat(filters.maxCpc)
+        if (keyword.cpc > max) return false
+      }
+
+      // Position filters (only for ranked keywords)
+      if (filters.minPosition && keyword.position) {
+        const min = parseInt(filters.minPosition)
+        if (keyword.position < min) return false
+      }
+      if (filters.maxPosition && keyword.position) {
+        const max = parseInt(filters.maxPosition)
+        if (keyword.position > max) return false
+      }
+
       return true
     })
-  }, [results.keywords, filters])
+
+    // Apply sorting
+    if (sortConfig !== null) {
+      filtered = filtered.sort((a, b) => {
+        const aValue = getKeywordValue(a, sortConfig.key)
+        const bValue = getKeywordValue(b, sortConfig.key)
+
+        if (aValue < bValue) {
+          return sortConfig.direction === "asc" ? -1 : 1
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === "asc" ? 1 : -1
+        }
+        return 0
+      })
+    }
+
+    return filtered
+  }, [results.keywords, filters, sortConfig])
+
+  // Handle sort
+  const handleSort = (key: string) => {
+    let direction: "asc" | "desc" = "desc"
+    if (
+      sortConfig &&
+      sortConfig.key === key &&
+      sortConfig.direction === "desc"
+    ) {
+      direction = "asc"
+    }
+    setSortConfig({ key, direction })
+  }
 
   // Export to CSV
   const exportToCSV = () => {
     const headers = [
-      "Keyword",
-      "Type",
-      "Search Volume",
-      "Difficulty",
-      "CPC",
-      "Position",
-      "URL",
+      tTable("keyword"),
+      tTable("type"),
+      tTable("searchVolume"),
+      tTable("difficulty"),
+      tTable("cpc"),
+      tTable("position"),
+      tTable("url"),
     ]
 
     const csvContent = [
@@ -254,6 +340,30 @@ export function KeywordResults({
     if (num >= 1000) return `${(num / 1000).toFixed(1)}K`
     return num.toString()
   }
+
+  // Sortable header component
+  const SortableHeader = ({
+    sortKey,
+    children,
+  }: {
+    sortKey: string
+    children: React.ReactNode
+  }) => (
+    <TableHead
+      className="cursor-pointer select-none hover:bg-gray-50 dark:hover:bg-gray-800"
+      onClick={() => handleSort(sortKey)}
+    >
+      <div className="flex items-center gap-1">
+        {children}
+        {sortConfig?.key === sortKey &&
+          (sortConfig.direction === "asc" ? (
+            <ChevronUp className="h-4 w-4" />
+          ) : (
+            <ChevronDown className="h-4 w-4" />
+          ))}
+      </div>
+    </TableHead>
+  )
 
   return (
     <div className="space-y-6">
@@ -329,7 +439,7 @@ export function KeywordResults({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
             <div className="space-y-2">
               <Label>{tFilters("keywordType")}</Label>
               <Select
@@ -366,7 +476,7 @@ export function KeywordResults({
               <Label>{tFilters("volumeRange")}</Label>
               <div className="flex gap-2">
                 <Input
-                  placeholder="Min"
+                  placeholder={tTable("min")}
                   type="number"
                   value={filters.minVolume}
                   onChange={(e) =>
@@ -377,13 +487,112 @@ export function KeywordResults({
                   }
                 />
                 <Input
-                  placeholder="Max"
+                  placeholder={tTable("max")}
                   type="number"
                   value={filters.maxVolume}
                   onChange={(e) =>
                     setFilters((prev) => ({
                       ...prev,
                       maxVolume: e.target.value,
+                    }))
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Difficulté (%)</Label>
+              <div className="flex gap-2">
+                <Input
+                  placeholder={tTable("min")}
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={filters.minDifficulty}
+                  onChange={(e) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      minDifficulty: e.target.value,
+                    }))
+                  }
+                />
+                <Input
+                  placeholder={tTable("max")}
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={filters.maxDifficulty}
+                  onChange={(e) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      maxDifficulty: e.target.value,
+                    }))
+                  }
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Deuxième ligne de filtres */}
+          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label>CPC ({getCurrencySymbol(targetCountry)})</Label>
+              <div className="flex gap-2">
+                <Input
+                  placeholder={tTable("min")}
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={filters.minCpc}
+                  onChange={(e) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      minCpc: e.target.value,
+                    }))
+                  }
+                />
+                <Input
+                  placeholder={tTable("max")}
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={filters.maxCpc}
+                  onChange={(e) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      maxCpc: e.target.value,
+                    }))
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Position</Label>
+              <div className="flex gap-2">
+                <Input
+                  placeholder={tTable("min")}
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={filters.minPosition}
+                  onChange={(e) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      minPosition: e.target.value,
+                    }))
+                  }
+                />
+                <Input
+                  placeholder={tTable("max")}
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={filters.maxPosition}
+                  onChange={(e) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      maxPosition: e.target.value,
                     }))
                   }
                 />
@@ -404,7 +613,11 @@ export function KeywordResults({
               filters.minVolume ||
               filters.maxVolume ||
               filters.minDifficulty ||
-              filters.maxDifficulty) && (
+              filters.maxDifficulty ||
+              filters.minCpc ||
+              filters.maxCpc ||
+              filters.minPosition ||
+              filters.maxPosition) && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -415,6 +628,10 @@ export function KeywordResults({
                     maxVolume: "",
                     minDifficulty: "",
                     maxDifficulty: "",
+                    minCpc: "",
+                    maxCpc: "",
+                    minPosition: "",
+                    maxPosition: "",
                     search: "",
                   })
                 }
@@ -436,25 +653,45 @@ export function KeywordResults({
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-            <Table>
+            <Table className="w-full table-fixed">
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t("table.keyword")}</TableHead>
-                  <TableHead>{t("table.type")}</TableHead>
-                  <TableHead className="text-right">
-                    {t("table.volume")}
+                  <SortableHeader sortKey="keyword">
+                    <div className="w-full min-w-[200px]">
+                      {t("table.keyword")}
+                    </div>
+                  </SortableHeader>
+                  <TableHead className="w-[80px] text-center">
+                    {t("table.type")}
                   </TableHead>
-                  <TableHead className="text-right">
-                    {t("table.difficulty")}
+                  <SortableHeader sortKey="searchVolume">
+                    <div className="w-full min-w-[100px] text-right">
+                      {t("table.volume")}
+                    </div>
+                  </SortableHeader>
+                  <SortableHeader sortKey="difficulty">
+                    <div className="w-full min-w-[90px] text-right">
+                      {t("table.difficulty")}
+                    </div>
+                  </SortableHeader>
+                  <SortableHeader sortKey="cpc">
+                    <div className="w-full min-w-[80px] text-right">
+                      {t("table.cpc")}
+                    </div>
+                  </SortableHeader>
+                  <SortableHeader sortKey="etv">
+                    <div className="w-full min-w-[90px] text-right">
+                      ETV ({getCurrencySymbol(targetCountry)})
+                    </div>
+                  </SortableHeader>
+                  <SortableHeader sortKey="position">
+                    <div className="w-full min-w-[80px] text-right">
+                      {t("table.position")}
+                    </div>
+                  </SortableHeader>
+                  <TableHead className="w-[80px] text-center">
+                    {t("table.url")}
                   </TableHead>
-                  <TableHead className="text-right">{t("table.cpc")}</TableHead>
-                  <TableHead className="text-right">
-                    ETV ({getCurrencySymbol(targetCountry)})
-                  </TableHead>
-                  <TableHead className="text-right">
-                    {t("table.position")}
-                  </TableHead>
-                  <TableHead>{t("table.url")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -501,11 +738,11 @@ export function KeywordResults({
                             }`}
                           >
                             {keyword.intent === "transactional"
-                              ? "Commercial"
+                              ? tTable("commercial")
                               : keyword.intent === "informational"
-                                ? "Informationnel"
+                                ? tTable("informational")
                                 : keyword.intent === "navigational"
-                                  ? "Navigationnel"
+                                  ? tTable("navigational")
                                   : keyword.intent}
                           </Badge>
                         )}
@@ -552,7 +789,7 @@ export function KeywordResults({
                           </div>
                         )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-center">
                       <Badge
                         variant={
                           keyword.type === "ranked" ? "default" : "secondary"
@@ -563,9 +800,7 @@ export function KeywordResults({
                             : ""
                         }
                       >
-                        {keyword.type === "ranked"
-                          ? t("ranked")
-                          : t("suggestion")}
+                        {keyword.type === "ranked" ? "R" : "S"}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
@@ -634,7 +869,7 @@ export function KeywordResults({
                         "-"
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-center">
                       {keyword.url ? (
                         <Button
                           variant="ghost"
@@ -644,7 +879,7 @@ export function KeywordResults({
                           <ExternalLink className="h-4 w-4" />
                         </Button>
                       ) : (
-                        "-"
+                        <span className="text-gray-400">-</span>
                       )}
                     </TableCell>
                   </TableRow>

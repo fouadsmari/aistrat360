@@ -685,14 +685,37 @@
         "keywordsList": "Keywords list",
         "ranked": "Ranked",
         "suggestion": "Suggestion",
+        "overview": "Overview",
+        "loading": "Loading advanced data",
+        "keywords": "Keywords",
         "table": {
           "keyword": "Keyword",
           "type": "Type",
           "volume": "Volume",
+          "searchVolume": "Search Volume",
           "difficulty": "Difficulty",
           "cpc": "CPC",
           "position": "Position",
-          "url": "URL"
+          "url": "URL",
+          "commercial": "Commercial",
+          "informational": "Informational",
+          "navigational": "Navigational",
+          "min": "Min",
+          "max": "Max"
+        },
+        "cards": {
+          "rankedKeywords": "Positioned Keywords",
+          "suggestedKeywords": "Suggested Keywords",
+          "number": "Number",
+          "avgVolume": "Average Volume",
+          "avgPosition": "Average Position",
+          "avgCpc": "Average CPC",
+          "completeAnalysis": "Complete Analysis",
+          "competitionDistribution": "Competition Distribution",
+          "intentAnalysis": "Intent Analysis",
+          "overview": "Overview",
+          "keywords": "Keywords",
+          "pages": "Pages"
         }
       },
       "filters": {
@@ -708,7 +731,18 @@
         "searchKeywords": "Search keywords",
         "searchPlaceholder": "Search for a keyword...",
         "volumeRange": "Volume range",
-        "clearFilters": "Clear filters"
+        "clearFilters": "Clear filters",
+        "cpc": "CPC",
+        "minCpc": "Minimum CPC",
+        "maxCpc": "Maximum CPC",
+        "position": "Position",
+        "minPosition": "Minimum position",
+        "maxPosition": "Maximum position",
+        "minDifficulty": "Minimum difficulty",
+        "maxDifficulty": "Maximum difficulty",
+        "cpcRange": "CPC range",
+        "positionRange": "Position range",
+        "difficultyRange": "Difficulty range"
       },
       "grouped": {
         "title": "Keywords by Page",

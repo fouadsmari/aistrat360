@@ -141,19 +141,40 @@ export async function GET(request: NextRequest) {
             fullAnalysis.keyword_suggestions_response[0].items
 
           const suggestionKeywords = suggestionItems.map((item: any) => ({
-            keyword: item.keyword_data?.keyword || item.keyword,
+            keyword: item.keyword || item.keyword_data?.keyword,
             type: "suggestion",
-            searchVolume: item.keyword_data?.search_volume || 0,
-            difficulty: item.keyword_data?.keyword_difficulty || 0,
-            cpc: item.keyword_data?.cpc || 0,
-            competition: item.keyword_data?.competition || 0,
-            competitionLevel: item.keyword_data?.competition_level || "UNKNOWN",
+            searchVolume:
+              item.keyword_info?.search_volume ||
+              item.keyword_data?.search_volume ||
+              0,
+            difficulty:
+              item.keyword_properties?.keyword_difficulty ||
+              item.keyword_data?.keyword_difficulty ||
+              0,
+            cpc: item.keyword_info?.cpc || item.keyword_data?.cpc || 0,
+            competition:
+              item.keyword_info?.competition ||
+              item.keyword_data?.competition ||
+              0,
+            competitionLevel:
+              item.keyword_info?.competition_level ||
+              item.keyword_data?.competition_level ||
+              "UNKNOWN",
             position: null,
             intent: item.search_intent_info?.main_intent || "unknown",
-            monthlySearches: item.keyword_data?.monthly_searches || [],
-            trends: item.keyword_data?.search_volume_trend || {},
-            serpFeatures: [],
-            categories: item.keyword_data?.categories || [],
+            monthlySearches:
+              item.keyword_info?.monthly_searches ||
+              item.keyword_data?.monthly_searches ||
+              [],
+            trends:
+              item.keyword_info?.search_volume_trend ||
+              item.keyword_data?.search_volume_trend ||
+              {},
+            serpFeatures: item.serp_info?.serp_item_types || [],
+            categories:
+              item.keyword_info?.categories ||
+              item.keyword_data?.categories ||
+              [],
           }))
 
           formattedKeywords = [...formattedKeywords, ...suggestionKeywords]

@@ -54,11 +54,14 @@ export async function GET() {
     }
 
     // Get user's websites with quota information
+    console.log("API: Fetching websites for user:", user.id, user.email)
     const { data: websites, error: websitesError } = await supabase
       .from("user_websites")
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
+
+    console.log("API: Found websites:", websites?.length || 0, websites)
 
     if (websitesError) {
       console.error("Error fetching websites:", websitesError)
@@ -68,12 +71,12 @@ export async function GET() {
       )
     }
 
-    // Get quota information
+    // Get quota information (using maybeSingle as the view might not have an entry for new users)
     const { data: quotaInfo, error: quotaError } = await supabase
       .from("user_website_quotas")
       .select("*")
       .eq("user_id", user.id)
-      .single()
+      .maybeSingle()
 
     if (quotaError) {
       console.error("Error fetching quota:", quotaError)
@@ -83,9 +86,18 @@ export async function GET() {
       )
     }
 
+    // If no quota info exists (new user), create default quota info
+    const defaultQuotaInfo = {
+      user_id: user.id,
+      plan: "free",
+      websites_used: websites?.length || 0,
+      websites_limit: 1,
+      quota_reached: (websites?.length || 0) >= 1,
+    }
+
     return NextResponse.json({
       websites,
-      quota: quotaInfo,
+      quota: quotaInfo || defaultQuotaInfo,
     })
   } catch (error) {
     console.error("Unexpected error in GET /api/profile/websites:", error)

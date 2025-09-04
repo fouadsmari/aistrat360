@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react"
 import { useTranslations } from "next-intl"
+import { formatCurrency } from "@/lib/currency"
 import {
   Card,
   CardContent,
@@ -121,6 +122,7 @@ interface Props {
 
 export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
   const t = useTranslations("tools.keywords.results")
+  const tCards = useTranslations("tools.keywords.results.cards")
   const [data, setData] = useState<EnhancedAnalysisData | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedKeyword, setSelectedKeyword] =
@@ -184,11 +186,19 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
   }, [selectedKeyword])
 
   const competitionDistribution = useMemo(() => {
-    if (!data?.rankedKeywords) return []
+    if (!data?.rankedKeywords && !data?.suggestions) return []
+
+    // Combiner tous les mots-clés (ranked + suggestions)
+    const allKeywords = [
+      ...(data.rankedKeywords || []),
+      ...(data.suggestions || []),
+    ]
+    if (allKeywords.length === 0) return []
 
     const levels = { LOW: 0, MEDIUM: 0, HIGH: 0, UNKNOWN: 0 }
-    data.rankedKeywords.forEach((kw) => {
-      levels[kw.competitionLevel as keyof typeof levels] += 1
+    allKeywords.forEach((kw) => {
+      const level = kw.competitionLevel || "UNKNOWN"
+      levels[level as keyof typeof levels] += 1
     })
 
     return Object.entries(levels).map(([level, count]) => ({
@@ -206,17 +216,24 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
   }, [data])
 
   const intentDistribution = useMemo(() => {
-    if (!data?.rankedKeywords) return []
+    if (!data?.rankedKeywords && !data?.suggestions) return []
+
+    // Combiner tous les mots-clés (ranked + suggestions)
+    const allKeywords = [
+      ...(data.rankedKeywords || []),
+      ...(data.suggestions || []),
+    ]
+    if (allKeywords.length === 0) return []
 
     const intents: { [key: string]: number } = {}
-    data.rankedKeywords.forEach((kw) => {
+    allKeywords.forEach((kw) => {
       intents[kw.intent] = (intents[kw.intent] || 0) + 1
     })
 
     return Object.entries(intents).map(([intent, count]) => ({
       intent,
       count,
-      percentage: Math.round((count / data.rankedKeywords.length) * 100),
+      percentage: Math.round((count / allKeywords.length) * 100),
     }))
   }, [data])
 
@@ -270,16 +287,14 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
-        <span className="ml-2">Chargement des données avancées...</span>
+        <span className="ml-2">{t("loading")}...</span>
       </div>
     )
   }
 
   if (!data) {
     return (
-      <div className="py-8 text-center text-gray-500">
-        Aucune donnée disponible
-      </div>
+      <div className="py-8 text-center text-gray-500">{t("noResults")}</div>
     )
   }
 
@@ -290,7 +305,7 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
             <Award className="h-6 w-6 text-violet-600 dark:text-violet-400" />
-            Analyse Complète - {websiteName}
+            {tCards("completeAnalysis")} - {websiteName}
           </CardTitle>
           <CardDescription className="text-gray-600 dark:text-gray-300">
             Données enrichies de {data.rankedKeywords.length} mots-clés avec
@@ -298,37 +313,108 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            <div className="rounded-lg border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800">
-              <div className="text-2xl font-bold text-violet-600 dark:text-violet-400">
-                {data.summary.avgSearchVolume.toLocaleString()}
+          {/* Mots-clés positionnés - Première ligne */}
+          <div className="mb-6">
+            <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
+              <Target className="h-5 w-5 text-blue-600" />
+              {tCards("rankedKeywords")}
+            </h3>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              <div className="rounded-lg border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800">
+                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  {data.rankedKeywords.length}
+                </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  {tCards("number")}
+                </div>
               </div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">
-                Volume Moyen
+              <div className="rounded-lg border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800">
+                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  {Math.round(
+                    data.rankedKeywords.reduce(
+                      (sum, kw) => sum + kw.searchVolume,
+                      0
+                    ) / data.rankedKeywords.length
+                  ).toLocaleString()}
+                </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  {tCards("avgVolume")}
+                </div>
+              </div>
+              <div className="rounded-lg border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800">
+                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  #{data.summary.avgPosition}
+                </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  {tCards("avgPosition")}
+                </div>
+              </div>
+              <div className="rounded-lg border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800">
+                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  {formatCurrency(
+                    data.rankedKeywords.reduce((sum, kw) => sum + kw.cpc, 0) /
+                      data.rankedKeywords.length,
+                    "CA"
+                  )}
+                </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  {tCards("avgCpc")}
+                </div>
               </div>
             </div>
-            <div className="rounded-lg border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800">
-              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                #{data.summary.avgPosition}
+          </div>
+
+          {/* Mots-clés suggérés - Deuxième ligne */}
+          <div>
+            <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
+              <Zap className="h-5 w-5 text-green-600" />
+              {tCards("suggestedKeywords")}
+            </h3>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              <div className="rounded-lg border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800">
+                <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  {data.suggestions.length}
+                </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  {tCards("number")}
+                </div>
               </div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">
-                Position Moy.
+              <div className="rounded-lg border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800">
+                <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  {data.suggestions.length > 0
+                    ? Math.round(
+                        data.suggestions.reduce(
+                          (sum, kw) => sum + kw.searchVolume,
+                          0
+                        ) / data.suggestions.length
+                      ).toLocaleString()
+                    : "0"}
+                </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  {tCards("avgVolume")}
+                </div>
               </div>
-            </div>
-            <div className="rounded-lg border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800">
-              <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                €{data.summary.avgCpc.toFixed(2)}
+              <div className="rounded-lg border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800">
+                <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  -
+                </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  {tCards("avgPosition")}
+                </div>
               </div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">
-                CPC Moyen
-              </div>
-            </div>
-            <div className="rounded-lg border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800">
-              <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                €{data.summary.totalEtv.toFixed(0)}
-              </div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">
-                Valeur Trafic
+              <div className="rounded-lg border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800">
+                <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  {data.suggestions.length > 0
+                    ? formatCurrency(
+                        data.suggestions.reduce((sum, kw) => sum + kw.cpc, 0) /
+                          data.suggestions.length,
+                        "CA"
+                      )
+                    : formatCurrency(0, "CA")}
+                </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  {tCards("avgCpc")}
+                </div>
               </div>
             </div>
           </div>
@@ -343,14 +429,14 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
             className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-violet-600 dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-violet-400"
           >
             <BarChart3 className="h-4 w-4" />
-            Vue d&apos;ensemble
+            {t("overview")}
           </TabsTrigger>
           <TabsTrigger
             value="keywords"
             className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-violet-600 dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-violet-400"
           >
             <Search className="h-4 w-4" />
-            Mots-clés
+            {t("keywords")}
           </TabsTrigger>
           <TabsTrigger
             value="pages"
@@ -369,7 +455,7 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
                   <Shield className="h-5 w-5 text-violet-600 dark:text-violet-400" />
-                  Distribution de la Concurrence
+                  {tCards("competitionDistribution")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -414,7 +500,7 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
                   <Target className="h-5 w-5 text-violet-600 dark:text-violet-400" />
-                  Analyse d&apos;Intention
+                  {tCards("intentAnalysis")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -479,19 +565,19 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
                     <div>
-                      <div className="text-gray-500">Volume</div>
+                      <div className="text-gray-500">{t("searchVolume")}</div>
                       <div className="font-medium">
                         {keyword.searchVolume.toLocaleString()}/mois
                       </div>
                     </div>
                     <div>
-                      <div className="text-gray-500">CPC</div>
+                      <div className="text-gray-500">{t("cpc")}</div>
                       <div className="font-medium">
-                        €{keyword.cpc.toFixed(2)}
+                        {formatCurrency(keyword.cpc, "CA")}
                       </div>
                     </div>
                     <div>
-                      <div className="text-gray-500">Difficulté</div>
+                      <div className="text-gray-500">{t("difficulty")}</div>
                       <div
                         className={`font-medium ${getDifficultyColor(keyword.difficulty)}`}
                       >
@@ -503,7 +589,7 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
                     <div>
                       <div className="text-gray-500">Valeur</div>
                       <div className="font-medium text-green-600">
-                        €{keyword.etv.toFixed(2)}
+                        {formatCurrency(keyword.etv, "CA")}
                       </div>
                     </div>
                   </div>
@@ -550,19 +636,21 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
                     <div className="text-2xl font-bold text-blue-600">
                       {selectedKeyword.searchVolume.toLocaleString()}
                     </div>
-                    <div className="text-sm text-gray-600">Volume/mois</div>
+                    <div className="text-sm text-gray-600">
+                      {t("searchVolume")}/mois
+                    </div>
                   </div>
                   <div className="rounded-lg bg-green-50 p-4 text-center">
                     <div className="text-2xl font-bold text-green-600">
                       #{selectedKeyword.currentPosition || "N/A"}
                     </div>
-                    <div className="text-sm text-gray-600">Position</div>
+                    <div className="text-sm text-gray-600">{t("position")}</div>
                   </div>
                   <div className="rounded-lg bg-purple-50 p-4 text-center">
                     <div className="text-2xl font-bold text-purple-600">
-                      €{selectedKeyword.cpc.toFixed(2)}
+                      {formatCurrency(selectedKeyword.cpc, "CA")}
                     </div>
-                    <div className="text-sm text-gray-600">CPC</div>
+                    <div className="text-sm text-gray-600">{t("cpc")}</div>
                   </div>
                   <div className="rounded-lg bg-orange-50 p-4 text-center">
                     <div
@@ -572,7 +660,9 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
                         ? `${selectedKeyword.difficulty}%`
                         : "N/A"}
                     </div>
-                    <div className="text-sm text-gray-600">Difficulté</div>
+                    <div className="text-sm text-gray-600">
+                      {t("difficulty")}
+                    </div>
                   </div>
                 </div>
 
@@ -670,7 +760,7 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-600">ETV:</span>
                         <span className="font-medium text-green-600">
-                          €{selectedKeyword.etv.toFixed(2)}
+                          {formatCurrency(selectedKeyword.etv, "CA")}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
@@ -678,7 +768,10 @@ export function EnhancedKeywordResults({ analysisId, websiteName }: Props) {
                           Coût Pub Estimé:
                         </span>
                         <span className="font-medium">
-                          €{selectedKeyword.estimatedPaidCost.toFixed(2)}
+                          {formatCurrency(
+                            selectedKeyword.estimatedPaidCost,
+                            "CA"
+                          )}
                         </span>
                       </div>
                       {selectedKeyword.trends && (

@@ -346,24 +346,16 @@ async function performAnalysisInBackground(
           "keyword ideas in result"
         )
         for (const item of result.items) {
-          console.log(
-            "DEBUG: Processing keyword idea item:",
-            JSON.stringify(item, null, 2)
-          )
-          if (item.keyword_data?.keyword || item.keyword) {
+          if (item.keyword) {
             allKeywords.push({
               analysis_id: analysisId,
-              keyword: item.keyword_data?.keyword || item.keyword,
+              keyword: item.keyword,
               keyword_type: "suggestion",
-              search_volume:
-                item.keyword_data?.search_volume || item.search_volume || 0,
+              search_volume: item.keyword_info?.search_volume || 0,
               keyword_difficulty:
-                item.keyword_data?.keyword_difficulty ||
-                item.keyword_difficulty ||
-                0,
-              cpc: item.keyword_data?.cpc || item.cpc || 0,
-              competition:
-                item.keyword_data?.competition || item.competition || 0,
+                item.keyword_properties?.keyword_difficulty || 0,
+              cpc: item.keyword_info?.cpc || 0,
+              competition: item.keyword_info?.competition || 0,
             })
           }
         }
