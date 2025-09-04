@@ -98,10 +98,11 @@ interface Props {
   results: AnalysisResults
   websiteName: string
   targetCountry?: string
+  hideEnhancedResults?: boolean
 }
 
 interface Filters {
-  keywordType: "all" | "ranked" | "suggestions"
+  keywordType: "all" | "ranked" | "keywordIdeas"
   minVolume: string
   maxVolume: string
   minDifficulty: string
@@ -117,6 +118,7 @@ export function KeywordResults({
   results,
   websiteName,
   targetCountry = "FR",
+  hideEnhancedResults = false,
 }: Props) {
   const t = useTranslations("tools.keywords.results")
   const tFilters = useTranslations("tools.keywords.filters")
@@ -141,11 +143,13 @@ export function KeywordResults({
     key: string
     direction: "asc" | "desc"
   } | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 30
 
   // Metrics calculations
   const metrics = useMemo(() => {
     const rankedKeywords = results.keywords.filter((k) => k.type === "ranked")
-    const suggestions = results.keywords.filter((k) => k.type === "suggestion")
+    const keywordIdeas = results.keywords.filter((k) => k.type === "suggestion")
 
     const totalVolume = results.keywords.reduce(
       (sum, k) => sum + k.searchVolume,
@@ -161,10 +165,17 @@ export function KeywordResults({
       .sort((a, b) => b.searchVolume - a.searchVolume)
       .slice(0, 10)
 
-    const opportunityKeywords = suggestions
-      .filter((k) => k.searchVolume > 1000 && k.difficulty < 50)
-      .sort((a, b) => b.searchVolume - a.searchVolume)
-      .slice(0, 5)
+    // Calcul des opportunités : mots-clés suggérés avec bon volume et faible difficulté
+    const opportunityKeywords = keywordIdeas
+      .filter((k) => k.searchVolume > 500 && k.difficulty < 60)
+      .sort((a, b) => {
+        // Score d'opportunité basé sur volume / difficulté
+        const scoreA =
+          (a.searchVolume / Math.max(a.difficulty, 1)) * (a.cpc || 0.1)
+        const scoreB =
+          (b.searchVolume / Math.max(b.difficulty, 1)) * (b.cpc || 0.1)
+        return scoreB - scoreA
+      })
 
     return {
       totalVolume,
@@ -172,7 +183,8 @@ export function KeywordResults({
       topKeywords,
       opportunityKeywords,
       rankedKeywords: rankedKeywords.length,
-      suggestions: suggestions.length,
+      suggestions: keywordIdeas.length,
+      opportunities: opportunityKeywords.length,
     }
   }, [results.keywords])
 
@@ -203,7 +215,7 @@ export function KeywordResults({
       if (filters.keywordType === "ranked" && keyword.type !== "ranked")
         return false
       if (
-        filters.keywordType === "suggestions" &&
+        filters.keywordType === "keywordIdeas" &&
         keyword.type !== "suggestion"
       )
         return false
@@ -277,6 +289,14 @@ export function KeywordResults({
 
     return filtered
   }, [results.keywords, filters, sortConfig])
+
+  // Pagination
+  const paginatedKeywords = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage
+    return filteredKeywords.slice(startIndex, startIndex + itemsPerPage)
+  }, [filteredKeywords, currentPage, itemsPerPage])
+
+  const totalPages = Math.ceil(filteredKeywords.length / itemsPerPage)
 
   // Handle sort
   const handleSort = (key: string) => {
@@ -367,13 +387,12 @@ export function KeywordResults({
 
   return (
     <div className="space-y-6">
-      {/* Enhanced Interactive Results */}
-      <EnhancedKeywordResults
-        analysisId={results.id}
-        websiteName={websiteName}
-      />
-
-      {/* Header & Summary Stats */}
+      {!hideEnhancedResults && (
+        <EnhancedKeywordResults
+          analysisId={results.id}
+          websiteName={websiteName}
+        />
+      )}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -393,10 +412,10 @@ export function KeywordResults({
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
             <div className="text-center">
               <div className="text-2xl font-bold text-violet-600">
-                {results.totalKeywords}
+                {results.keywords.length}
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 {t("totalKeywords")}
@@ -411,8 +430,16 @@ export function KeywordResults({
               </div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">
+              <div className="text-2xl font-bold text-cyan-600">
                 {metrics.suggestions}
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Suggestions
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-600">
+                {metrics.opportunities}
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 {t("opportunities")}
@@ -430,300 +457,298 @@ export function KeywordResults({
         </CardContent>
       </Card>
 
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
-            {tFilters("title")}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
-            <div className="space-y-2">
-              <Label>{tFilters("keywordType")}</Label>
-              <Select
-                value={filters.keywordType}
-                onValueChange={(value: any) =>
-                  setFilters((prev) => ({ ...prev, keywordType: value }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
-                  <SelectItem value="all">{tFilters("all")}</SelectItem>
-                  <SelectItem value="ranked">{tFilters("ranked")}</SelectItem>
-                  <SelectItem value="suggestions">
-                    {tFilters("suggestions")}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>{tFilters("searchKeywords")}</Label>
-              <Input
-                placeholder={tFilters("searchPlaceholder")}
-                value={filters.search}
-                onChange={(e) =>
-                  setFilters((prev) => ({ ...prev, search: e.target.value }))
-                }
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>{tFilters("volumeRange")}</Label>
-              <div className="flex gap-2">
-                <Input
-                  placeholder={tTable("min")}
-                  type="number"
-                  value={filters.minVolume}
-                  onChange={(e) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      minVolume: e.target.value,
-                    }))
+      {/* Main Results View - Only visible in overview */}
+      <div id="main-table-view">
+        {/* Filters */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5" />
+              {tFilters("title")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
+              <div className="space-y-2">
+                <Label>{tFilters("keywordType")}</Label>
+                <Select
+                  value={filters.keywordType}
+                  onValueChange={(value: any) =>
+                    setFilters((prev) => ({ ...prev, keywordType: value }))
                   }
-                />
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
+                    <SelectItem value="all">{tFilters("all")}</SelectItem>
+                    <SelectItem value="ranked">{tFilters("ranked")}</SelectItem>
+                    <SelectItem value="keywordIdeas">
+                      {tFilters("keywordIdeas")}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>{tFilters("searchKeywords")}</Label>
                 <Input
-                  placeholder={tTable("max")}
-                  type="number"
-                  value={filters.maxVolume}
+                  placeholder={tFilters("searchPlaceholder")}
+                  value={filters.search}
                   onChange={(e) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      maxVolume: e.target.value,
-                    }))
+                    setFilters((prev) => ({ ...prev, search: e.target.value }))
                   }
                 />
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label>Difficulté (%)</Label>
-              <div className="flex gap-2">
-                <Input
-                  placeholder={tTable("min")}
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={filters.minDifficulty}
-                  onChange={(e) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      minDifficulty: e.target.value,
-                    }))
-                  }
-                />
-                <Input
-                  placeholder={tTable("max")}
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={filters.maxDifficulty}
-                  onChange={(e) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      maxDifficulty: e.target.value,
-                    }))
-                  }
-                />
+              <div className="space-y-2">
+                <Label>{tFilters("volumeRange")}</Label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder={tTable("min")}
+                    type="number"
+                    value={filters.minVolume}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        minVolume: e.target.value,
+                      }))
+                    }
+                  />
+                  <Input
+                    placeholder={tTable("max")}
+                    type="number"
+                    value={filters.maxVolume}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        maxVolume: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
               </div>
-            </div>
-          </div>
 
-          {/* Deuxième ligne de filtres */}
-          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label>CPC ({getCurrencySymbol(targetCountry)})</Label>
-              <div className="flex gap-2">
-                <Input
-                  placeholder={tTable("min")}
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={filters.minCpc}
-                  onChange={(e) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      minCpc: e.target.value,
-                    }))
-                  }
-                />
-                <Input
-                  placeholder={tTable("max")}
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={filters.maxCpc}
-                  onChange={(e) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      maxCpc: e.target.value,
-                    }))
-                  }
-                />
+              <div className="space-y-2">
+                <Label>Difficulté (%)</Label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder={tTable("min")}
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={filters.minDifficulty}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        minDifficulty: e.target.value,
+                      }))
+                    }
+                  />
+                  <Input
+                    placeholder={tTable("max")}
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={filters.maxDifficulty}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        maxDifficulty: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label>Position</Label>
-              <div className="flex gap-2">
-                <Input
-                  placeholder={tTable("min")}
-                  type="number"
-                  min="1"
-                  max="100"
-                  value={filters.minPosition}
-                  onChange={(e) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      minPosition: e.target.value,
-                    }))
-                  }
-                />
-                <Input
-                  placeholder={tTable("max")}
-                  type="number"
-                  min="1"
-                  max="100"
-                  value={filters.maxPosition}
-                  onChange={(e) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      maxPosition: e.target.value,
-                    }))
-                  }
-                />
+            {/* Deuxième ligne de filtres */}
+            <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label>CPC ({getCurrencySymbol(targetCountry)})</Label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder={tTable("min")}
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={filters.minCpc}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        minCpc: e.target.value,
+                      }))
+                    }
+                  />
+                  <Input
+                    placeholder={tTable("max")}
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={filters.maxCpc}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        maxCpc: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Position</Label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder={tTable("min")}
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={filters.minPosition}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        minPosition: e.target.value,
+                      }))
+                    }
+                  />
+                  <Input
+                    placeholder={tTable("max")}
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={filters.maxPosition}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        maxPosition: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Active filters count */}
-          <div className="mt-4 flex items-center gap-2">
-            <span className="text-sm text-gray-600 dark:text-gray-400">
-              {t("showingResults", {
-                count: filteredKeywords.length,
-                total: results.keywords.length,
-              })}
-            </span>
-            {(filters.search ||
-              filters.keywordType !== "all" ||
-              filters.minVolume ||
-              filters.maxVolume ||
-              filters.minDifficulty ||
-              filters.maxDifficulty ||
-              filters.minCpc ||
-              filters.maxCpc ||
-              filters.minPosition ||
-              filters.maxPosition) && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() =>
-                  setFilters({
-                    keywordType: "all",
-                    minVolume: "",
-                    maxVolume: "",
-                    minDifficulty: "",
-                    maxDifficulty: "",
-                    minCpc: "",
-                    maxCpc: "",
-                    minPosition: "",
-                    maxPosition: "",
-                    search: "",
-                  })
-                }
-              >
-                {tFilters("clearFilters")}
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+            {/* Active filters count */}
+            <div className="mt-4 flex items-center gap-2">
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                {t("showingResults", {
+                  count: filteredKeywords.length,
+                  total: results.keywords.length,
+                })}
+              </span>
+              {(filters.search ||
+                filters.keywordType !== "all" ||
+                filters.minVolume ||
+                filters.maxVolume ||
+                filters.minDifficulty ||
+                filters.maxDifficulty ||
+                filters.minCpc ||
+                filters.maxCpc ||
+                filters.minPosition ||
+                filters.maxPosition) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() =>
+                    setFilters({
+                      keywordType: "all",
+                      minVolume: "",
+                      maxVolume: "",
+                      minDifficulty: "",
+                      maxDifficulty: "",
+                      minCpc: "",
+                      maxCpc: "",
+                      minPosition: "",
+                      maxPosition: "",
+                      search: "",
+                    })
+                  }
+                >
+                  {tFilters("clearFilters")}
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
-      {/* Keywords Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Hash className="h-5 w-5" />
-            {t("keywordsList")}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table className="w-full table-fixed">
-              <TableHeader>
-                <TableRow>
-                  <SortableHeader sortKey="keyword">
-                    <div className="w-full min-w-[200px]">
-                      {t("table.keyword")}
-                    </div>
-                  </SortableHeader>
-                  <TableHead className="w-[80px] text-center">
-                    {t("table.type")}
-                  </TableHead>
-                  <SortableHeader sortKey="searchVolume">
-                    <div className="w-full min-w-[100px] text-right">
-                      {t("table.volume")}
-                    </div>
-                  </SortableHeader>
-                  <SortableHeader sortKey="difficulty">
-                    <div className="w-full min-w-[90px] text-right">
-                      {t("table.difficulty")}
-                    </div>
-                  </SortableHeader>
-                  <SortableHeader sortKey="cpc">
-                    <div className="w-full min-w-[80px] text-right">
-                      {t("table.cpc")}
-                    </div>
-                  </SortableHeader>
-                  <SortableHeader sortKey="etv">
-                    <div className="w-full min-w-[90px] text-right">
-                      ETV ({getCurrencySymbol(targetCountry)})
-                    </div>
-                  </SortableHeader>
-                  <SortableHeader sortKey="position">
-                    <div className="w-full min-w-[80px] text-right">
-                      {t("table.position")}
-                    </div>
-                  </SortableHeader>
-                  <TableHead className="w-[80px] text-center">
-                    {t("table.url")}
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredKeywords.map((keyword, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        <span>{keyword.keyword}</span>
-                        {keyword.isNew && (
+        {/* Keywords Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Hash className="h-5 w-5" />
+              {t("keywordsList")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <Table className="w-full table-fixed">
+                <TableHeader>
+                  <TableRow>
+                    <SortableHeader sortKey="keyword">
+                      <div className="w-full min-w-[300px]">
+                        {t("table.keyword")}
+                      </div>
+                    </SortableHeader>
+                    <TableHead className="w-[100px] text-center">
+                      Type
+                    </TableHead>
+                    <TableHead className="w-[120px] text-center">
+                      Intention
+                    </TableHead>
+                    <SortableHeader sortKey="searchVolume">
+                      <div className="w-full min-w-[100px] text-right">
+                        Volume
+                      </div>
+                    </SortableHeader>
+                    <SortableHeader sortKey="difficulty">
+                      <div className="w-full min-w-[90px] text-right">
+                        Difficulté
+                      </div>
+                    </SortableHeader>
+                    <TableHead className="w-[100px] text-center">
+                      Compétition
+                    </TableHead>
+                    <SortableHeader sortKey="cpc">
+                      <div className="w-full min-w-[80px] text-right">CPC</div>
+                    </SortableHeader>
+                    <SortableHeader sortKey="position">
+                      <div className="w-full min-w-[80px] text-right">
+                        Position
+                      </div>
+                    </SortableHeader>
+                    <TableHead className="w-[80px] text-center">URL</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedKeywords.map((keyword, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-2">
+                          <span>{keyword.keyword}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex flex-col items-center gap-1">
                           <Badge
-                            variant="secondary"
-                            className="bg-blue-100 text-xs text-blue-800"
+                            variant={
+                              keyword.type === "ranked"
+                                ? "default"
+                                : "secondary"
+                            }
+                            className={
+                              keyword.type === "ranked"
+                                ? "bg-violet-100 text-violet-800 dark:bg-violet-900/20 dark:text-violet-400"
+                                : "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
+                            }
                           >
-                            NEW
+                            {keyword.type === "ranked"
+                              ? "Positionné"
+                              : "Suggéré"}
                           </Badge>
-                        )}
-                        {keyword.isUp && (
-                          <Badge
-                            variant="secondary"
-                            className="bg-green-100 text-xs text-green-800"
-                          >
-                            ↑
-                          </Badge>
-                        )}
-                        {keyword.isDown && (
-                          <Badge
-                            variant="secondary"
-                            className="bg-red-100 text-xs text-red-800"
-                          >
-                            ↓
-                          </Badge>
-                        )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">
                         {keyword.intent && keyword.intent !== "unknown" && (
                           <Badge
                             variant="outline"
@@ -738,163 +763,186 @@ export function KeywordResults({
                             }`}
                           >
                             {keyword.intent === "transactional"
-                              ? tTable("commercial")
+                              ? "Commercial"
                               : keyword.intent === "informational"
-                                ? tTable("informational")
+                                ? "Informatif"
                                 : keyword.intent === "navigational"
-                                  ? tTable("navigational")
+                                  ? "Navigation"
                                   : keyword.intent}
                           </Badge>
                         )}
-                      </div>
-                      {keyword.competitionLevel &&
-                        keyword.competitionLevel !== "UNKNOWN" && (
-                          <div className="mt-1 text-xs text-gray-500">
-                            Competition:{" "}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <span>{formatNumber(keyword.searchVolume)}</span>
+                          {keyword.trends && keyword.trends.monthly && (
                             <span
-                              className={`font-medium ${
-                                keyword.competitionLevel === "LOW"
-                                  ? "text-green-600"
-                                  : keyword.competitionLevel === "MEDIUM"
-                                    ? "text-yellow-600"
-                                    : "text-red-600"
+                              className={`text-xs ${
+                                keyword.trends.monthly > 0
+                                  ? "text-green-500"
+                                  : keyword.trends.monthly < 0
+                                    ? "text-red-500"
+                                    : "text-gray-400"
                               }`}
                             >
-                              {keyword.competitionLevel}
-                            </span>
-                          </div>
-                        )}
-                      {keyword.serpFeatures &&
-                        keyword.serpFeatures.length > 0 && (
-                          <div className="mt-1 flex flex-wrap gap-1">
-                            {keyword.serpFeatures
-                              .slice(0, 3)
-                              .map((feature, idx) => (
-                                <Badge
-                                  key={idx}
-                                  variant="outline"
-                                  className="px-1 py-0 text-xs"
-                                >
-                                  {feature.replace(/_/g, " ").toLowerCase()}
-                                </Badge>
-                              ))}
-                            {keyword.serpFeatures.length > 3 && (
-                              <Badge
-                                variant="outline"
-                                className="px-1 py-0 text-xs"
-                              >
-                                +{keyword.serpFeatures.length - 3}
-                              </Badge>
-                            )}
-                          </div>
-                        )}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge
-                        variant={
-                          keyword.type === "ranked" ? "default" : "secondary"
-                        }
-                        className={
-                          keyword.type === "ranked"
-                            ? "bg-violet-100 text-violet-800 dark:bg-violet-900/20 dark:text-violet-400"
-                            : ""
-                        }
-                      >
-                        {keyword.type === "ranked" ? "R" : "S"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <span>{formatNumber(keyword.searchVolume)}</span>
-                        {keyword.trends && keyword.trends.monthly && (
-                          <span
-                            className={`text-xs ${
-                              keyword.trends.monthly > 0
-                                ? "text-green-500"
+                              {keyword.trends.monthly > 0
+                                ? "↗"
                                 : keyword.trends.monthly < 0
-                                  ? "text-red-500"
-                                  : "text-gray-400"
-                            }`}
-                          >
-                            {keyword.trends.monthly > 0
-                              ? "↗"
-                              : keyword.trends.monthly < 0
-                                ? "↘"
-                                : "→"}
-                          </span>
-                        )}
-                      </div>
-                      {keyword.monthlySearches &&
-                        keyword.monthlySearches.length > 0 && (
-                          <div className="mt-1 text-xs text-gray-500">
-                            Avg:{" "}
-                            {Math.round(
-                              keyword.monthlySearches.reduce(
-                                (sum: number, m: any) => sum + m.search_volume,
-                                0
-                              ) / keyword.monthlySearches.length
-                            )}
-                          </div>
-                        )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Badge
-                        variant="outline"
-                        className={getDifficultyColor(keyword.difficulty)}
-                      >
-                        {keyword.difficulty}%
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {formatCPC(keyword.cpc, targetCountry)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {keyword.etv ? (
-                        <span className="font-medium text-green-600">
-                          {formatCPC(keyword.etv, targetCountry)}
-                        </span>
-                      ) : (
-                        "-"
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {keyword.position ? (
+                                  ? "↘"
+                                  : "→"}
+                            </span>
+                          )}
+                        </div>
+                        {keyword.monthlySearches &&
+                          keyword.monthlySearches.length > 0 && (
+                            <div className="mt-1 text-xs text-gray-500">
+                              Avg:{" "}
+                              {Math.round(
+                                keyword.monthlySearches.reduce(
+                                  (sum: number, m: any) =>
+                                    sum + m.search_volume,
+                                  0
+                                ) / keyword.monthlySearches.length
+                              )}
+                            </div>
+                          )}
+                      </TableCell>
+                      <TableCell className="text-right">
                         <Badge
                           variant="outline"
-                          className="bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400"
+                          className={getDifficultyColor(keyword.difficulty)}
                         >
-                          #{keyword.position}
+                          {keyword.difficulty}%
                         </Badge>
-                      ) : (
-                        "-"
-                      )}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {keyword.url ? (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => window.open(keyword.url, "_blank")}
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </Button>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {keyword.competitionLevel &&
+                        keyword.competitionLevel !== "UNKNOWN" ? (
+                          <Badge
+                            variant="outline"
+                            className={`text-xs ${
+                              keyword.competitionLevel === "LOW"
+                                ? "border-green-300 bg-green-50 text-green-700 dark:border-green-700 dark:bg-green-900/20 dark:text-green-400"
+                                : keyword.competitionLevel === "MEDIUM"
+                                  ? "border-yellow-300 bg-yellow-50 text-yellow-700 dark:border-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400"
+                                  : "border-red-300 bg-red-50 text-red-700 dark:border-red-700 dark:bg-red-900/20 dark:text-red-400"
+                            }`}
+                          >
+                            {keyword.competitionLevel === "LOW"
+                              ? "Faible"
+                              : keyword.competitionLevel === "MEDIUM"
+                                ? "Moyen"
+                                : "Élevé"}
+                          </Badge>
+                        ) : (
+                          "-"
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {formatCPC(keyword.cpc, targetCountry)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {keyword.position ? (
+                          <Badge
+                            variant="outline"
+                            className="bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400"
+                          >
+                            #{keyword.position}
+                          </Badge>
+                        ) : (
+                          "-"
+                        )}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {keyword.url ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => window.open(keyword.url, "_blank")}
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
 
-            {filteredKeywords.length === 0 && (
-              <div className="py-8 text-center text-gray-500">
-                {t("noResults")}
+              {paginatedKeywords.length === 0 && (
+                <div className="py-8 text-center text-gray-500">
+                  {t("noResults")}
+                </div>
+              )}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-4 flex items-center justify-between">
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  Affichage {(currentPage - 1) * itemsPerPage + 1} à{" "}
+                  {Math.min(
+                    currentPage * itemsPerPage,
+                    filteredKeywords.length
+                  )}{" "}
+                  sur {filteredKeywords.length} résultats
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronUp className="mr-1 h-4 w-4 rotate-90" />
+                    Précédent
+                  </Button>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNumber
+                      if (totalPages <= 5) {
+                        pageNumber = i + 1
+                      } else if (currentPage <= 3) {
+                        pageNumber = i + 1
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNumber = totalPages - 4 + i
+                      } else {
+                        pageNumber = currentPage - 2 + i
+                      }
+                      return (
+                        <Button
+                          key={pageNumber}
+                          variant={
+                            currentPage === pageNumber ? "default" : "outline"
+                          }
+                          size="sm"
+                          onClick={() => setCurrentPage(pageNumber)}
+                          className="h-8 w-8 p-0"
+                        >
+                          {pageNumber}
+                        </Button>
+                      )
+                    })}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setCurrentPage(Math.min(totalPages, currentPage + 1))
+                    }
+                    disabled={currentPage === totalPages}
+                  >
+                    Suivant
+                    <ChevronDown className="ml-1 h-4 w-4 rotate-90" />
+                  </Button>
+                </div>
               </div>
             )}
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

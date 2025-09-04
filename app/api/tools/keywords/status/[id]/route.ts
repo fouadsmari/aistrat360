@@ -134,20 +134,22 @@ export async function GET(
       if (analysis.keyword_suggestions_response?.[0]?.items) {
         const suggestionItems = analysis.keyword_suggestions_response[0].items
 
+        // keyword_ideas structure est différente de ranked_keywords
         const suggestions = suggestionItems.map((item: any) => ({
           keyword: item.keyword_data?.keyword || item.keyword,
           type: "suggestion",
-          searchVolume: item.keyword_data?.search_volume || 0,
-          difficulty: item.keyword_data?.keyword_difficulty || 0,
-          cpc: item.keyword_data?.cpc || 0,
-          competition: item.keyword_data?.competition || 0,
+          searchVolume: item.keyword_data?.search_volume || 0, // Direct dans keyword_data
+          difficulty: item.keyword_data?.keyword_difficulty || 0, // Direct dans keyword_data
+          cpc: item.keyword_data?.cpc || 0, // Direct dans keyword_data
+          competition: item.keyword_data?.competition || 0, // Direct dans keyword_data
           competitionLevel: item.keyword_data?.competition_level || "UNKNOWN",
           position: null,
-          intent: item.search_intent_info?.main_intent || "unknown",
-          monthlySearches: item.keyword_data?.monthly_searches || [],
-          trends: item.keyword_data?.search_volume_trend || {},
-          serpFeatures: [],
-          categories: item.keyword_data?.categories || [],
+          intent:
+            item.keyword_data?.search_intent_info?.main_intent || "unknown",
+          monthlySearches: [], // Pas disponible dans keyword_ideas
+          trends: {}, // Pas disponible dans keyword_ideas
+          serpFeatures: item.serp_info?.serp_item_types || [],
+          categories: [], // Pas disponible dans keyword_ideas
         }))
 
         allKeywords = [...allKeywords, ...suggestions]

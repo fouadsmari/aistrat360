@@ -325,16 +325,15 @@ async function performAnalysisInBackground(
       // keyword_ideas returns results with items array
       if (result.items && Array.isArray(result.items)) {
         for (const item of result.items) {
-          if (item.keyword) {
+          if (item.keyword_data && item.keyword_data.keyword) {
             allKeywords.push({
               analysis_id: analysisId,
-              keyword: item.keyword,
+              keyword: item.keyword_data.keyword,
               keyword_type: "suggestion",
-              search_volume: item.keyword_info?.search_volume || 0,
-              keyword_difficulty:
-                item.keyword_properties?.keyword_difficulty || 0,
-              cpc: item.keyword_info?.cpc || 0,
-              competition: item.keyword_info?.competition || 0,
+              search_volume: item.keyword_data.search_volume || 0, // Direct dans keyword_data
+              keyword_difficulty: item.keyword_data.keyword_difficulty || 0, // Direct dans keyword_data
+              cpc: item.keyword_data.cpc || 0, // Direct dans keyword_data
+              competition: item.keyword_data.competition || 0, // Direct dans keyword_data
             })
           }
         }
@@ -358,6 +357,14 @@ async function performAnalysisInBackground(
       keywordSuggestions.length > 0 ? 1 : 0
     )
 
+    // Count actual suggestions (not the response array length)
+    const suggestionCount = allKeywords.filter(
+      (k) => k.keyword_type === "suggestion"
+    ).length
+    const rankedCount = allKeywords.filter(
+      (k) => k.keyword_type === "ranked"
+    ).length
+
     // Update analysis with results
     const { error: updateError } = await supabase
       .from("dataforseo_analyses")
@@ -369,8 +376,8 @@ async function performAnalysisInBackground(
         html_content_response: { content: pageContent },
         analysis_results: {
           totalKeywords: allKeywords.length,
-          rankedKeywords: rankedKeywords.length,
-          opportunities: keywordSuggestions.length,
+          rankedKeywords: rankedCount,
+          opportunities: suggestionCount,
           avgPosition: allKeywords
             .filter((k) => k.current_position)
             .reduce(

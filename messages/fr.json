@@ -636,7 +636,7 @@
         "progress": {
           "fetchingPages": "Récupération des pages...",
           "analyzingKeywords": "Analyse des mots-clés...",
-          "processingSuggestions": "Traitement des suggestions...",
+          "processingKeywordIdeas": "Traitement des idées de mots-clés...",
           "calculatingMetrics": "Calcul des métriques...",
           "finalizingResults": "Finalisation des résultats..."
         },
@@ -735,7 +735,7 @@
         "keywordType": "Type de mot-clé",
         "all": "Tous",
         "ranked": "Positionnés",
-        "suggestions": "Suggestions",
+        "keywordIdeas": "Idées de mots-clés",
         "searchKeywords": "Rechercher des mots-clés",
         "searchPlaceholder": "Rechercher un mot-clé...",
         "volumeRange": "Plage de volume",

@@ -23,7 +23,7 @@ import {
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { KeywordResults } from "./keyword-results"
+import { KeywordResultsTabs } from "./keyword-results-tabs"
 import {
   Globe,
   Search,
@@ -651,7 +651,7 @@ export function KeywordAnalysis() {
 
         {/* Analysis Results */}
         {analysisResults && (
-          <KeywordResults
+          <KeywordResultsTabs
             results={analysisResults}
             websiteName={
               analysisResults.websiteName ||

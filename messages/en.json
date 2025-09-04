@@ -636,7 +636,7 @@
         "progress": {
           "fetchingPages": "Fetching pages...",
           "analyzingKeywords": "Analyzing keywords...",
-          "processingSuggestions": "Processing suggestions...",
+          "processingKeywordIdeas": "Processing keyword ideas...",
           "calculatingMetrics": "Calculating metrics...",
           "finalizingResults": "Finalizing results..."
         },
@@ -727,7 +727,7 @@
         "keywordType": "Keyword type",
         "all": "All",
         "ranked": "Ranked",
-        "suggestions": "Suggestions",
+        "keywordIdeas": "Keyword Ideas",
         "searchKeywords": "Search keywords",
         "searchPlaceholder": "Search for a keyword...",
         "volumeRange": "Volume range",

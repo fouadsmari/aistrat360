@@ -127,22 +127,23 @@ export async function GET(
       }
     })
 
-    // Process keyword suggestions
+    // Process keyword ideas (not suggestions!)
+    // keyword_ideas a une structure différente de ranked_keywords
     const suggestions = analysis.keyword_suggestions_response?.[0]?.items || []
     const processedSuggestions = suggestions.map((item: any) => ({
       keyword: item.keyword_data?.keyword || item.keyword,
-      searchVolume: item.keyword_data?.search_volume || 0,
-      cpc: item.keyword_data?.cpc || 0,
-      competition: item.keyword_data?.competition || 0,
-      difficulty: item.keyword_data?.keyword_difficulty || 0,
-      intent: item.search_intent_info?.main_intent || "unknown",
+      searchVolume: item.keyword_data?.search_volume || 0, // Direct, pas dans keyword_info
+      cpc: item.keyword_data?.cpc || 0, // Direct, pas dans keyword_info
+      competition: item.keyword_data?.competition || 0, // Direct, pas dans keyword_info
+      difficulty: item.keyword_data?.keyword_difficulty || 0, // Direct, pas dans keyword_properties
+      intent: item.keyword_data?.search_intent_info?.main_intent || "unknown",
     }))
 
     return NextResponse.json({
       id: analysis.id,
       website: analysis.user_websites,
       rankedKeywords: processedKeywords,
-      suggestions: processedSuggestions,
+      keywordIdeas: processedSuggestions,
       totalKeywords: processedKeywords.length,
       totalSuggestions: processedSuggestions.length,
       summary: {
