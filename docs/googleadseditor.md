@@ -47,77 +47,77 @@ Ce guide décrit la structure des fichiers Excel/CSV que l'application AIStrat36
 
 #### **Feuille 1 : Campaigns**
 
-| Column Header | Description | Exemple | Requis |
-|--------------|-------------|---------|--------|
-| Campaign | Nom de la campagne | FR_Search_Chaussures_2025 | ✅ |
-| Campaign Type | Type de campagne | Search / Performance Max | ✅ |
-| Campaign Status | Statut | Enabled / Paused | ✅ |
-| Campaign Daily Budget | Budget quotidien | 50.00 | ✅ |
-| Networks | Réseaux | Google search;Search partners | ✅ |
-| Languages | Langues ciblées | French;English | ✅ |
-| Locations | Zones géographiques | France;Canada | ✅ |
-| Bid Strategy Type | Stratégie d'enchères | Maximize conversions | ✅ |
-| Start Date | Date de début | 2025-01-15 | ❌ |
-| End Date | Date de fin | 2025-12-31 | ❌ |
-| Campaign Goal | Objectif | Sales / Leads / Traffic | ✅ |
-| Target CPA | CPA cible | 25.00 | ❌ |
-| Target ROAS | ROAS cible | 400% | ❌ |
+| Column Header         | Description          | Exemple                       | Requis |
+| --------------------- | -------------------- | ----------------------------- | ------ |
+| Campaign              | Nom de la campagne   | FR_Search_Chaussures_2025     | ✅     |
+| Campaign Type         | Type de campagne     | Search / Performance Max      | ✅     |
+| Campaign Status       | Statut               | Enabled / Paused              | ✅     |
+| Campaign Daily Budget | Budget quotidien     | 50.00                         | ✅     |
+| Networks              | Réseaux              | Google search;Search partners | ✅     |
+| Languages             | Langues ciblées      | French;English                | ✅     |
+| Locations             | Zones géographiques  | France;Canada                 | ✅     |
+| Bid Strategy Type     | Stratégie d'enchères | Maximize conversions          | ✅     |
+| Start Date            | Date de début        | 2025-01-15                    | ❌     |
+| End Date              | Date de fin          | 2025-12-31                    | ❌     |
+| Campaign Goal         | Objectif             | Sales / Leads / Traffic       | ✅     |
+| Target CPA            | CPA cible            | 25.00                         | ❌     |
+| Target ROAS           | ROAS cible           | 400%                          | ❌     |
 
 #### **Feuille 2 : Ad Groups**
 
-| Column Header | Description | Exemple | Requis |
-|--------------|-------------|---------|--------|
-| Campaign | Nom de la campagne parent | FR_Search_Chaussures_2025 | ✅ |
-| Ad Group | Nom du groupe d'annonces | Chaussures_Running_Homme | ✅ |
-| Ad Group Type | Type | Standard | ✅ |
-| Ad Group Status | Statut | Enabled | ✅ |
-| Max CPC | Enchère max CPC | 2.50 | ❌ |
-| Target CPA | CPA cible groupe | 30.00 | ❌ |
-| Targeting Method | Méthode de ciblage | Keywords | ✅ |
+| Column Header    | Description               | Exemple                   | Requis |
+| ---------------- | ------------------------- | ------------------------- | ------ |
+| Campaign         | Nom de la campagne parent | FR_Search_Chaussures_2025 | ✅     |
+| Ad Group         | Nom du groupe d'annonces  | Chaussures_Running_Homme  | ✅     |
+| Ad Group Type    | Type                      | Standard                  | ✅     |
+| Ad Group Status  | Statut                    | Enabled                   | ✅     |
+| Max CPC          | Enchère max CPC           | 2.50                      | ❌     |
+| Target CPA       | CPA cible groupe          | 30.00                     | ❌     |
+| Targeting Method | Méthode de ciblage        | Keywords                  | ✅     |
 
 #### **Feuille 3 : Keywords**
 
-| Column Header | Description | Exemple | Requis |
-|--------------|-------------|---------|--------|
-| Campaign | Nom de la campagne | FR_Search_Chaussures_2025 | ✅ |
-| Ad Group | Nom du groupe d'annonces | Chaussures_Running_Homme | ✅ |
-| Keyword | Mot-clé | chaussures running homme | ✅ |
-| Match Type | Type de correspondance | Broad / Phrase / Exact | ✅ |
-| Max CPC | Enchère max | 1.75 | ❌ |
-| Status | Statut | Enabled | ✅ |
-| Final URL | URL de destination | https://site.com/running | ❌ |
-| Quality Score | Score de qualité (lecture) | 8/10 | ❌ |
-| Monthly Volume | Volume mensuel | 12000 | ❌ |
-| Competition | Concurrence | Low / Medium / High | ❌ |
-| Suggested Bid | Enchère suggérée | 1.50 | ❌ |
+| Column Header  | Description                | Exemple                   | Requis |
+| -------------- | -------------------------- | ------------------------- | ------ |
+| Campaign       | Nom de la campagne         | FR_Search_Chaussures_2025 | ✅     |
+| Ad Group       | Nom du groupe d'annonces   | Chaussures_Running_Homme  | ✅     |
+| Keyword        | Mot-clé                    | chaussures running homme  | ✅     |
+| Match Type     | Type de correspondance     | Broad / Phrase / Exact    | ✅     |
+| Max CPC        | Enchère max                | 1.75                      | ❌     |
+| Status         | Statut                     | Enabled                   | ✅     |
+| Final URL      | URL de destination         | https://site.com/running  | ❌     |
+| Quality Score  | Score de qualité (lecture) | 8/10                      | ❌     |
+| Monthly Volume | Volume mensuel             | 12000                     | ❌     |
+| Competition    | Concurrence                | Low / Medium / High       | ❌     |
+| Suggested Bid  | Enchère suggérée           | 1.50                      | ❌     |
 
 #### **Feuille 4 : Responsive Search Ads**
 
-| Column Header | Description | Exemple | Requis |
-|--------------|-------------|---------|--------|
-| Campaign | Nom de la campagne | FR_Search_Chaussures_2025 | ✅ |
-| Ad Group | Nom du groupe d'annonces | Chaussures_Running_Homme | ✅ |
-| Status | Statut de l'annonce | Enabled | ✅ |
-| Headline 1 | Titre 1 (30 car max) | Chaussures Running Pro | ✅ |
-| Headline 2 | Titre 2 | Livraison Gratuite 24h | ✅ |
-| Headline 3 | Titre 3 | -20% Premier Achat | ✅ |
-| Headline 4-15 | Titres supplémentaires | ... | ❌ |
-| Description 1 | Description 1 (90 car) | Découvrez notre sélection... | ✅ |
-| Description 2 | Description 2 | Plus de 500 modèles... | ✅ |
-| Description 3-4 | Descriptions supplémentaires | ... | ❌ |
-| Final URL | URL de destination | https://site.com/running | ✅ |
-| Display URL Path 1 | Chemin affiché 1 | Running | ❌ |
-| Display URL Path 2 | Chemin affiché 2 | Homme | ❌ |
+| Column Header      | Description                  | Exemple                      | Requis |
+| ------------------ | ---------------------------- | ---------------------------- | ------ |
+| Campaign           | Nom de la campagne           | FR_Search_Chaussures_2025    | ✅     |
+| Ad Group           | Nom du groupe d'annonces     | Chaussures_Running_Homme     | ✅     |
+| Status             | Statut de l'annonce          | Enabled                      | ✅     |
+| Headline 1         | Titre 1 (30 car max)         | Chaussures Running Pro       | ✅     |
+| Headline 2         | Titre 2                      | Livraison Gratuite 24h       | ✅     |
+| Headline 3         | Titre 3                      | -20% Premier Achat           | ✅     |
+| Headline 4-15      | Titres supplémentaires       | ...                          | ❌     |
+| Description 1      | Description 1 (90 car)       | Découvrez notre sélection... | ✅     |
+| Description 2      | Description 2                | Plus de 500 modèles...       | ✅     |
+| Description 3-4    | Descriptions supplémentaires | ...                          | ❌     |
+| Final URL          | URL de destination           | https://site.com/running     | ✅     |
+| Display URL Path 1 | Chemin affiché 1             | Running                      | ❌     |
+| Display URL Path 2 | Chemin affiché 2             | Homme                        | ❌     |
 
 #### **Feuille 5 : Extensions (Optionnel)**
 
-| Column Header | Description | Exemple | Requis |
-|--------------|-------------|---------|--------|
-| Campaign | Nom de la campagne | FR_Search_Chaussures_2025 | ✅ |
-| Extension Type | Type d'extension | Sitelink / Callout / Call | ✅ |
-| Extension Text | Texte de l'extension | Contactez-nous | ✅ |
-| Extension URL | URL (si applicable) | https://site.com/contact | ❌ |
-| Extension Description | Description | Service client 7j/7 | ❌ |
+| Column Header         | Description          | Exemple                   | Requis |
+| --------------------- | -------------------- | ------------------------- | ------ |
+| Campaign              | Nom de la campagne   | FR_Search_Chaussures_2025 | ✅     |
+| Extension Type        | Type d'extension     | Sitelink / Callout / Call | ✅     |
+| Extension Text        | Texte de l'extension | Contactez-nous            | ✅     |
+| Extension URL         | URL (si applicable)  | https://site.com/contact  | ❌     |
+| Extension Description | Description          | Service client 7j/7       | ❌     |
 
 ---
 
@@ -127,22 +127,22 @@ Ce guide décrit la structure des fichiers Excel/CSV que l'application AIStrat36
 
 #### **Feuille PMax : Asset Groups**
 
-| Column Header | Description | Exemple | Requis |
-|--------------|-------------|---------|--------|
-| Campaign | Nom campagne PMax | FR_PMax_Ecommerce_2025 | ✅ |
-| Asset Group Name | Nom du groupe | Chaussures_Sport | ✅ |
-| Status | Statut | Enabled | ✅ |
-| Final URL | URL principale | https://site.com | ✅ |
+| Column Header    | Description       | Exemple                | Requis |
+| ---------------- | ----------------- | ---------------------- | ------ |
+| Campaign         | Nom campagne PMax | FR_PMax_Ecommerce_2025 | ✅     |
+| Asset Group Name | Nom du groupe     | Chaussures_Sport       | ✅     |
+| Status           | Statut            | Enabled                | ✅     |
+| Final URL        | URL principale    | https://site.com       | ✅     |
 
 #### **Feuille PMax : Text Assets**
 
-| Column Header | Description | Exemple | Requis |
-|--------------|-------------|---------|--------|
-| Campaign | Nom campagne PMax | FR_PMax_Ecommerce_2025 | ✅ |
-| Asset Group | Groupe d'assets | Chaussures_Sport | ✅ |
-| Asset Type | Type d'asset | Headline / Description | ✅ |
-| Asset Text | Texte | Chaussures de qualité | ✅ |
-| Performance Label | Label performance | Primary / | ❌ |
+| Column Header     | Description       | Exemple                | Requis |
+| ----------------- | ----------------- | ---------------------- | ------ |
+| Campaign          | Nom campagne PMax | FR_PMax_Ecommerce_2025 | ✅     |
+| Asset Group       | Groupe d'assets   | Chaussures_Sport       | ✅     |
+| Asset Type        | Type d'asset      | Headline / Description | ✅     |
+| Asset Text        | Texte             | Chaussures de qualité  | ✅     |
+| Performance Label | Label performance | Primary /              | ❌     |
 
 ---
 
@@ -186,29 +186,32 @@ Ce guide décrit la structure des fichiers Excel/CSV que l'application AIStrat36
 
 ## 🎯 Mapping Objectifs → Type de campagne
 
-| Objectif Business | Type Campagne Recommandé | Stratégie d'enchères |
-|------------------|-------------------------|---------------------|
-| **Ventes E-commerce** | Performance Max | Maximize conversion value |
-| **Génération de leads** | Search | Maximize conversions |
-| **Trafic qualifié** | Search | Maximize clicks (avec CPC max) |
-| **Notoriété locale** | Performance Max + Local | Target impression share |
-| **Branding** | Display + Video | Target CPM |
+| Objectif Business       | Type Campagne Recommandé | Stratégie d'enchères           |
+| ----------------------- | ------------------------ | ------------------------------ |
+| **Ventes E-commerce**   | Performance Max          | Maximize conversion value      |
+| **Génération de leads** | Search                   | Maximize conversions           |
+| **Trafic qualifié**     | Search                   | Maximize clicks (avec CPC max) |
+| **Notoriété locale**    | Performance Max + Local  | Target impression share        |
+| **Branding**            | Display + Video          | Target CPM                     |
 
 ---
 
 ## 📈 Optimisations post-import
 
 ### Semaine 1-2
+
 - Monitorer les impressions et CTR
 - Ajuster les budgets si nécessaire
 - Pauser les mots-clés non performants
 
 ### Semaine 3-4
+
 - Analyser les conversions
 - Optimiser les enchères
 - Ajouter des mots-clés négatifs
 
 ### Mois 2+
+
 - A/B testing des annonces
 - Expansion des mots-clés performants
 - Ajustement des stratégies d'enchères
@@ -233,4 +236,4 @@ Ce guide décrit la structure des fichiers Excel/CSV que l'application AIStrat36
 
 ---
 
-*Ce document est généré automatiquement par AIStrat360 pour faciliter la création de campagnes Google Ads optimisées basées sur l'analyse de mots-clés et la profitabilité estimée.*
+_Ce document est généré automatiquement par AIStrat360 pour faciliter la création de campagnes Google Ads optimisées basées sur l'analyse de mots-clés et la profitabilité estimée._

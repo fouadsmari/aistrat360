@@ -3,6 +3,8 @@
 import { useState, useMemo, useEffect } from "react"
 import { useTranslations } from "next-intl"
 import { formatCPC } from "@/lib/currency-utils"
+import { CampaignGenerationModal } from "@/components/google-ads/campaign-generation-modal"
+import { CampaignDisplayModal } from "@/components/google-ads/campaign-display-modal"
 import {
   Card,
   CardContent,
@@ -46,6 +48,7 @@ import {
   Award,
   Clock,
   ArrowUpDown,
+  Megaphone,
 } from "lucide-react"
 
 interface DetailedKeyword {
@@ -94,6 +97,7 @@ interface GroupedPage {
 interface Props {
   analysisId: string
   websiteName: string
+  websiteId?: string
 }
 
 type SortField =
@@ -106,7 +110,11 @@ type SortField =
   | "totalEtv"
 type SortOrder = "asc" | "desc"
 
-export function GroupedKeywordResults({ analysisId, websiteName }: Props) {
+export function GroupedKeywordResults({
+  analysisId,
+  websiteName,
+  websiteId,
+}: Props) {
   const t = useTranslations("tools.keywords")
   const tResults = useTranslations("tools.keywords.results")
   const tGrouped = useTranslations("tools.keywords.grouped")
@@ -122,6 +130,11 @@ export function GroupedKeywordResults({ analysisId, websiteName }: Props) {
   const [maxVolume, setMaxVolume] = useState("")
   const [minDifficulty, setMinDifficulty] = useState("")
   const [maxDifficulty, setMaxDifficulty] = useState("")
+
+  // Campaign modals state
+  const [showCampaignModal, setShowCampaignModal] = useState(false)
+  const [showDisplayModal, setShowDisplayModal] = useState(false)
+  const [selectedPage, setSelectedPage] = useState<GroupedPage | null>(null)
 
   // Fetch detailed data
   useEffect(() => {
@@ -677,13 +690,41 @@ export function GroupedKeywordResults({ analysisId, websiteName }: Props) {
                       </div>
                     )}
                   </div>
-                  <ChevronDown
-                    className={`h-5 w-5 transition-transform ${
-                      expandedItems.includes(page.url)
-                        ? "rotate-180 transform"
-                        : ""
-                    }`}
-                  />
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-violet-200 hover:bg-violet-50 hover:text-violet-700 dark:border-violet-800 dark:hover:bg-violet-900/20"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setSelectedPage(page)
+                        setShowCampaignModal(true)
+                      }}
+                    >
+                      <Megaphone className="mr-1 h-4 w-4" />
+                      Campagne
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-blue-200 hover:bg-blue-50 hover:text-blue-700 dark:border-blue-800 dark:hover:bg-blue-900/20"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setSelectedPage(page)
+                        setShowDisplayModal(true)
+                      }}
+                    >
+                      <Eye className="mr-1 h-4 w-4" />
+                      Afficher
+                    </Button>
+                    <ChevronDown
+                      className={`h-5 w-5 transition-transform ${
+                        expandedItems.includes(page.url)
+                          ? "rotate-180 transform"
+                          : ""
+                      }`}
+                    />
+                  </div>
                 </div>
               </div>
             </CardHeader>
@@ -856,6 +897,37 @@ export function GroupedKeywordResults({ analysisId, websiteName }: Props) {
               {tGrouped("noResults")}
             </CardContent>
           </Card>
+        )}
+
+        {/* Campaign Generation Modal */}
+        {selectedPage && (
+          <CampaignGenerationModal
+            isOpen={showCampaignModal}
+            onClose={() => {
+              setShowCampaignModal(false)
+              setSelectedPage(null)
+            }}
+            pageUrl={selectedPage.url}
+            pageTitle={selectedPage.title}
+            keywords={selectedPage.keywords}
+            websiteId={websiteId || analysisId}
+            onCampaignGenerated={(campaignId) => {
+              console.log("Campaign generated:", campaignId)
+              // Optionally refresh data or show success message
+            }}
+          />
+        )}
+
+        {/* Campaign Display Modal */}
+        {selectedPage && (
+          <CampaignDisplayModal
+            isOpen={showDisplayModal}
+            onClose={() => {
+              setShowDisplayModal(false)
+              setSelectedPage(null)
+            }}
+            pageUrl={selectedPage.url}
+          />
         )}
       </div>
     </div>
