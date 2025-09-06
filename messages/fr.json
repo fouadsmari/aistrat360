@@ -796,5 +796,74 @@
     "description": "Gérez vos sites web et leurs analyses SEO",
     "selectSite": "Sélectionner un site",
     "addSite": "Ajouter un site"
+  },
+  "googleAds": {
+    "title": "Google Ads",
+    "subtitle": "Analysez et optimisez vos campagnes publicitaires",
+    "description": "Optimisation et analyse des campagnes Google Ads",
+    "sitePerformance": "Analyse Google Ads de {siteName}",
+    "selectSite": "Sélectionner un site",
+    "selectSiteDescription": "Choisissez le site web pour lequel vous souhaitez analyser les opportunités publicitaires",
+    "chooseSite": "Choisir un site",
+    "selectSitePlaceholder": "Sélectionner un site web...",
+    "selectedSiteInfo": "Site sélectionné",
+    "countries": "Pays ciblés",
+    "languages": "Langues",
+    "noSites": "Aucun site web configuré",
+    "noSitesDescription": "Vous devez d'abord ajouter un site web dans votre profil",
+    "readyToAnalyze": "Prêt pour l'analyse publicitaire",
+    "readyToAnalyzeDescription": "Utilisez les données d'analyse existantes pour optimiser vos campagnes Google Ads",
+    "analysisNote": "Les métriques sont optimisées pour les campagnes publicitaires",
+    "analysisHistory": "Historique des analyses",
+    "unlimitedQuota": "Quota illimité",
+    "quota": "Utilisé {used}/{limit}",
+    "lowQuota": "Quota faible",
+    "hide": "Masquer",
+    "show": "Afficher",
+    "viewResults": "Voir les résultats",
+    "errorLoadingHistory": "Erreur lors du chargement de l'historique",
+    "loadingHistory": "Chargement de l'historique...",
+    "selectSitePrompt": "Veuillez sélectionner un site web dans la barre latérale",
+    "goToProfile": "Aller au profil",
+    "startAnalysis": "Démarrer l'analyse Google Ads",
+    "analysisRunning": "Analyse en cours",
+    "quotaTitle": "Quota d'analyses",
+    "quotaExceeded": "Quota épuisé",
+    "quotaUpgrade": "Upgrader",
+    "historyTitle": "Historique des analyses",
+    "historyDescription": "Vos analyses Google Ads récentes avec résultats",
+    "progress": {
+      "step1": "Analyse des pages du site...",
+      "step2": "Évaluation des opportunités publicitaires...",
+      "step3": "Calcul des métriques Google Ads...",
+      "step4": "Traitement des données de campagne...",
+      "step5": "Finalisation de l'analyse publicitaire..."
+    },
+    "results": {
+      "googleAdsMetrics": "Métriques Google Ads",
+      "adOpportunities": "Opportunités publicitaires",
+      "avgCpc": "CPC moyen",
+      "totalVolume": "Volume total",
+      "highPotentialKeywords": "Mots-clés à fort potentiel",
+      "showingResults": "Affichage de {count} sur {total} mots-clés",
+      "keywordsList": "Liste des mots-clés",
+      "table": {
+        "keyword": "Mot-clé"
+      },
+      "filters": {
+        "title": "Filtres",
+        "keywordType": "Type de mot-clé",
+        "all": "Tous",
+        "ranked": "Positionnés",
+        "keywordIdeas": "Opportunités",
+        "searchKeywords": "Rechercher",
+        "searchPlaceholder": "Rechercher un mot-clé...",
+        "clearFilters": "Effacer les filtres"
+      },
+      "cards": {
+        "googleAdsAnalysis": "Analyse Google Ads",
+        "completeAnalysis": "Analyse Complète"
+      }
+    }
   }
 }

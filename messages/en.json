@@ -796,5 +796,74 @@
     "description": "Manage your websites and their SEO analyses",
     "selectSite": "Select a website",
     "addSite": "Add a website"
+  },
+  "googleAds": {
+    "title": "Google Ads",
+    "subtitle": "Analyze and optimize your advertising campaigns",
+    "description": "Google Ads campaign optimization and analysis",
+    "sitePerformance": "Google Ads analysis for {siteName}",
+    "selectSite": "Select a website",
+    "selectSiteDescription": "Choose the website for which you want to analyze advertising opportunities",
+    "chooseSite": "Choose a site",
+    "selectSitePlaceholder": "Select a website...",
+    "selectedSiteInfo": "Selected site",
+    "countries": "Target countries",
+    "languages": "Languages",
+    "noSites": "No websites configured",
+    "noSitesDescription": "You must first add a website to your profile",
+    "readyToAnalyze": "Ready for advertising analysis",
+    "readyToAnalyzeDescription": "Use existing analysis data to optimize your Google Ads campaigns",
+    "analysisNote": "Metrics are optimized for advertising campaigns",
+    "analysisHistory": "Analysis history",
+    "unlimitedQuota": "Unlimited quota",
+    "quota": "Used {used}/{limit}",
+    "lowQuota": "Low quota",
+    "hide": "Hide",
+    "show": "Show",
+    "viewResults": "View results",
+    "errorLoadingHistory": "Error loading history",
+    "loadingHistory": "Loading history...",
+    "selectSitePrompt": "Please select a website from the sidebar",
+    "goToProfile": "Go to profile",
+    "startAnalysis": "Start Google Ads analysis",
+    "analysisRunning": "Analysis in progress",
+    "quotaTitle": "Analysis quota",
+    "quotaExceeded": "Quota exhausted",
+    "quotaUpgrade": "Upgrade",
+    "historyTitle": "Analysis history",
+    "historyDescription": "Your recent Google Ads analyses with results",
+    "progress": {
+      "step1": "Analyzing website pages...",
+      "step2": "Evaluating advertising opportunities...",
+      "step3": "Calculating Google Ads metrics...",
+      "step4": "Processing campaign data...",
+      "step5": "Finalizing advertising analysis..."
+    },
+    "results": {
+      "googleAdsMetrics": "Google Ads Metrics",
+      "adOpportunities": "Advertising opportunities",
+      "avgCpc": "Average CPC",
+      "totalVolume": "Total volume",
+      "highPotentialKeywords": "High potential keywords",
+      "showingResults": "Showing {count} of {total} keywords",
+      "keywordsList": "Keywords list",
+      "table": {
+        "keyword": "Keyword"
+      },
+      "filters": {
+        "title": "Filters",
+        "keywordType": "Keyword type",
+        "all": "All",
+        "ranked": "Ranked",
+        "keywordIdeas": "Opportunities",
+        "searchKeywords": "Search",
+        "searchPlaceholder": "Search for a keyword...",
+        "clearFilters": "Clear filters"
+      },
+      "cards": {
+        "googleAdsAnalysis": "Google Ads Analysis",
+        "completeAnalysis": "Complete Analysis"
+      }
+    }
   }
 }

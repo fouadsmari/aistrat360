@@ -2,7 +2,31 @@
 
 ## 🚀 En Cours
 
-_Aucune tâche en cours actuellement_
+### **[EN COURS] - Séparation complète pages Google Ads et Sites**
+
+**📅 Date : 06 Janvier 2025**
+
+**✅ TERMINÉ** : Isolation totale des deux pages pour éviter tout impact croisé
+
+**📋 MODIFICATIONS EFFECTUÉES :**
+
+1. **✅ Duplication des APIs** :
+   - Créé `/api/tools/google-ads/*` séparé de `/api/tools/keywords/*`
+   - Chaque page a ses propres endpoints (analyze, quota, history, status, cancel)
+   - Aucun partage d'API entre les deux pages
+
+2. **✅ Corrections traductions** :
+   - Ajouté clés manquantes `googleAds.sitePerformance` EN/FR
+   - Ajouté `errorLoadingHistory` et `loadingHistory` dans EN
+   - Tests i18n passent à 100%
+
+3. **✅ Validation complète** :
+   - `npm run check-deploy` : ✅ Tous les tests passent
+   - Build production : ✅ Compilation réussie
+   - Type checking : ✅ Aucune erreur
+   - Prettier/Lint : ✅ Code formaté
+
+**🎯 RÉSULTAT** : Les pages `/google-ads` et `/sites` sont maintenant totalement indépendantes
 
 ### **[PRIORITÉ MAXIMALE] - Refonte Workflow Analyse Profitabilité**
 
