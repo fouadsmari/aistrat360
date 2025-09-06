@@ -2,7 +2,7 @@
 
 ## 🚀 En Cours
 
-### **[EN COURS] - Séparation complète pages Google Ads et Sites**
+### **[TERMINÉ] - Séparation complète pages Google Ads et Sites**
 
 **📅 Date : 06 Janvier 2025**
 
@@ -20,13 +20,18 @@
    - Ajouté `errorLoadingHistory` et `loadingHistory` dans EN
    - Tests i18n passent à 100%
 
-3. **✅ Validation complète** :
+3. **✅ Interface Google Ads simplifiée** :
+   - Suppression de l'onglet "Mots-clés" redondant
+   - Conservation de 2 onglets : "Vue d'ensemble" et "Pages"
+   - Interface plus claire et focalisée
+
+4. **✅ Validation complète** :
    - `npm run check-deploy` : ✅ Tous les tests passent
    - Build production : ✅ Compilation réussie
    - Type checking : ✅ Aucune erreur
    - Prettier/Lint : ✅ Code formaté
 
-**🎯 RÉSULTAT** : Les pages `/google-ads` et `/sites` sont maintenant totalement indépendantes
+**🎯 RÉSULTAT** : Les pages `/google-ads` et `/sites` sont maintenant totalement indépendantes avec une UX optimisée
 
 ### **[PRIORITÉ MAXIMALE] - Refonte Workflow Analyse Profitabilité**
 
